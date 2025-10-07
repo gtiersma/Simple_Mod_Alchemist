@@ -142,9 +142,11 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
     controller.source = mod.getSource();
     controller.randomizeSource();
 
-    mod.setActiveIndex(
-      gameBrowser.getModManager().getActiveIndex(mod.getSource(), mod.getMods())
-    );
+    // Update new active mod in both the object and the UI:
+    int activeIndex = gameBrowser.getModManager().getActiveIndex(mod.getSource(), mod.getMods());
+    mod.setActiveIndex(activeIndex);
+    cell->setSelection(activeIndex + 1);
+
     return true;
   });
 }
