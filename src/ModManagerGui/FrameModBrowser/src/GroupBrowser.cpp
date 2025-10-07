@@ -5,6 +5,7 @@
 #include "GroupBrowser.h"
 #include "ModBrowser.h"
 #include "util.hpp"
+#include <AlchemistLogger.h>
 
 #include <StateAlchemist/controller.h>
 
@@ -46,8 +47,11 @@ GroupBrowser::GroupBrowser() {
       "Enable/disable all mods in \"" + controller.group + "\" at random?",
       "Changing mods in \"" + controller.group + "\".",
       [this]() {
+        alchemyLogger.log("GroupBrowser::GroupBrowser: doing the rando");
         controller.randomizeGroup();
+        alchemyLogger.log("GroupBrowser::GroupBrowser: rando done");
         this->_current_mod_browser_->refreshSelections();
+        alchemyLogger.log("GroupBrowser::GroupBrowser: refreshed selections done");
       }
     )->open();
     return true;

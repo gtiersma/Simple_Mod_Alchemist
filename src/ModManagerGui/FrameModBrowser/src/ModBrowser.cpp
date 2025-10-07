@@ -96,7 +96,9 @@ ModBrowser::ModBrowser(brls::View* parentCell): _parent_cell_(parentCell) {
 
 void ModBrowser::refreshSelections() {
   gameBrowser.getModManager().refreshActiveIndices();
+  alchemyLogger.log("ModBrowser::refreshSelections: reloading");
   modList->reloadData();
+  alchemyLogger.log("ModBrowser::refreshSelections: reload done");
 }
 
 void ModBrowser::handleModSelect(ModSource& mod, size_t selectedIndex) {

@@ -104,10 +104,15 @@ int ModManager::getActiveIndex(const std::string& source, const std::vector<std:
  * Updates all sources currently rendered in the UI with what mods are currently active
  */
 void ModManager::refreshActiveIndices() {
+  alchemyLogger.log("ModManager::refreshActiveIndices: starting");
   for (auto& source : this->_mod_source_cache_) {
+    alchemyLogger.log("ModManager::refreshActiveIndices: " + source.first);
+    alchemyLogger.log("ModManager::refreshActiveIndices: new index " + this->getActiveIndex(source.first, source.second.getMods()));
+    alchemyLogger.log("ModManager::refreshActiveIndices: applying");
     source.second.setActiveIndex(
       this->getActiveIndex(source.first, source.second.getMods())
     );
+    alchemyLogger.log("ModManager::refreshActiveIndices: applied");
   }
 }
 
