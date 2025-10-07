@@ -18,7 +18,7 @@ brls::Dialog* Util::buildConfirmDialog(
 ) {
   brls::Dialog* dialog = new brls::Dialog(warning + " Are you sure?");
 
-  dialog->addButton("Yes", [task, finishedCallback, &action]() {
+  dialog->addButton("Yes", [task, finishedCallback, action]() {
     brls::Dialog* loadingDialog = buildLoadingDialog(action);
     loadingDialog->open();
 
