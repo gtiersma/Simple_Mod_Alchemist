@@ -45,7 +45,7 @@ GroupBrowser::GroupBrowser() {
     Util::buildConfirmDialog(
       "Enable/disable all mods in \"" + controller.group + "\" at random?",
       "Changing mods in \"" + controller.group + "\".",
-      [this]() {
+      [this](std::atomic<float>& progress) {
         controller.randomizeGroup();
         this->_current_mod_browser_->refreshSelections();
       }

@@ -15,6 +15,8 @@
 #include <util.hpp>
 #include <note_cell.hpp>
 
+#include <atomic>
+
 using namespace brls::literals;
 
 TabGames::TabGames() {
@@ -86,7 +88,7 @@ brls::IconCell* TabGames::buildGameCell(const Game& game) {
     Util::buildConfirmDialog(
       "Enable/disable mods for " + game.name + " at random?",
       "Changing mods.",
-      []() { controller.randomizeGame(); }
+      [](std::atomic<float>& progress) { controller.randomizeGame(); }
     )->open();
     return true;
   });

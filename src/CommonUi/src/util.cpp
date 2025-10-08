@@ -1,5 +1,7 @@
 #include "util.hpp"
 
+#include "loading_dialog.hpp"
+
 void Util::padTabContent(brls::Box* tabContent) {
   brls::Style style = brls::Application::getStyle();
   tabContent->setPadding(
@@ -13,47 +15,22 @@ void Util::padTabContent(brls::Box* tabContent) {
 brls::Dialog* Util::buildConfirmDialog(
   const std::string& warning,
   const std::string& action,
-  std::function<void()> task,
+  std::function<void(std::atomic<float>& progress)> task,
   std::function<void()> finishedCallback
 ) {
   brls::Dialog* dialog = new brls::Dialog(warning + " Are you sure?");
 
   dialog->addButton("Yes", [task, finishedCallback, action]() {
-    brls::Dialog* loadingDialog = buildLoadingDialog(action);
+    LoadingDialog* loadingDialog = LoadingDialog::build();
+    loadingDialog->setAction(action);
     loadingDialog->open();
 
     new std::thread([task, finishedCallback, loadingDialog]() {
-      task();
+      task(loadingDialog->getAtomicProgress());
       loadingDialog->close(finishedCallback);
     });
   });
   dialog->addButton("No", []() {});
-
-  return dialog;
-}
-
-/**
- * Builds a dialog to show for while the a longer process is running
- * 
- * @param action Short label describing the action being performed
- */
-brls::Dialog* Util::buildLoadingDialog(std::string action) {
-  brls::Box* container = new brls::Box(brls::Axis::COLUMN);
-  container->setFocusable(true);
-  padTabContent(container);
-
-  brls::Label* label = new brls::Label();
-  label->setText(action + " Please wait...");
-  container->addView(label);
-
-  brls::ProgressSpinner* progress = new brls::ProgressSpinner();
-  container->addView(progress);
-
-  brls::Dialog* dialog = new brls::Dialog(container);
-  dialog->setCancelable(false);
-
-  // Work-around to keep anything behind it from becoming focused
-  brls::Application::giveFocus(container);
 
   return dialog;
 }

@@ -30,7 +30,7 @@ void TabGeneralSettings::rebuildLayout() {
       "This action cannot easily be undone.\n"\
       "Turn all the mods off in SimpleModManager first to clear them out before running this.",
       "Moving mods from the old SimpleModManager to this app.",
-      []() { ModMigrator().begin(); },
+      [](std::atomic<float>& progress) { ModMigrator().begin(); },
       [this]() { buildMigrateFinishedDialog()->open(); }
     )->open();
     return true;

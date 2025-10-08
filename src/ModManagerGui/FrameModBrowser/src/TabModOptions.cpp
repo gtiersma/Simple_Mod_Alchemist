@@ -26,7 +26,7 @@ void TabModOptions::buildRandomPicks() {
     Util::buildConfirmDialog(
       "Enable/disable mods for this game at random?",
       "Changing mods.",
-      []() { controller.randomizeGame(); }
+      [](std::atomic<float>& progress) { controller.randomizeGame(); }
     )->open();
     return true;
   });
@@ -47,8 +47,8 @@ void TabModOptions::buildDisableAllMods() {
   disableAll->registerClickAction([](brls::View* view) {
     Util::buildConfirmDialog(
       "Disable all mods?",
-      "Disabling all mods",
-      []() { controller.deactivateAll(); }
+      "Disabling all mods.",
+      [](std::atomic<float>& progress) { controller.deactivateAll(); }
     )->open();
     return true;
   });
