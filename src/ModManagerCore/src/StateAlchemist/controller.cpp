@@ -446,14 +446,39 @@ void Controller::deactivateAll() {
 
 /**
  * Randomly activates/deactivates all mods based upon their ratings
+ *
+ * @param progress Scale of 0.0-1.0 of the method's current progress.
+ *                 Updated while the method runs.
  */
-void Controller::randomizeGame() {
-
+void Controller::randomizeGame(std::atomic<float>& progress) {
   std::vector<std::string> groups = this->loadGroups(false);
 
+  // Percentage completed per group
+  float progressPerGroup = 1.0f / groups.size();
+
+  // Iterators are floats solely to allow for floating-point operations without conversion
+  float i = 0;
   for (const std::string& group : groups) {
     this->group = group;
-    this->randomizeGroup();
+
+    // The current progress made just looking at groups:
+    float groupProgress = i * progressPerGroup;
+
+    std::vector<std::string> sources = this->loadUnlockedSources();
+
+    float j = 0;
+    for (const std::string& source : sources) {
+      this->source = source;
+      this->randomizeSource();
+
+      // Percentage completed per source
+      float progressPerSource = sources.size() * progressPerGroup;
+    
+      j++;
+      progress.store(groupProgress + (j / progressPerSource));
+    }
+    
+    i++;
   }
 
   this->group = "";
@@ -464,13 +489,21 @@ void Controller::randomizeGame() {
  * Randomly activates/deactivates all mods in the current group
  * 
  * @requirement: group must be set
+ *
+ * @param progress Scale of 0.0-1.0 of the method's current progress.
+ *                 Updated while the method runs.
  */
-void Controller::randomizeGroup() {
+void Controller::randomizeGroup(std::atomic<float>& progress) {
   std::vector<std::string> sources = this->loadUnlockedSources();
 
+  // Iterator is float solely to allow for floating-point division without conversion
+  float i = 0;
   for (const std::string& source : sources) {
     this->source = source;
     this->randomizeSource();
+    
+    i++;
+    progress.store(i / sources.size());
   }
 }
 

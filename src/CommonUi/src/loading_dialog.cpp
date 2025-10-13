@@ -17,7 +17,7 @@ void LoadingDialog::open() {
   new std::thread([this]() {
     while(this->watchProgress.load()) {
       float progress = this->progress.load();
-      this->progressLabel->setText(std::to_string(progress) + "%");
+      this->progressLabel->setText(std::to_string(progress * 100) + "%");
       this->progressBar->setProgress(progress);
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -49,7 +49,7 @@ LoadingDialog::LoadingDialog(Box* contentView): brls::Dialog(contentView) {
   this->progressLabel->setText("0%");
   contentView->addView(this->progressLabel);
 
-  this->progressBar = new brls::Slider();
+  this->progressBar = new ProgressBar();
   this->progressBar->setProgress(0);
   contentView->addView(this->progressBar);
 

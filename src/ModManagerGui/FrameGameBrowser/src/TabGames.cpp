@@ -64,7 +64,7 @@ brls::IconCell* TabGames::buildGameCell(const Game& game) {
     gameBrowser.selectGame(game.titleId);
 
     // Let the user know if there's no mods:
-    // TODO: Mods are loaded only to check if they exist here. Not efficient.
+    // TODO: Groups are loaded only to check if they exist here. Not efficient.
     std::vector<std::string> groups = controller.loadGroups(false);
     if (groups.empty()) {
       brls::Dialog* dialog = new brls::Dialog(
@@ -88,7 +88,7 @@ brls::IconCell* TabGames::buildGameCell(const Game& game) {
     Util::buildConfirmDialog(
       "Enable/disable mods for " + game.name + " at random?",
       "Changing mods.",
-      [](std::atomic<float>& progress) { controller.randomizeGame(); }
+      [](std::atomic<float>& progress) { controller.randomizeGame(progress); }
     )->open();
     return true;
   });

@@ -2,6 +2,8 @@
 
 #include "borealis.hpp"
 
+#include "progress_bar.hpp"
+
 #include <string>
 #include <atomic>
 
@@ -29,5 +31,5 @@ class LoadingDialog : public brls::Dialog
 
     brls::Label* label{nullptr};
     brls::Label* progressLabel{nullptr};
-    brls::Slider* progressBar{nullptr};
+    ProgressBar* progressBar{nullptr};
 };

@@ -26,7 +26,7 @@ void TabModOptions::buildRandomPicks() {
     Util::buildConfirmDialog(
       "Enable/disable mods for this game at random?",
       "Changing mods.",
-      [](std::atomic<float>& progress) { controller.randomizeGame(); }
+      [](std::atomic<float>& progress) { controller.randomizeGame(progress); }
     )->open();
     return true;
   });

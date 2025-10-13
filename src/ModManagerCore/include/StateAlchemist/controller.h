@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <ctime>
+#include <atomic>
 
 class Controller {
   public:
@@ -111,15 +112,21 @@ class Controller {
 
     /**
      * Randomly activates/deactivates all mods in the current game based upon their ratings
+     *
+     * @param progress Scale of 0.0-1.0 of the method's current progress.
+     *                 Updated while the method runs.
      */
-    void randomizeGame();
+    void randomizeGame(std::atomic<float>& progress);
 
     /**
      * Randomly activates/deactivates all mods in the current group
      * 
      * @requirement: group must be set
+     *
+     * @param progress Scale of 0.0-1.0 of the method's current progress.
+     *                 Updated while the method runs.
      */
-    void randomizeGroup();
+    void randomizeGroup(std::atomic<float>& progress);
 
     /**
      * Randomly activates/deactivates a mod for the current source in the current group

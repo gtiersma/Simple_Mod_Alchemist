@@ -46,7 +46,7 @@ GroupBrowser::GroupBrowser() {
       "Enable/disable all mods in \"" + controller.group + "\" at random?",
       "Changing mods in \"" + controller.group + "\".",
       [this](std::atomic<float>& progress) {
-        controller.randomizeGroup();
+        controller.randomizeGroup(progress);
         this->_current_mod_browser_->refreshSelections();
       }
     )->open();
