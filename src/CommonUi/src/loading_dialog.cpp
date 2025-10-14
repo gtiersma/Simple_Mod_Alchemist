@@ -5,11 +5,12 @@
 #include <cmath>
 
 LoadingDialog* LoadingDialog::build() {
-  brls::Box* container = new brls::Box(brls::Axis::COLUMN);
-  container->setFocusable(true);
-  Util::padTabContent(container);
-
-  return new LoadingDialog(container);
+  brls::Box* contentView = new brls::Box(brls::Axis::COLUMN);
+  contentView->setHeight(300.0f);
+  contentView->setJustifyContent(brls::JustifyContent::SPACE_AROUND);
+  contentView->setAlignItems(brls::AlignItems::CENTER);
+  Util::padTabContent(contentView);
+  return new LoadingDialog(contentView);
 }
 
 void LoadingDialog::open() {
@@ -57,8 +58,8 @@ LoadingDialog::LoadingDialog(Box* contentView): brls::Dialog(contentView) {
   this->progressBar->setProgress(0);
   contentView->addView(this->progressBar);
 
-  // Work-around to keep anything behind it from becoming focused
-  //brls::Application::giveFocus(contentView);
+  this->setFocusable(true);
+  this->setHideHighlight(true);
   this->setCancelable(false);
 }
 

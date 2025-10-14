@@ -24,6 +24,7 @@ double ProgressBar::highlightPulseColor = 0;
 
 ProgressBar::ProgressBar()
 {
+    setWidthPercentage(100.0f);
     setHeight(30);
 
     brls::Theme theme = brls::Application::getTheme();
