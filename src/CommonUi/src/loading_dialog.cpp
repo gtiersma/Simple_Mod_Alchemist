@@ -2,6 +2,8 @@
 
 #include "util.hpp"
 
+#include <cmath>
+
 LoadingDialog* LoadingDialog::build() {
   brls::Box* container = new brls::Box(brls::Axis::COLUMN);
   container->setFocusable(true);
@@ -17,7 +19,9 @@ void LoadingDialog::open() {
   new std::thread([this]() {
     while(this->watchProgress.load()) {
       float progress = this->progress.load();
-      this->progressLabel->setText(std::to_string(progress * 100) + "%");
+      this->progressLabel->setText(
+        std::to_string(std::round(progress * 100)) + "%"
+      );
       this->progressBar->setProgress(progress);
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }

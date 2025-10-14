@@ -23,39 +23,35 @@
 
 #pragma once
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/bind.hpp>
-#include <borealis/core/box.hpp>
-#include <borealis/views/label.hpp>
-#include <borealis/views/rectangle.hpp>
+#include <borealis.hpp>
 
 class ProgressBar : public brls::Box
 {
   public:
     ProgressBar();
 
-    void onLayout() override;
     void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style, brls::FrameContext* ctx) override;
 
     void setProgress(float progress);
-
     float getProgress();
-
-    brls::Event<float>* getProgressEvent();
-
-    void setStep(float step);
 
     static brls::View* create();
 
   private:
-    brls::InputManager* input;
-    brls::Rectangle* line;
-    brls::Rectangle* lineEmpty;
-
-    brls::Event<float> progressEvent;
-
     float progress = 0;
-    float step = 0.5f;
 
-    void updateUI();
+    // Counter for the last frame of the animated gradient this bar had drawed.
+    double lastFrame;
+
+    /**
+     * Updates the animated highlight data that's shared between all progress bars.
+     */
+    static void updateHighlight();
+
+    static double highlightFrame;
+    static double highlightGradientX;
+    static double highlightGradientY;
+    static double highlightPulseColor;
+
+    static constexpr float HIGHLIGHT_SPEED = 200.0f;
 };

@@ -472,10 +472,10 @@ void Controller::randomizeGame(std::atomic<float>& progress) {
       this->randomizeSource();
 
       // Percentage completed per source
-      float progressPerSource = sources.size() * progressPerGroup;
+      float progressPerSource = progressPerGroup / sources.size();
     
       j++;
-      progress.store(groupProgress + (j / progressPerSource));
+      progress.store(groupProgress + j * progressPerSource);
     }
     
     i++;

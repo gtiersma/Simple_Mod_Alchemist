@@ -14,32 +14,23 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/touch/pan_gesture.hpp>
-#include <borealis/core/util.hpp>
-
 #include <progress_bar.hpp>
 
 
+double ProgressBar::highlightFrame = 0;
+double ProgressBar::highlightGradientX = 0;
+double ProgressBar::highlightGradientY = 0;
+double ProgressBar::highlightPulseColor = 0;
 
 ProgressBar::ProgressBar()
 {
-    lineEmpty = new brls::Rectangle();
-    lineEmpty->detach();
-    addView(lineEmpty);
-
     setHeight(30);
-    lineEmpty->setHeight(30);
-    lineEmpty->setWidthPercentage(100.0f);
 
     brls::Theme theme = brls::Application::getTheme();
-    lineEmpty->setColor(theme["brls/slider/line_empty"]);
-}
+    setBackgroundColor(theme["brls/slider/line_empty"]);
 
-void ProgressBar::onLayout()
-{
-    Box::onLayout();
-    updateUI();
+    // Animation begins at the last highlight frame that was rendered for a progress bar: 
+    this->lastFrame = ProgressBar::highlightFrame;
 }
 
 void ProgressBar::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style, brls::FrameContext* ctx)
@@ -51,28 +42,36 @@ void ProgressBar::draw(NVGcontext* vg, float x, float y, float width, float heig
 
     float progressWidth = width * this->progress;
 
-    float gradientX, gradientY, color;
-    brls::getHighlightAnimation(&gradientX, &gradientY, &color);
+    // Ready for a new highlight animation frame.
+    // It only needs to update the highlight animation data if it's on the latest frame from the highlight data:
+    if (this->lastFrame == ProgressBar::highlightFrame) {
+        ProgressBar::updateHighlight();
+    }
+
+    // We will now render a frame for the latest highlight data:
+    this->lastFrame = ProgressBar::highlightFrame;
 
     NVGcolor highlightColor1 = ctx->theme["brls/highlight/color1"];
 
-    NVGcolor pulsationColor = RGBAf((color * highlightColor1.r) + (1 - color) * highlightColor1.r,
-        (color * highlightColor1.g) + (1 - color) * highlightColor1.g,
-        (color * highlightColor1.b) + (1 - color) * highlightColor1.b,
-        alpha);
+    NVGcolor pulsationColor = RGBAf(
+        (ProgressBar::highlightPulseColor * highlightColor1.r) + (1 - ProgressBar::highlightPulseColor) * highlightColor1.r,
+        (ProgressBar::highlightPulseColor * highlightColor1.g) + (1 - ProgressBar::highlightPulseColor) * highlightColor1.g,
+        (ProgressBar::highlightPulseColor * highlightColor1.b) + (1 - ProgressBar::highlightPulseColor) * highlightColor1.b,
+        alpha
+    );
 
-    NVGcolor borderColor = ctx->theme["brls/highlight/color2"];
-    borderColor.a        = 0.5f * alpha * this->getAlpha();
+    NVGcolor highlightColor2 = ctx->theme["brls/highlight/color2"];
+    highlightColor2.a        = 0.7f * alpha * this->getAlpha();
 
-    NVGpaint border1Paint = nvgRadialGradient(vg,
-        x + gradientX * progressWidth, y + gradientY * height,
-        100, 400,
-        borderColor, brls::TRANSPARENT);
+    NVGpaint gradient1Paint = nvgRadialGradient(vg,
+        x + ProgressBar::highlightGradientX * progressWidth, y + ProgressBar::highlightGradientY * height,
+        100, 300,
+        highlightColor2, brls::TRANSPARENT);
 
-    NVGpaint border2Paint = nvgRadialGradient(vg,
-        x + (1 - gradientX) * progressWidth, y + (1 - gradientY) * height,
-        100, 400,
-        borderColor, brls::TRANSPARENT);
+    NVGpaint gradient2Paint = nvgRadialGradient(vg,
+        x + (1 - ProgressBar::highlightGradientX) * progressWidth, y + (1 - ProgressBar::highlightGradientY) * height,
+        100, 300,
+        highlightColor2, brls::TRANSPARENT);
 
     nvgBeginPath(vg);
     nvgFillColor(vg, pulsationColor);
@@ -80,12 +79,12 @@ void ProgressBar::draw(NVGcontext* vg, float x, float y, float width, float heig
     nvgFill(vg);
 
     nvgBeginPath(vg);
-    nvgFillPaint(vg, border1Paint);
+    nvgFillPaint(vg, gradient1Paint);
     nvgRoundedRect(vg, x, y, progressWidth, height, 1.5f);
     nvgFill(vg);
 
     nvgBeginPath(vg);
-    nvgFillPaint(vg, border2Paint);
+    nvgFillPaint(vg, gradient2Paint);
     nvgRoundedRect(vg, x, y, progressWidth, height, 1.5f);
     nvgFill(vg);
 
@@ -94,8 +93,6 @@ void ProgressBar::draw(NVGcontext* vg, float x, float y, float width, float heig
 
 void ProgressBar::setProgress(float progress)
 {
-    static int lastProgressTicker = this->progress * 10;
-
     this->progress = progress;
 
     if (this->progress < 0)
@@ -103,19 +100,6 @@ void ProgressBar::setProgress(float progress)
 
     if (this->progress > 1)
         this->progress = 1;
-
-    if (lastProgressTicker != (int)(this->progress * 10))
-    {
-        lastProgressTicker = this->progress * 10;
-    }
-
-    progressEvent.fire(this->progress);
-    updateUI();
-}
-
-void ProgressBar::updateUI()
-{
-    lineEmpty->setPositionLeftPercentage(this->progress * 100.0f);
 }
 
 float ProgressBar::getProgress()
@@ -123,17 +107,18 @@ float ProgressBar::getProgress()
     return progress;
 }
 
-brls::Event<float>* ProgressBar::getProgressEvent()
-{
-    return &progressEvent;
-}
-
-void ProgressBar::setStep(float step)
-{
-    this->step = step;
-}
-
 brls::View* ProgressBar::create()
 {
     return new ProgressBar();
+}
+
+void ProgressBar::updateHighlight()
+{
+    brls::Time currentTime = brls::getCPUTimeUsec() / 1000;
+
+    ProgressBar::highlightGradientX  = (cos((double)currentTime / ProgressBar::HIGHLIGHT_SPEED / 3.0) + 1.0) / 2.0;
+    ProgressBar::highlightGradientY  = (sin((double)currentTime / ProgressBar::HIGHLIGHT_SPEED / 3.0) + 1.0) / 2.0;
+    ProgressBar::highlightPulseColor = (sin((double)currentTime / ProgressBar::HIGHLIGHT_SPEED * 2.0) + 1.0) / 2.0;
+
+    ProgressBar::highlightFrame++;
 }
