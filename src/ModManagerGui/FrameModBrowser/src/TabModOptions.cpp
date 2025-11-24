@@ -48,7 +48,7 @@ void TabModOptions::buildDisableAllMods() {
     Util::buildConfirmDialog(
       "Disable all mods?",
       "Disabling all mods.",
-      [](std::atomic<float>& progress) { controller.deactivateAll(); }
+      [](std::atomic<float>& progress) { controller.deactivateAll(progress); }
     )->open();
     return true;
   });

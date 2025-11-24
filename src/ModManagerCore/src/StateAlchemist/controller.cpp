@@ -423,12 +423,23 @@ void Controller::deactivateMod() {
   this->returnFiles(activeMod);
 }
 
-void Controller::deactivateAll() {
+/**
+ * @param progress Scale of 0.0-1.0 of the method's current progress.
+ *                 Updated while the method runs.
+ */
+void Controller::deactivateAll(std::atomic<float>& progress) {
   std::vector<std::string> groups = this->loadGroups(false);
+
+  // Percentage completed per group
+  float progressPerGroup = 1.0f / groups.size();
 
   for (const std::string& group : groups) {
     this->group = group;
+
     std::vector<std::string> sources = this->loadSources(false);
+
+    // Percentage completed per source
+    float progressPerSource = progressPerGroup / sources.size();
 
     for (const std::string& source : sources) {
       this->source = source;
@@ -437,6 +448,8 @@ void Controller::deactivateAll() {
       if (!activeMod.empty()) {
         this->returnFiles(activeMod);
       }
+    
+      progress.store(progress.load() + progressPerSource);
     }
   }
 
@@ -456,29 +469,9 @@ void Controller::randomizeGame(std::atomic<float>& progress) {
   // Percentage completed per group
   float progressPerGroup = 1.0f / groups.size();
 
-  // Iterators are floats solely to allow for floating-point operations without conversion
-  float i = 0;
   for (const std::string& group : groups) {
     this->group = group;
-
-    // The current progress made just looking at groups:
-    float groupProgress = i * progressPerGroup;
-
-    std::vector<std::string> sources = this->loadUnlockedSources();
-
-    float j = 0;
-    for (const std::string& source : sources) {
-      this->source = source;
-      this->randomizeSource();
-
-      // Percentage completed per source
-      float progressPerSource = progressPerGroup / sources.size();
-    
-      j++;
-      progress.store(groupProgress + j * progressPerSource);
-    }
-    
-    i++;
+    this->randomizeGroup(progress, progressPerGroup);
   }
 
   this->group = "";
@@ -492,18 +485,24 @@ void Controller::randomizeGame(std::atomic<float>& progress) {
  *
  * @param progress Scale of 0.0-1.0 of the method's current progress.
  *                 Updated while the method runs.
+ *
+ * @param percentageOfGame If the group is being randomized as part of an entire game,
+ *                         include the percentage of the total number of groups this group represents.
+ *                         The method will only increase the progress by that percentage.
+ *                         Otherwise, it's expected that this group is the only thing being randomized,
+ *                         so the progress param is at 0% and it will move forward to 100%.
  */
-void Controller::randomizeGroup(std::atomic<float>& progress) {
+void Controller::randomizeGroup(std::atomic<float>& progress, const float& percentageOfGame) {
   std::vector<std::string> sources = this->loadUnlockedSources();
 
-  // Iterator is float solely to allow for floating-point division without conversion
-  float i = 0;
+  // Percentage completed per source
+  float progressPerSource = percentageOfGame / sources.size();
+
   for (const std::string& source : sources) {
     this->source = source;
     this->randomizeSource();
     
-    i++;
-    progress.store(i / sources.size());
+    progress.store(progress.load() + progressPerSource);
   }
 }
 

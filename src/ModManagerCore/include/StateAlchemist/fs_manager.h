@@ -31,6 +31,12 @@ namespace FsManager {
   bool doesFileExist(const std::string& path);
 
   /**
+   * Returns "true" if the folder at the given folder path (or any subfolder within it - regardless of how deep) contains a file.
+   * Returns "false" if the entire folder hierarchy at that path is empty.
+   */
+  bool hasFilesDeep(const std::string& path);
+
+  /**
    * Gets a vector of all entity names that are directly within the specified path
    * (parsing the name from the folder name)
    * 

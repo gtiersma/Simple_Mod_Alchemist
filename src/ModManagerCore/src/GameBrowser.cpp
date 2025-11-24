@@ -48,7 +48,9 @@ void GameBrowser::selectGame(const u64 &titleId_) {
 }
 
 // protected
-void GameBrowser::init(){
+void GameBrowser::loadGames() {
+  _gameList_.clear();
+
   auto folderList = GenericToolbox::lsDirs(ALCHEMIST_PATH);
   
   // Filter out any folders that are definitely no Switch Title ID:

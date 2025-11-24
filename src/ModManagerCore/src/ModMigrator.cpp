@@ -22,7 +22,11 @@ const std::string ModMigrator::MIGRATION_GROUP = "_Uncategorized";
 // so each mod will have its own source with a single mod under it for enabling it.
 const std::string ModMigrator::MIGRATION_MOD_NAME = "Enable Mod";
 
-void ModMigrator::begin() {
+/**
+ * @param progress Scale of 0.0-1.0 of the method's current progress.
+ *                 Updated while the method runs.
+ */
+void ModMigrator::begin(std::atomic<float>& progress) {
 
   // Case: Vanilla SMM folder isn't there, so do nothing:
   if (!FsManager::doesFolderExist(LEGACY_BASE_PATH)) return;
@@ -32,43 +36,61 @@ void ModMigrator::begin() {
   // Case: No legacy folders for games:
   if (gameFolders.empty()) return;
 
+  // Percentage completed per game
+  float progressPerGame = 1.0f / gameFolders.size();
+
+  // Iterators are floats solely to allow for floating-point operations without conversion
+  float i = 0;
   for (const std::string& gameFolder : gameFolders) {
-    migrateGame(gameFolder);
+    bool isMigrated = migrateGame(gameFolder, progress, progressPerGame);
+
+    // "migrateGame" only increments progress if migrated.
+    // If it was skipped, progress still needs to be incremented, so we do that here:
+    if (!isMigrated) {
+      progress.store(progress.load() + progressPerGame);
+    }
   }
 
-  // Delete the vanilla SMM root folder.
-  // Not throwing errors. If it fails for whatever reason, it's fine. Just leave it there.
-  // It could've failed from files that couldn't be migrated.
-  fsFsDeleteDirectoryRecursively(&FsManager::sdSystem, FsManager::toPathBuffer(LEGACY_BASE_PATH).get());
+  // Delete the old "mods" folder only if it's now empty (not recursively):
+  fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(LEGACY_BASE_PATH).get());
 }
 
 /**
  * Migrates mods belonging to a single game
  * 
  * @param gameFolder The name of the game that matches the folder under LEGACY_BASE_PATH
+ *
+ * @param progress Scale of 0.0-1.0 of the method's current progress.
+ *                 Updated while the method runs.
+ *
+ * @param percentageOfTotal The percentage of the total number of games this game represents.
+ *                          The method will only increase the progress by that percentage.
+ *
+ * @returns "true" if it moved the game's mods (or at least attempted to move).
+ *          "false" if something's not right, so it skipped moving the game's mods.
  */
-void ModMigrator::migrateGame(const std::string& gameFolder) {
+bool ModMigrator::migrateGame(const std::string& gameFolder, std::atomic<float>& progress, const float& percentageOfTotal) {
   std::string legacyGamePath = LEGACY_BASE_PATH + "/" + gameFolder;
 
   std::vector<std::string> modFolders = FsManager::listNames(legacyGamePath, false);
 
   // Case: No mods for this game, so do nothing
-  if (modFolders.empty()) return;
+  if (modFolders.empty()) return false;
 
   // Get the folder that contains the folder with the game's title ID:
   std::string contentsFolder = legacyGamePath + "/" + modFolders[0] + "/" + LEGACY_MOD_ROOT_FOLDER;
 
   // Case: The folder isn't found, which means there's something weird about this mod.
   // Just don't migrate these mods. Skip them. Better safe than sorry.
-  if (!FsManager::doesFolderExist(contentsFolder)) return;
+  if (!FsManager::doesFolderExist(contentsFolder)) return false;
 
   // Should be a single folder with the game's title ID
   std::vector<std::string> titleId = FsManager::listNames(contentsFolder, false);
 
   // Case: It wasn't a single folder with the game's title ID. Something weird about these mods.
   // Just don't migrate them. Skip them. Better safe than sorry.
-  if (titleId.size() != 1) return;
-  if (!MetaManager::isTitleId(titleId[0])) return;
+  if (titleId.size() != 1) return false;
+  if (!MetaManager::isTitleId(titleId[0])) return false;
 
   // Create the new game folder
   std::string newGamePath = ALCHEMIST_PATH + "/" + titleId[0];
@@ -78,14 +100,18 @@ void ModMigrator::migrateGame(const std::string& gameFolder) {
   std::string groupPath = newGamePath + "/" + MIGRATION_GROUP;
   FsManager::createFolderIfNeeded(groupPath);
 
+  // Percentage completed per mod folder
+  float progressPerMod = percentageOfTotal / modFolders.size();
+
   for (const std::string& modFolder : modFolders) {
     migrateMod(groupPath, modFolder, titleId[0], legacyGamePath);
+    progress.store(progress.load() + progressPerMod);
   }
 
-  // Delete the old game folder.
-  // Not throwing errors. If it fails for whatever reason, it's fine. Just leave it there.
-  // It could've failed from files that couldn't be migrated.
-  fsFsDeleteDirectoryRecursively(&FsManager::sdSystem, FsManager::toPathBuffer(legacyGamePath).get());
+  // Delete the old game folder only if it's now empty (not recursively):
+  fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(legacyGamePath).get());
+
+  return true;
 }
 
 /**
@@ -119,9 +145,13 @@ void ModMigrator::migrateMod(
   moveFiles(oldModTitleIdPath, newModPath);
 
   // Delete the old mod folder.
-  // Not throwing errors. If it fails for whatever reason, it's fine. Just leave it there.
-  // It could've failed from files that couldn't be migrated.
-  fsFsDeleteDirectoryRecursively(&FsManager::sdSystem, FsManager::toPathBuffer(oldModPath).get());
+  // But we're checking if there are any files left in that folder.
+  //
+  // If there are, something went wrong and we'll pernamently delete some mod files if we do so,
+  // so then just leave everything there to be safe.
+  if (!FsManager::hasFilesDeep(oldModTitleIdPath)) {
+    fsFsDeleteDirectoryRecursively(&FsManager::sdSystem, FsManager::toPathBuffer(oldModPath).get());
+  }
 }
 
 /**

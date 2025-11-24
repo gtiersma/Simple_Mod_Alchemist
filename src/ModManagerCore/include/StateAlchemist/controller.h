@@ -108,7 +108,11 @@ class Controller {
      */
     void deactivateMod();
 
-    void deactivateAll();
+    /**
+     * @param progress Scale of 0.0-1.0 of the method's current progress.
+     *                 Updated while the method runs.
+     */
+    void deactivateAll(std::atomic<float>& progress);
 
     /**
      * Randomly activates/deactivates all mods in the current game based upon their ratings
@@ -125,8 +129,14 @@ class Controller {
      *
      * @param progress Scale of 0.0-1.0 of the method's current progress.
      *                 Updated while the method runs.
+     *
+     * @param percentageOfGame If the group is being randomized as part of an entire game,
+     *                         include the percentage of the total number of groups this group represents.
+     *                         The method will only increase the progress by that percentage.
+     *                         Otherwise, it's expected that this group is the only thing being randomized,
+     *                         so the progress param is at 0% and it will move forward to 100%.
      */
-    void randomizeGroup(std::atomic<float>& progress);
+    void randomizeGroup(std::atomic<float>& progress, const float& percentageOfGame = 1.0f);
 
     /**
      * Randomly activates/deactivates a mod for the current source in the current group

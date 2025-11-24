@@ -28,7 +28,6 @@ public:
 
   void applyMod(const std::string &modName_);
   void applyModsList(std::vector<std::string>& modsList_);
-  void removeAllMods();
 
 protected:
   void applyModPresetFunction(const std::string& presetName_);

@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
     // Create the app's folder in the SD Root if not yet created:
     FsManager::createFolderIfNeeded(ALCHEMIST_PATH);
 
-    gameBrowser.init();
+    gameBrowser.loadGames();
 
     brls::Activity* mainActivity = new FrameRoot();
 
