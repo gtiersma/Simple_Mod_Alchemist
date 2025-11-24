@@ -43,10 +43,9 @@ TabAbout::TabAbout(): brls::Box(brls::Axis::COLUMN) {
 
   brls::Label* changelog = new brls::Label();
   changelog->setText(
-    " - Mods are now grouped\n"\
-    " - Major performance improvements with large files\n"\
-    " - Major visual interface upgrade\n"
-    " - Improved how mods are organized in folders\n"\
+    " - Atmosphere v1.10.0 support\n"\
+    " - Mods can now be changed at random\n"\
+    " - Working progress bars\n"
     " - The best part: General stability improvements\n"
   );
   changelog->setHorizontalAlign(brls::HorizontalAlign::LEFT);
