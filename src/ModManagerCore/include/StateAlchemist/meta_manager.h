@@ -33,14 +33,9 @@ namespace MetaManager {
   u8 parseRating(const std::string& folderName);
 
   /**
-   * Parses whether a source is locked from randomization or not from the source's folder name
-   */
-  bool parseLockedStatus(const std::string& folderName);
-
-  /**
    * Builds a folder name from a mod name and rating
    */
-  std::string buildFolderName(const std::string& modName, const u8& rating, bool locked);
+  std::string buildFolderName(const std::string& modName, const u8& rating);
 
   /**
    * Checks if the entity name belongs to a folder name

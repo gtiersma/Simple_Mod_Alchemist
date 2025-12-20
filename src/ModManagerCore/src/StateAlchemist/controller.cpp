@@ -53,119 +53,6 @@ std::vector<std::string> Controller::loadSources(bool sort) {
   return FsManager::listNames(this->getGroupPath(), sort);
 }
 
-/*
- * Gets an unsorted vector of only the sources that are unlocked
- * 
- * @requirement: group must be set
- */
-std::vector<std::string> Controller::loadUnlockedSources() {
-  std::vector<std::string> sources;
-
-  FsDir dir = FsManager::openFolder(this->getGroupPath(), FsDirOpenMode_ReadDirs);
-
-  FsDirectoryEntry entry;
-  s64 readCount = 0;
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, 1, &entry)) && readCount) {
-    if (entry.type == FsDirEntryType_Dir && !MetaManager::parseLockedStatus(entry.name)) {
-      sources.push_back(MetaManager::parseName(entry.name));
-    }
-  }
-
-  fsDirClose(&dir);
-
-  return sources;
-}
-
-/*
- * Checks if the source is locked from randomization
- *
- * @requirement: group must be set
- */
-bool Controller::isSourceLocked(const std::string& source) {
-  bool isLocked;
-
-  FsDir dir = FsManager::openFolder(this->getGroupPath(), FsDirOpenMode_ReadDirs);
-
-  FsDirectoryEntry entry;
-  s64 readCount = 0;
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, 1, &entry))) {
-    if (entry.type == FsDirEntryType_Dir && source == MetaManager::parseName(entry.name)) {
-      isLocked = MetaManager::parseLockedStatus(entry.name);
-      break;
-    }
-  }
-
-  fsDirClose(&dir);
-
-  return isLocked;
-}
-
-/*
- * Load all source options within the specified group along with their lock status
- * 
- * @requirement: group must be set
- */
-std::map<std::string, bool> Controller::loadSourceLocks() {
-  std::map<std::string, bool> locks;
-
-  FsDir dir = FsManager::openFolder(this->getGroupPath(), FsDirOpenMode_ReadDirs);
-
-  FsDirectoryEntry entry;
-  s64 readCount = 0;
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, 1, &entry)) && readCount) {
-    if (entry.type == FsDirEntryType_Dir) {
-      std::string source = MetaManager::parseName(entry.name);
-      locks[source] = MetaManager::parseLockedStatus(entry.name);
-    }
-  }
-
-  fsDirClose(&dir);
-
-  return locks;
-}
-
-/*
- * Disable randomization for the specified source
- * 
- * @requirement: group and source must be set
- * @requirement: source must not already be locked
- */
-void Controller::lockSource() {
-  u8 rating = this->loadDefaultRating();
-
-  std::string currentPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating, false);
-  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating, true);
-
-  MetaManager::tryResult(
-    fsFsRenameDirectory(
-      &FsManager::sdSystem,
-      FsManager::toPathBuffer(currentPath).get(),
-      FsManager::toPathBuffer(newPath).get()
-    )
-  );
-}
-
-/*
- * Enable randomization for the specified source
- * 
- * @requirement: group and source must be set
- * @requirement: source must be currently locked
- */
-void Controller::unlockSource() {
-  u8 rating = this->loadDefaultRating();
-
-  std::string currentPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating, true);
-  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating, false);
-
-  MetaManager::tryResult(
-    fsFsRenameDirectory(
-      &FsManager::sdSystem,
-      FsManager::toPathBuffer(currentPath).get(),
-      FsManager::toPathBuffer(newPath).get()
-    )
-  );
-}
-
 /**
  * Load all mod options that could be activated for the moddable source in the group
  * 
@@ -251,8 +138,7 @@ void Controller::saveRatings(const std::map<std::string, u8>& ratings) {
  * Saves the rating for using no mod for the current source
  */
 void Controller::saveDefaultRating(const u8& rating) {
-  bool isLocked = this->isSourceLocked(this->source);
-  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating, isLocked);
+  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating);
 
   MetaManager::tryResult(
     fsFsRenameDirectory(
@@ -493,7 +379,7 @@ void Controller::randomizeGame(std::atomic<float>& progress) {
  *                         so the progress param is at 0% and it will move forward to 100%.
  */
 void Controller::randomizeGroup(std::atomic<float>& progress, const float& percentageOfGame) {
-  std::vector<std::string> sources = this->loadUnlockedSources();
+  std::vector<std::string> sources = this->loadSources();
 
   // Percentage completed per source
   float progressPerSource = percentageOfGame / sources.size();
@@ -525,7 +411,7 @@ void Controller::randomizeSource() {
     ratingTotal += rating;
   }
 
-  // Just treat it as locked if all ratings are 0 for some reason:
+  // Just skip if all ratings are 0 for some reason:
   if (ratingTotal == 0) { return; }
 
   // Get the random number 

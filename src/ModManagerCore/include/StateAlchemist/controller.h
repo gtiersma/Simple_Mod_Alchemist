@@ -43,27 +43,6 @@ class Controller {
     std::vector<std::string> loadSources(bool sort);
 
     /*
-     * Gets a vector of only the sources that are unlocked
-     */
-    std::vector<std::string> loadUnlockedSources();
-
-    /*
-     * Checks if the source is locked from randomization
-     */
-    bool isSourceLocked(const std::string& source);
-
-    /*
-     * Load all source options within the specified group along with their lock status
-     */
-    std::map<std::string, bool> loadSourceLocks();
-
-    /*
-     * Enable/disable randomization for the specified source
-     */
-    void lockSource();
-    void unlockSource();
-
-    /*
      * Load all mod options that could be activated for the moddable source in the group
      * 
      * @param sort Whether to sort the list of names alphabetically or not
