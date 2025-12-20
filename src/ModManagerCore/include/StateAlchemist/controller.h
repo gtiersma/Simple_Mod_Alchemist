@@ -60,8 +60,8 @@ class Controller {
     /*
      * Enable/disable randomization for the specified source
      */
-    void lockSource(const std::string& source);
-    void unlockSource(const std::string& source);
+    void lockSource();
+    void unlockSource();
 
     /*
      * Load all mod options that could be activated for the moddable source in the group
@@ -78,8 +78,10 @@ class Controller {
 
     /*
      * Loads the rating for the source (for using no mod)
+     * 
+     * @requirement: group and source must be set
      */
-    u8 loadDefaultRating(const std::string& source);
+    u8 loadDefaultRating();
 
     /*
      * Saves the ratings for each mod

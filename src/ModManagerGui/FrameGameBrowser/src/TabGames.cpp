@@ -28,11 +28,11 @@ TabGames::TabGames() {
     message->setNote(
       "SD:/mod-alchemy/<title-id-of-the-game>/<group>/<thing-being-replaced>/<mod-name>/<mod-files-and-folders>"
     );
-    Util::padTabContent(message);
+    Util::padContent(message);
     this->addView(message);
   } else {
      brls::Box* container = new brls::Box(brls::Axis::COLUMN);
-     Util::padTabContent(container);
+     Util::padContent(container);
      this->addView(container);
 
     _gameItems_.reserve(gameList.size());

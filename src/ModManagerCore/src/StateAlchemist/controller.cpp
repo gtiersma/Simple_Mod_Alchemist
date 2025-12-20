@@ -127,14 +127,14 @@ std::map<std::string, bool> Controller::loadSourceLocks() {
 /*
  * Disable randomization for the specified source
  * 
- * @requirement: group must be set
+ * @requirement: group and source must be set
  * @requirement: source must not already be locked
  */
-void Controller::lockSource(const std::string& source) {
-  u8 rating = this->loadDefaultRating(source);
+void Controller::lockSource() {
+  u8 rating = this->loadDefaultRating();
 
-  std::string currentPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(source, rating, false);
-  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(source, rating, true);
+  std::string currentPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating, false);
+  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating, true);
 
   MetaManager::tryResult(
     fsFsRenameDirectory(
@@ -148,14 +148,14 @@ void Controller::lockSource(const std::string& source) {
 /*
  * Enable randomization for the specified source
  * 
- * @requirement: group must be set
+ * @requirement: group and source must be set
  * @requirement: source must be currently locked
  */
-void Controller::unlockSource(const std::string& source) {
-  u8 rating = this->loadDefaultRating(source);
+void Controller::unlockSource() {
+  u8 rating = this->loadDefaultRating();
 
-  std::string currentPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(source, rating, true);
-  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(source, rating, false);
+  std::string currentPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating, true);
+  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating, false);
 
   MetaManager::tryResult(
     fsFsRenameDirectory(
@@ -206,9 +206,9 @@ std::map<std::string, u8> Controller::loadRatings() {
 /*
  * Loads the rating for the source (for using no mod)
  * 
- * @requirement: group must be set
+ * @requirement: group and source must be set
  */
-u8 Controller::loadDefaultRating(const std::string& source) {
+u8 Controller::loadDefaultRating() {
   u8 rating;
 
   FsDir dir = FsManager::openFolder(this->getGroupPath(), FsDirOpenMode_ReadDirs);
@@ -216,7 +216,7 @@ u8 Controller::loadDefaultRating(const std::string& source) {
   FsDirectoryEntry entry;
   s64 readCount = 0;
   while (R_SUCCEEDED(fsDirRead(&dir, &readCount, 1, &entry))) {
-    if (entry.type == FsDirEntryType_Dir && source == MetaManager::parseName(entry.name)) {
+    if (entry.type == FsDirEntryType_Dir && this->source == MetaManager::parseName(entry.name)) {
       rating = MetaManager::parseRating(entry.name);
       break;
     }
@@ -517,7 +517,7 @@ void Controller::randomizeSource() {
   std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
   std::map<std::string, u8> ratings = this->loadRatings();
-  u8 defaultRating = this->loadDefaultRating(this->source);
+  u8 defaultRating = this->loadDefaultRating();
 
   // Sum all ratings to pick one at random:
   u16 ratingTotal = defaultRating;

@@ -13,7 +13,7 @@
 using namespace brls::literals;
 
 TabModOptions::TabModOptions(): brls::Box(brls::Axis::COLUMN) {
-  Util::padTabContent(this);
+  Util::padContent(this);
   this->buildRandomPicks();
   this->buildDisableAllMods();
 }

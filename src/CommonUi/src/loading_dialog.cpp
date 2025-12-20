@@ -9,7 +9,7 @@ LoadingDialog* LoadingDialog::build() {
   contentView->setHeight(300.0f);
   contentView->setJustifyContent(brls::JustifyContent::SPACE_AROUND);
   contentView->setAlignItems(brls::AlignItems::CENTER);
-  Util::padTabContent(contentView);
+  Util::padContent(contentView);
   return new LoadingDialog(contentView);
 }
 

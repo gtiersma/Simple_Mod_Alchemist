@@ -2,9 +2,9 @@
 
 #include "loading_dialog.hpp"
 
-void Util::padTabContent(brls::Box* tabContent) {
+void Util::padContent(brls::Box* content) {
   brls::Style style = brls::Application::getStyle();
-  tabContent->setPadding(
+  content->setPadding(
     style["brls/tab_details/padding_top"],
     style["brls/tab_details/padding_right"],
     style["brls/tab_details/padding_bottom"],

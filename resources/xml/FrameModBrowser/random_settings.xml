@@ -1,0 +1,43 @@
+<brls:Box
+    width="720px"
+    height="600px"
+    axis="column"
+    paddingLeft="48px"
+    paddingRight="48px"
+    paddingTop="32px"
+    paddingBottom="32px">
+
+    <brls:Box
+        width="auto"
+        height="auto"
+        alignItems="center"
+        justifyContent="center"
+        paddingTop="24px"
+        paddingBottom="24px">
+        <brls:Label
+            id="title"
+            width="auto"
+            height="auto"
+            fontSize="30"
+            horizontalAlign="center"/>
+        <brls:Rectangle
+            width="auto"
+            height="2px"
+            color="@theme/brls/sidebar/separator"/>
+    </brls:Box>
+
+    <brls:Label
+        text="Adjust the likelihood of a mod being enabled when randomly changing it."
+        marginBottom="30px"/>
+
+    <brls:Box
+        width="auto"
+        height="auto"
+        grow="1">
+        <brls:RecyclerFrame
+          id="list"
+          width="100%"
+          height="auto"/>
+    </brls:Box>
+
+</brls:Box>

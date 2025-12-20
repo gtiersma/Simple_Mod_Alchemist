@@ -11,7 +11,7 @@ namespace Util {
     /**
      * Sets the box's padding to the amount that's commonly used for tab content.
      */
-    void padTabContent(brls::Box* tabContent);
+    void padContent(brls::Box* tabContent);
 
     /**
      * Builds a dialog that can be shown that gets confirmation before doing something, showing a loading spinner while doing it

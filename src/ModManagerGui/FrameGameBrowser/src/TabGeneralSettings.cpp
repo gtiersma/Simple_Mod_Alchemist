@@ -18,7 +18,7 @@ TabGeneralSettings::TabGeneralSettings() {
 }
 
 void TabGeneralSettings::rebuildLayout() {
-  Util::padTabContent(this);
+  Util::padContent(this);
 
   brls::NoteCell* migrationItem = new brls::NoteCell();
   migrationItem->setText("Bring over old SimpleModManager mods");

@@ -4,6 +4,7 @@
 
 #include "ModBrowser.h"
 #include "FrameModBrowser.h"
+#include "RandomSettings.h"
 
 #include <StateAlchemist/controller.h>
 #include <StateAlchemist/meta_manager.h>
@@ -147,6 +148,12 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
     mod.setActiveIndex(activeIndex);
     cell->setSelection(activeIndex + 1);
 
+    return true;
+  });
+
+  selector->registerAction("Random Settings", brls::BUTTON_Y, [this, &mod](brls::View* view) {
+    controller.source = mod.getSource();
+    RandomSettings::showInDialog();
     return true;
   });
 }
