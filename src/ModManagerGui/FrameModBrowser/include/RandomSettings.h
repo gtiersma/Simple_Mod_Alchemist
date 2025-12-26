@@ -30,6 +30,9 @@ class RandomDataSource : public brls::RecyclerDataSource
     );
 
     int numberOfRows(brls::RecyclerFrame* recycler, int section) override;
+    int numberOfSections(brls::RecyclerFrame* recycler) override;
+    std::string titleForHeader(brls::RecyclerFrame* recycler, int section) override;
+    float heightForHeader(brls::RecyclerFrame* recycler, int section) override;
     brls::RecyclerCell* cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath index) override;
 
     /**

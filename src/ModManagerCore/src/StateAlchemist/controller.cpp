@@ -122,7 +122,7 @@ u8 Controller::loadDefaultRating() {
 void Controller::saveRatings(const std::map<std::string, u8>& ratings) {
   for (const auto& [mod, rating]: ratings) {
     std::string currentPath = this->getModPath(mod);
-    std::string newPath = this->getSourcePath() + "/" + MetaManager::buildFolderName(mod, rating, false);
+    std::string newPath = this->getSourcePath() + "/" + MetaManager::buildFolderName(mod, rating);
 
     MetaManager::tryResult(
       fsFsRenameDirectory(
@@ -379,7 +379,7 @@ void Controller::randomizeGame(std::atomic<float>& progress) {
  *                         so the progress param is at 0% and it will move forward to 100%.
  */
 void Controller::randomizeGroup(std::atomic<float>& progress, const float& percentageOfGame) {
-  std::vector<std::string> sources = this->loadSources();
+  std::vector<std::string> sources = this->loadSources(false);
 
   // Percentage completed per source
   float progressPerSource = percentageOfGame / sources.size();

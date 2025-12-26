@@ -19,26 +19,55 @@ RandomDataSource::RandomDataSource(
 }
 
 int RandomDataSource::numberOfRows(brls::RecyclerFrame* recycler, int section) {
+    return 1; // Each section has one row
+}
+
+int RandomDataSource::numberOfSections(brls::RecyclerFrame* recycler) {
     // Additional +1 for the modless option row:
     return this->fractionalRatings.size() + 1;
+}
+
+std::string RandomDataSource::titleForHeader(brls::RecyclerFrame* recycler, int section) {
+    if (section == 0) {
+        return "Default " + controller.source + " (No Mod)";
+    }
+    return this->modNames[section - 1];
+}
+
+float RandomDataSource::heightForHeader(brls::RecyclerFrame* recycler, int section) {
+    return 44.0f;
 }
 
 brls::RecyclerCell* RandomDataSource::cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath indexPath) {
     brls::SliderCell* cell = (brls::SliderCell*)recycler->dequeueReusableCell("Slider");
 
-    if (indexPath.row == 0) {
+    if (indexPath.section == 0) {
         cell->init(
-            "Default " + controller.source + " (No Mod)",
+            Util::toPercentLabel(this->modlessFractionalRating),
             this->modlessFractionalRating,
-            [this](float value) { this->changedModlessFractional = value; }
+            [this, cell](float value) {
+                this->changedModlessFractional = value;
+                cell->setText(Util::toPercentLabel(value));
+            }
         );
     } else {
-        std::string& name = this->modNames[indexPath.row - 1];
-        float& rating = this->fractionalRatings[indexPath.row - 1];
-        cell->init(name, rating, [this, name, rating](float value) {
-            this->changedFractionals[name] = rating;
-        });
+        std::string name = this->modNames[indexPath.section - 1];
+        float rating = this->fractionalRatings[indexPath.section - 1];
+        cell->init(
+            Util::toPercentLabel(rating),
+            rating,
+            [this, cell, name](float value) {
+                this->changedFractionals[name] = value;
+                cell->setText(Util::toPercentLabel(value));
+            }
+        );
     }
+
+    // Extra spacing to push the cell below a little further away.
+    // This ensures each slider is spaced closer to the header that belongs to it.
+    // Otherwise, it's more difficult to quickly distinguish which slider belongs to which.
+    cell->setPaddingTop(60);
+    cell->setPaddingBottom(50);
 
     return cell;
 }
@@ -69,7 +98,7 @@ RandomSettings::RandomSettings() {
 
     title->setText(controller.source);
 
-    list->estimatedRowHeight = 70;
+    list->estimatedRowHeight = 160;
     list->registerCell("Slider", []() { return new brls::SliderCell(); });
     list->setDataSource(this->dataSource);
 }

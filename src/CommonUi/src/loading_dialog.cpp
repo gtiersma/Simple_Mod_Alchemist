@@ -21,7 +21,7 @@ void LoadingDialog::open() {
     while(this->watchProgress.load()) {
       float progress = this->progress.load();
       this->progressLabel->setText(
-        std::to_string(std::round(progress * 100)) + "%"
+        Util::toPercentLabel(progress)
       );
       this->progressBar->setProgress(progress);
       std::this_thread::sleep_for(std::chrono::milliseconds(100));

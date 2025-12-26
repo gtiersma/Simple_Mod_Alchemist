@@ -14,16 +14,16 @@
         justifyContent="center"
         paddingTop="24px"
         paddingBottom="24px">
+        <brls:Rectangle
+            width="auto"
+            height="2px"
+            color="@theme/brls/sidebar/separator"/>
         <brls:Label
             id="title"
             width="auto"
             height="auto"
             fontSize="30"
             horizontalAlign="center"/>
-        <brls:Rectangle
-            width="auto"
-            height="2px"
-            color="@theme/brls/sidebar/separator"/>
     </brls:Box>
 
     <brls:Label

@@ -8,6 +8,8 @@
  */
 namespace Util {
 
+    std::string toPercentLabel(float fractional);
+
     /**
      * Sets the box's padding to the amount that's commonly used for tab content.
      */
