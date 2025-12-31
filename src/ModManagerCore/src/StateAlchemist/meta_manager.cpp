@@ -77,8 +77,11 @@ std::string MetaManager::parseName(const std::string& folderName) {
     name = folderName.substr(0, folderName.length() - RATING_DELIMITER.length() - 2);
   }
 
-  // Remove the locked character from the folder name if there is one:
-  if (parseLockedStatus(name)) {
+  // Remove the locked character from the folder name if there is one.
+  //
+  // Locking is an old feature from State Alchemist no longer supported.
+  // Some old mods brought over from that app could still have this character at the begining.
+  if (name[0] == '*') {
     name = name.substr(1);
   }
 
@@ -112,16 +115,9 @@ u8 MetaManager::parseRating(const std::string& folderName) {
 }
 
 /**
- * Parses whether a source is locked from randomization or not from the source's folder name
- */
-bool MetaManager::parseLockedStatus(const std::string& folderName) {
-  return folderName[0] == LOCKED_CHAR;
-}
-
-/**
  * Builds a folder name from a mod name and rating
  */
-std::string MetaManager::buildFolderName(const std::string& modName, const u8& rating, bool locked) {
+std::string MetaManager::buildFolderName(const std::string& modName, const u8& rating) {
   std::string folderName = modName;
 
   if (rating != 100) {
@@ -132,10 +128,6 @@ std::string MetaManager::buildFolderName(const std::string& modName, const u8& r
     }
 
     folderName += RATING_DELIMITER + ratingStr;
-  }
-
-  if (locked) {
-    folderName.insert(0, 1, LOCKED_CHAR);
   }
 
   return folderName;

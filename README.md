@@ -16,6 +16,7 @@ Simple Mod Alchemist is the definitive Nintendo Switch mod management solution. 
   * This makes switching between large files seemingly instant
 * Can automatically bring over mods from SimpleModManager to start using right away
 * Scalable - works with lists of hundreds of mods
+* Change mods at random
 * More to come!
 
 
@@ -86,6 +87,14 @@ If there ever is a mod you're using that you want to delete permanently, **make 
 Once you're sure it's disabled, deleting the mod is as easy as deleting the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>` folder belonging to it from your SD card.
 
 Disabling the mod is necessary because enabled mods have their files mixed in with all the other enabled mod files within the `/atmosphere/contents/<title_id>/` folder. Disabling the mod will move its files back to the original folder they were in: `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>`, that way, when you delete the folder, you can be sure all files for that mod are being deleted as well.
+
+### Changing Mods at Random
+
+Have the mods be picked for you at random.
+
+Mods can be changed individually, by group or by an entire game.
+
+To do so, highlight a game, group or individual mod and press *X*.
 
 
 ## Help / FAQs

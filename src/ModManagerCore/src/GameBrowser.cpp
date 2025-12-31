@@ -51,8 +51,9 @@ void GameBrowser::selectGame(const u64 &titleId_) {
 }
 
 // protected
-void GameBrowser::init(){
+void GameBrowser::loadGames() {
   alchemyLogger.log("GameBrowser::init();");
+  _gameList_.clear();
 
   auto folderList = GenericToolbox::lsDirs(ALCHEMIST_PATH);
   

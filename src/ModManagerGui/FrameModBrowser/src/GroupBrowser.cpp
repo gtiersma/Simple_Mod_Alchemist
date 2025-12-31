@@ -46,9 +46,9 @@ GroupBrowser::GroupBrowser() {
     Util::buildConfirmDialog(
       "Enable/disable all mods in \"" + controller.group + "\" at random?",
       "Changing mods in \"" + controller.group + "\".",
-      [this]() {
+      [this](std::atomic<float>& progress) {
         alchemyLogger.log("GroupBrowser::GroupBrowser: doing the rando");
-        controller.randomizeGroup();
+        controller.randomizeGroup(progress);
         alchemyLogger.log("GroupBrowser::GroupBrowser: rando done");
         this->_current_mod_browser_->refreshSelections();
         alchemyLogger.log("GroupBrowser::GroupBrowser: refreshed selections done");

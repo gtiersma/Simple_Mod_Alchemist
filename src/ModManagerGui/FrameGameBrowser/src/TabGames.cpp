@@ -16,6 +16,8 @@
 #include <note_cell.hpp>
 #include <AlchemistLogger.h>
 
+#include <atomic>
+
 using namespace brls::literals;
 
 TabGames::TabGames() {
@@ -28,11 +30,11 @@ TabGames::TabGames() {
     message->setNote(
       "SD:/mod-alchemy/<title-id-of-the-game>/<group>/<thing-being-replaced>/<mod-name>/<mod-files-and-folders>"
     );
-    Util::padTabContent(message);
+    Util::padContent(message);
     this->addView(message);
   } else {
      brls::Box* container = new brls::Box(brls::Axis::COLUMN);
-     Util::padTabContent(container);
+     Util::padContent(container);
      this->addView(container);
 
     _gameItems_.reserve(gameList.size());
@@ -64,7 +66,7 @@ brls::IconCell* TabGames::buildGameCell(const Game& game) {
     gameBrowser.selectGame(game.titleId);
 
     // Let the user know if there's no mods:
-    // TODO: Mods are loaded only to check if they exist here. Not efficient.
+    // TODO: Groups are loaded only to check if they exist here. Not efficient.
     std::vector<std::string> groups = controller.loadGroups(false);
     if (groups.empty()) {
       brls::Dialog* dialog = new brls::Dialog(
@@ -83,12 +85,12 @@ brls::IconCell* TabGames::buildGameCell(const Game& game) {
     return true;
   });
 
-  item->registerAction("Randomly Change Game's Mods", brls::BUTTON_X, [&game](brls::View* view) {
+  item->registerAction("Randomly Change Game's Mods", brls::BUTTON_X, [game](brls::View* view) {
     gameBrowser.selectGame(game.titleId);
     Util::buildConfirmDialog(
       "Enable/disable mods for " + game.name + " at random?",
       "Changing mods.",
-      []() { controller.randomizeGame(); }
+      [](std::atomic<float>& progress) { controller.randomizeGame(progress); }
     )->open();
     return true;
   });

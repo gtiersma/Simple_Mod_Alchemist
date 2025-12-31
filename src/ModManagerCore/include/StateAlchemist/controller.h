@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <ctime>
+#include <atomic>
 
 class Controller {
   public:
@@ -44,27 +45,6 @@ class Controller {
     std::vector<std::string> loadSources(bool sort);
 
     /*
-     * Gets a vector of only the sources that are unlocked
-     */
-    std::vector<std::string> loadUnlockedSources();
-
-    /*
-     * Checks if the source is locked from randomization
-     */
-    bool isSourceLocked(const std::string& source);
-
-    /*
-     * Load all source options within the specified group along with their lock status
-     */
-    std::map<std::string, bool> loadSourceLocks();
-
-    /*
-     * Enable/disable randomization for the specified source
-     */
-    void lockSource(const std::string& source);
-    void unlockSource(const std::string& source);
-
-    /*
      * Load all mod options that could be activated for the moddable source in the group
      * 
      * @param sort Whether to sort the list of names alphabetically or not
@@ -79,8 +59,10 @@ class Controller {
 
     /*
      * Loads the rating for the source (for using no mod)
+     * 
+     * @requirement: group and source must be set
      */
-    u8 loadDefaultRating(const std::string& source);
+    u8 loadDefaultRating();
 
     /*
      * Saves the ratings for each mod
@@ -109,19 +91,35 @@ class Controller {
      */
     void deactivateMod();
 
-    void deactivateAll();
+    /**
+     * @param progress Scale of 0.0-1.0 of the method's current progress.
+     *                 Updated while the method runs.
+     */
+    void deactivateAll(std::atomic<float>& progress);
 
     /**
      * Randomly activates/deactivates all mods in the current game based upon their ratings
+     *
+     * @param progress Scale of 0.0-1.0 of the method's current progress.
+     *                 Updated while the method runs.
      */
-    void randomizeGame();
+    void randomizeGame(std::atomic<float>& progress);
 
     /**
      * Randomly activates/deactivates all mods in the current group
      * 
      * @requirement: group must be set
+     *
+     * @param progress Scale of 0.0-1.0 of the method's current progress.
+     *                 Updated while the method runs.
+     *
+     * @param percentageOfGame If the group is being randomized as part of an entire game,
+     *                         include the percentage of the total number of groups this group represents.
+     *                         The method will only increase the progress by that percentage.
+     *                         Otherwise, it's expected that this group is the only thing being randomized,
+     *                         so the progress param is at 0% and it will move forward to 100%.
      */
-    void randomizeGroup();
+    void randomizeGroup(std::atomic<float>& progress, const float& percentageOfGame = 1.0f);
 
     /**
      * Randomly activates/deactivates a mod for the current source in the current group

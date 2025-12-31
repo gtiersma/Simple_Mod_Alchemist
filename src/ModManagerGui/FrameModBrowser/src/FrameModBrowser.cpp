@@ -36,12 +36,24 @@ void FrameModBrowser::initialize() {
 
   appletFrame->setTitle(game.name);
 
-  tabs->registerAction("Back to Game Selection", brls::BUTTON_B, [](brls::View* view) {
+  tabs->registerAction("Back to Game List", brls::BUTTON_B, [](brls::View* view) {
     brls::Application::popActivity();
 
     // clear the group/source shown
     controller.source = "";
     controller.group = "";
+
+    return true;
+  });
+
+  tabs->registerAction("Start Game", brls::BUTTON_START, [game](brls::View* view) {
+    brls::Dialog* dialog = new brls::Dialog("Launch " + game.name + "?");
+    
+    dialog->addButton("Yes", [game](){
+      appletRequestLaunchApplication(game.titleId, NULL);
+    });
+    dialog->addButton("No", []() {});
+    dialog->open();
 
     return true;
   });

@@ -3,10 +3,9 @@
 
 #include <string>
 
-const std::string APP_VERSION = "1.0.0";
+const std::string APP_VERSION = "1.0.1";
 
-// Small to minimize memory usage
-const int64_t FILE_LIST_BUFFER_SIZE = 30;
+const int64_t FILE_LIST_BUFFER_SIZE = 100;
 
 // Max number of folders/files to load at a time when processing them
 const int MAX_FS_ENTRY_LOAD = 50;

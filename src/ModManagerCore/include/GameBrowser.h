@@ -20,7 +20,7 @@ class GameBrowser{
 
 public:
   GameBrowser();
-  void init();
+  void loadGames();
 
   // getters
   const ConfigHandler &getConfigHandler() const;
@@ -33,9 +33,6 @@ public:
 
   // browse
   void selectGame(const u64 &gameName_);
-
-  // IO
-  void scanInputs(u64 kDown, u64 kHeld);
 
 private:
   ModManager _modManager_{this};

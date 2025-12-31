@@ -15,7 +15,7 @@
 using namespace brls::literals;
 
 TabModOptions::TabModOptions(): brls::Box(brls::Axis::COLUMN) {
-  Util::padTabContent(this);
+  Util::padContent(this);
   this->buildRandomPicks();
   this->buildDisableAllMods();
 }
@@ -28,7 +28,7 @@ void TabModOptions::buildRandomPicks() {
     Util::buildConfirmDialog(
       "Enable/disable mods for this game at random?",
       "Changing mods.",
-      []() { controller.randomizeGame(); }
+      [](std::atomic<float>& progress) { controller.randomizeGame(progress); }
     )->open();
     return true;
   });
@@ -50,8 +50,8 @@ void TabModOptions::buildDisableAllMods() {
   disableAll->registerClickAction([](brls::View* view) {
     Util::buildConfirmDialog(
       "Disable all mods?",
-      "Disabling all mods",
-      []() { controller.deactivateAll(); }
+      "Disabling all mods.",
+      [](std::atomic<float>& progress) { controller.deactivateAll(progress); }
     )->open();
     return true;
   });

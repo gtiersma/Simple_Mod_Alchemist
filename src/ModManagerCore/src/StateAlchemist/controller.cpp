@@ -4,6 +4,9 @@
 #include "StateAlchemist/fs_manager.h"
 #include "StateAlchemist/meta_manager.h"
 
+#include <set>
+
+
 Controller controller;
 
 
@@ -60,119 +63,6 @@ std::vector<std::string> Controller::loadSources(bool sort) {
   return FsManager::listNames(this->getGroupPath(), sort);
 }
 
-/*
- * Gets an unsorted vector of only the sources that are unlocked
- * 
- * @requirement: group must be set
- */
-std::vector<std::string> Controller::loadUnlockedSources() {
-  std::vector<std::string> sources;
-
-  FsDir dir = FsManager::openFolder(this->getGroupPath(), FsDirOpenMode_ReadDirs);
-
-  FsDirectoryEntry entry;
-  s64 readCount = 0;
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, 1, &entry)) && readCount) {
-    if (entry.type == FsDirEntryType_Dir && !MetaManager::parseLockedStatus(entry.name)) {
-      sources.push_back(MetaManager::parseName(entry.name));
-    }
-  }
-
-  fsDirClose(&dir);
-
-  return sources;
-}
-
-/*
- * Checks if the source is locked from randomization
- *
- * @requirement: group must be set
- */
-bool Controller::isSourceLocked(const std::string& source) {
-  bool isLocked;
-
-  FsDir dir = FsManager::openFolder(this->getGroupPath(), FsDirOpenMode_ReadDirs);
-
-  FsDirectoryEntry entry;
-  s64 readCount = 0;
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, 1, &entry))) {
-    if (entry.type == FsDirEntryType_Dir && source == MetaManager::parseName(entry.name)) {
-      isLocked = MetaManager::parseLockedStatus(entry.name);
-      break;
-    }
-  }
-
-  fsDirClose(&dir);
-
-  return isLocked;
-}
-
-/*
- * Load all source options within the specified group along with their lock status
- * 
- * @requirement: group must be set
- */
-std::map<std::string, bool> Controller::loadSourceLocks() {
-  std::map<std::string, bool> locks;
-
-  FsDir dir = FsManager::openFolder(this->getGroupPath(), FsDirOpenMode_ReadDirs);
-
-  FsDirectoryEntry entry;
-  s64 readCount = 0;
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, 1, &entry)) && readCount) {
-    if (entry.type == FsDirEntryType_Dir) {
-      std::string source = MetaManager::parseName(entry.name);
-      locks[source] = MetaManager::parseLockedStatus(entry.name);
-    }
-  }
-
-  fsDirClose(&dir);
-
-  return locks;
-}
-
-/*
- * Disable randomization for the specified source
- * 
- * @requirement: group must be set
- * @requirement: source must not already be locked
- */
-void Controller::lockSource(const std::string& source) {
-  u8 rating = this->loadDefaultRating(source);
-
-  std::string currentPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(source, rating, false);
-  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(source, rating, true);
-
-  MetaManager::tryResult(
-    fsFsRenameDirectory(
-      &FsManager::sdSystem,
-      FsManager::toPathBuffer(currentPath).get(),
-      FsManager::toPathBuffer(newPath).get()
-    )
-  );
-}
-
-/*
- * Enable randomization for the specified source
- * 
- * @requirement: group must be set
- * @requirement: source must be currently locked
- */
-void Controller::unlockSource(const std::string& source) {
-  u8 rating = this->loadDefaultRating(source);
-
-  std::string currentPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(source, rating, true);
-  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(source, rating, false);
-
-  MetaManager::tryResult(
-    fsFsRenameDirectory(
-      &FsManager::sdSystem,
-      FsManager::toPathBuffer(currentPath).get(),
-      FsManager::toPathBuffer(newPath).get()
-    )
-  );
-}
-
 /**
  * Load all mod options that could be activated for the moddable source in the group
  * 
@@ -213,9 +103,9 @@ std::map<std::string, u8> Controller::loadRatings() {
 /*
  * Loads the rating for the source (for using no mod)
  * 
- * @requirement: group must be set
+ * @requirement: group and source must be set
  */
-u8 Controller::loadDefaultRating(const std::string& source) {
+u8 Controller::loadDefaultRating() {
   u8 rating;
 
   FsDir dir = FsManager::openFolder(this->getGroupPath(), FsDirOpenMode_ReadDirs);
@@ -223,7 +113,7 @@ u8 Controller::loadDefaultRating(const std::string& source) {
   FsDirectoryEntry entry;
   s64 readCount = 0;
   while (R_SUCCEEDED(fsDirRead(&dir, &readCount, 1, &entry))) {
-    if (entry.type == FsDirEntryType_Dir && source == MetaManager::parseName(entry.name)) {
+    if (entry.type == FsDirEntryType_Dir && this->source == MetaManager::parseName(entry.name)) {
       rating = MetaManager::parseRating(entry.name);
       break;
     }
@@ -242,7 +132,7 @@ u8 Controller::loadDefaultRating(const std::string& source) {
 void Controller::saveRatings(const std::map<std::string, u8>& ratings) {
   for (const auto& [mod, rating]: ratings) {
     std::string currentPath = this->getModPath(mod);
-    std::string newPath = this->getSourcePath() + "/" + MetaManager::buildFolderName(mod, rating, false);
+    std::string newPath = this->getSourcePath() + "/" + MetaManager::buildFolderName(mod, rating);
 
     MetaManager::tryResult(
       fsFsRenameDirectory(
@@ -258,8 +148,7 @@ void Controller::saveRatings(const std::map<std::string, u8>& ratings) {
  * Saves the rating for using no mod for the current source
  */
 void Controller::saveDefaultRating(const u8& rating) {
-  bool isLocked = this->isSourceLocked(this->source);
-  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating, isLocked);
+  std::string newPath = this->getGroupPath() + "/" + MetaManager::buildFolderName(this->source, rating);
 
   MetaManager::tryResult(
     fsFsRenameDirectory(
@@ -396,6 +285,9 @@ void Controller::activateMod(const std::string& mod) {
         // If there's nothing left in our count storage, we've navigated everything, so we're done:
         if (iStorage.size() == 0) { break; }
 
+        // Delete the folder only if it's now empty. The folder should be empty, but if not for whatever reason, this should just silently break and skip it:
+        fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(modPath + currentBasePath).get());
+
         // Otherwise, let's get back the count data of where we left off in the parent:
         i = iStorage.back();
         iStorage.pop_back();
@@ -430,12 +322,23 @@ void Controller::deactivateMod() {
   this->returnFiles(activeMod);
 }
 
-void Controller::deactivateAll() {
+/**
+ * @param progress Scale of 0.0-1.0 of the method's current progress.
+ *                 Updated while the method runs.
+ */
+void Controller::deactivateAll(std::atomic<float>& progress) {
   std::vector<std::string> groups = this->loadGroups(false);
+
+  // Percentage completed per group
+  float progressPerGroup = 1.0f / groups.size();
 
   for (const std::string& group : groups) {
     this->group = group;
+
     std::vector<std::string> sources = this->loadSources(false);
+
+    // Percentage completed per source
+    float progressPerSource = progressPerGroup / sources.size();
 
     for (const std::string& source : sources) {
       this->source = source;
@@ -444,6 +347,8 @@ void Controller::deactivateAll() {
       if (!activeMod.empty()) {
         this->returnFiles(activeMod);
       }
+    
+      progress.store(progress.load() + progressPerSource);
     }
   }
 
@@ -453,14 +358,19 @@ void Controller::deactivateAll() {
 
 /**
  * Randomly activates/deactivates all mods based upon their ratings
+ *
+ * @param progress Scale of 0.0-1.0 of the method's current progress.
+ *                 Updated while the method runs.
  */
-void Controller::randomizeGame() {
-
+void Controller::randomizeGame(std::atomic<float>& progress) {
   std::vector<std::string> groups = this->loadGroups(false);
+
+  // Percentage completed per group
+  float progressPerGroup = 1.0f / groups.size();
 
   for (const std::string& group : groups) {
     this->group = group;
-    this->randomizeGroup();
+    this->randomizeGroup(progress, progressPerGroup);
   }
 
   this->group = "";
@@ -471,13 +381,27 @@ void Controller::randomizeGame() {
  * Randomly activates/deactivates all mods in the current group
  * 
  * @requirement: group must be set
+ *
+ * @param progress Scale of 0.0-1.0 of the method's current progress.
+ *                 Updated while the method runs.
+ *
+ * @param percentageOfGame If the group is being randomized as part of an entire game,
+ *                         include the percentage of the total number of groups this group represents.
+ *                         The method will only increase the progress by that percentage.
+ *                         Otherwise, it's expected that this group is the only thing being randomized,
+ *                         so the progress param is at 0% and it will move forward to 100%.
  */
-void Controller::randomizeGroup() {
-  std::vector<std::string> sources = this->loadUnlockedSources();
+void Controller::randomizeGroup(std::atomic<float>& progress, const float& percentageOfGame) {
+  std::vector<std::string> sources = this->loadSources(false);
+
+  // Percentage completed per source
+  float progressPerSource = percentageOfGame / sources.size();
 
   for (const std::string& source : sources) {
     this->source = source;
     this->randomizeSource();
+    
+    progress.store(progress.load() + progressPerSource);
   }
 }
 
@@ -492,7 +416,7 @@ void Controller::randomizeSource() {
   std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
   std::map<std::string, u8> ratings = this->loadRatings();
-  u8 defaultRating = this->loadDefaultRating(this->source);
+  u8 defaultRating = this->loadDefaultRating();
 
   // Sum all ratings to pick one at random:
   u16 ratingTotal = defaultRating;
@@ -500,7 +424,7 @@ void Controller::randomizeSource() {
     ratingTotal += rating;
   }
 
-  // Just treat it as locked if all ratings are 0 for some reason:
+  // Just skip if all ratings are 0 for some reason:
   if (ratingTotal == 0) { return; }
 
   // Get the random number 
@@ -552,6 +476,10 @@ void Controller::returnFiles(const std::string& mod) {
 
   std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
   std::string modPath = this->getModPath(mod);
+  std::string atmoRootPath = this->getAtmospherePath();
+  int atmoRootPathSize = atmoRootPath.size();
+
+  std::set<std::string> atmoFolders;
 
   // Try to open the active mod's txt file to get the list of files that were moved to atmosphere's folder:
   FsFile movedFilesList;
@@ -580,24 +508,35 @@ void Controller::returnFiles(const std::string& mod) {
 
     // If the path builder got a new line character from the buffer, we have a full path:
     std::size_t newLinePos = pathBuilder.find('\n');
-    if (newLinePos != std::string::npos) {
+    while (newLinePos != std::string::npos) {
       // Trim the new line and any characters that were gathered after it to get the cleaned atmosphere file path:
       std::string basePath = pathBuilder.substr(0, newLinePos);
+      std::string atmoPath = atmoRootPath + basePath;
 
       // Move any characters gathered after the new line to the pathBuilder string for the next path:
       pathBuilder = pathBuilder.substr(newLinePos + 1);
 
       // Move the file back to the mod's folder:
-      FsManager::moveFile(
-        this->getAtmospherePath() + basePath,
-        modPath + basePath
-      );
+      FsManager::moveFile(atmoPath, modPath + basePath);
 
       // Not sure why, but the file needs to be re-opened after each time a file moved:
       fsFileClose(&movedFilesList);
       MetaManager::tryResult(
         fsFsOpenFile(&FsManager::sdSystem, movedFilesListPath.get(), FsOpenMode_Read, &movedFilesList)
       );
+
+      FsManager::forEachFolderInFilePath(atmoPath, [atmoRootPathSize, &atmoFolders](std::string path) {
+        if (path.size() <= atmoRootPathSize) {
+          return false;
+        }
+        if (atmoFolders.count(path) == 1) {
+          return false;
+        }
+        atmoFolders.insert(path);
+        return true;
+      });
+
+      newLinePos = pathBuilder.find('\n');
     }
 
     offset += FILE_LIST_BUFFER_SIZE;
@@ -611,6 +550,12 @@ void Controller::returnFiles(const std::string& mod) {
   MetaManager::tryResult(
     fsFsDeleteFile(&FsManager::sdSystem, movedFilesListPath.get())
   );
+
+  for (std::string path: atmoFolders) {
+    if (FsManager::doesFolderExist(path) && !FsManager::hasFilesDeep(path)) {
+      fsFsDeleteDirectoryRecursively(&FsManager::sdSystem, FsManager::toPathBuffer(path).get());
+    }
+  }
 }
 
 /*

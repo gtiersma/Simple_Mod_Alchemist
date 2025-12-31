@@ -38,11 +38,6 @@ void GuiModManager::applyMod(const std::string &modName_) {
   controller.activateMod(modGrouping[2]);
 }
 
-void GuiModManager::removeAllMods() {
-  alchemyLogger.log("GUI MOD MANAGER: Deactivating all mods..."); 
-  controller.deactivateAll();
-}
-
 void GuiModManager::applyModsList(std::vector<std::string>& modsList_){
   for (const auto& modName : modsList_) {
     this->applyMod(modName);

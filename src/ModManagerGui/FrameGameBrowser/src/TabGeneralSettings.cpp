@@ -9,6 +9,7 @@
 #include <AlchemistLogger.h>
 #include <util.hpp>
 #include <note_cell.hpp>
+#include <GameBrowser.h>
 
 using namespace brls::literals;
 
@@ -19,7 +20,7 @@ TabGeneralSettings::TabGeneralSettings() {
 
 void TabGeneralSettings::rebuildLayout() {
   alchemyLogger.log("TabGeneralSettings::rebuildLayout();");
-  Util::padTabContent(this);
+  Util::padContent(this);
 
   brls::NoteCell* migrationItem = new brls::NoteCell();
   migrationItem->setText("Bring over old SimpleModManager mods");
@@ -32,8 +33,11 @@ void TabGeneralSettings::rebuildLayout() {
       "This action cannot easily be undone.\n"\
       "Turn all the mods off in SimpleModManager first to clear them out before running this.",
       "Moving mods from the old SimpleModManager to this app.",
-      []() { ModMigrator().begin(); },
-      [this]() { buildMigrateFinishedDialog()->open(); }
+      [](std::atomic<float>& progress) { ModMigrator().begin(progress); },
+      [this]() {
+        gameBrowser.loadGames();
+        buildMigrateFinishedDialog()->open();
+      }
     )->open();
     return true;
   });
@@ -49,7 +53,7 @@ brls::Dialog* TabGeneralSettings::buildMigrateFinishedDialog() {
     "Finished moving mod files & folders.\n\n"\
     "The mods have been grouped in an \"uncategorized\" folder. "\
     "It's recommended to reorganize them into group folders on your pc to make them easy to use, but you don't have to. "\
-    "Any files that couldn't be moved have been left where they were."
+    "Some empty folders with any files that couldn't be moved have been left where they were."
   );
   completeDialog->addButton("OK", []() {});
   return completeDialog;

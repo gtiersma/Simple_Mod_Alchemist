@@ -77,6 +77,87 @@ bool FsManager::doesFileExist(const std::string& path) {
   }
 }
 
+
+
+bool FsManager::hasFilesDeep(const std::string& path) {
+  
+  // Just to be safe, always treat the path as having files until we finish navigating the entire path's tree:
+  bool hasFiles = true;
+
+  FsDir dir = openFolder(path, FsDirOpenMode_ReadDirs);
+
+  // Iterartor for current entry in the current directory:
+  short i = 0;
+
+  // Used for "storing" where the iteration left off at when traversing deeper into the hierarchy:
+  std::vector<u64> iStorage;
+
+  // The path we are currently at relative to the original path.
+  // Empty string is original path itself:
+  std::string currentBasePath = "";
+
+  // The index of the current entry we're iterating over in the current directory:
+  short entryIndex = 0;
+
+  // The current number of files read at a time
+  // It reads 1 at a time, so it will always be either 1 or 0 (0 if all have been read)
+  s64 readCount = 0;
+
+  FsDirectoryEntry entry;
+
+  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, 1, &entry))) {
+
+    // Continue iterating the index until it catches up with the iteration we should be on (if needed):
+    entryIndex++;
+    if (entryIndex > i) {
+      i++;
+
+      if (readCount > 0) {
+        std::string nextPath = currentBasePath + "/" + entry.name;
+
+        // If the next entry is a folder, we will traverse within it:
+        if (entry.type == FsDirEntryType_Dir) {
+
+          // Add the current count to the storage:
+          iStorage.push_back(i);
+
+          currentBasePath = nextPath;
+          changeFolder(dir, path + nextPath, FsDirOpenMode_ReadDirs);
+
+          // Reset the index & iterator because we're starting in a new folder:
+          entryIndex = 0;
+          i = 0;
+        } else {
+          break; // File was found. No more work to do.
+        }
+      } else {
+        // If there's nothing left in our count storage, we've navigated everything, encountering no files:
+        if (iStorage.size() == 0) {
+          hasFiles = false;
+          break;
+        }
+
+        // Otherwise, let's get back the count data of where we left off in the parent:
+        i = iStorage.back();
+        iStorage.pop_back();
+
+        // Remove the string portion after the last '/' to get the parent's path:
+        std::size_t lastSlashIndex = currentBasePath.rfind('/');
+        currentBasePath = currentBasePath.substr(0, lastSlashIndex);
+        changeFolder(dir, path + currentBasePath, FsDirOpenMode_ReadDirs);
+
+        // Reset the entry index because it will start at the beginning again:
+        entryIndex = 0;
+      }
+    }
+
+  }
+
+  fsDirClose(&dir);
+
+  return hasFiles;
+}
+
 /**
  * Gets a vector of all entity names that are directly within the specified path
  * (parsing the name from the folder name)
@@ -178,6 +259,22 @@ void FsManager::moveFile(const std::string& fromPath, const std::string& toPath)
   MetaManager::tryResult(
     fsFsRenameFile(&sdSystem, toPathBuffer(fromPath).get(), toPathBuffer(toPath).get())
   );
+}
+
+void FsManager::forEachFolderInFilePath(const std::string& path, std::function<bool (const std::string& path)> fn) {
+  std::string currentPath = path;
+  int slashIndex = path.find_last_of("/");
+
+  while(slashIndex != std::string::npos) {
+    currentPath = currentPath.substr(0, slashIndex);
+
+    bool shouldContinue = fn(currentPath);
+    if (!shouldContinue) {
+      break;
+    }
+
+    int slashIndex = currentPath.find_last_of("/");
+  }
 }
 
 /**
