@@ -4,6 +4,9 @@
 #include "StateAlchemist/fs_manager.h"
 #include "StateAlchemist/meta_manager.h"
 
+#include <set>
+
+
 Controller controller;
 
 
@@ -275,6 +278,9 @@ void Controller::activateMod(const std::string& mod) {
         // If there's nothing left in our count storage, we've navigated everything, so we're done:
         if (iStorage.size() == 0) { break; }
 
+        // Delete the folder only if it's now empty. The folder should be empty, but if not for whatever reason, this should just silently break and skip it:
+        fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(modPath + currentBasePath).get());
+
         // Otherwise, let's get back the count data of where we left off in the parent:
         i = iStorage.back();
         iStorage.pop_back();
@@ -470,6 +476,10 @@ void Controller::returnFiles(const std::string& mod) {
 
   std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
   std::string modPath = this->getModPath(mod);
+  std::string atmoRootPath = this->getAtmospherePath();
+  int atmoRootPathSize = atmoRootPath.size();
+
+  std::set<std::string> atmoFolders;
 
   // Try to open the active mod's txt file to get the list of files that were moved to atmosphere's folder:
   FsFile movedFilesList;
@@ -498,24 +508,35 @@ void Controller::returnFiles(const std::string& mod) {
 
     // If the path builder got a new line character from the buffer, we have a full path:
     std::size_t newLinePos = pathBuilder.find('\n');
-    if (newLinePos != std::string::npos) {
+    while (newLinePos != std::string::npos) {
       // Trim the new line and any characters that were gathered after it to get the cleaned atmosphere file path:
       std::string basePath = pathBuilder.substr(0, newLinePos);
+      std::string atmoPath = atmoRootPath + basePath;
 
       // Move any characters gathered after the new line to the pathBuilder string for the next path:
       pathBuilder = pathBuilder.substr(newLinePos + 1);
 
       // Move the file back to the mod's folder:
-      FsManager::moveFile(
-        this->getAtmospherePath() + basePath,
-        modPath + basePath
-      );
+      FsManager::moveFile(atmoPath, modPath + basePath);
 
       // Not sure why, but the file needs to be re-opened after each time a file moved:
       fsFileClose(&movedFilesList);
       MetaManager::tryResult(
         fsFsOpenFile(&FsManager::sdSystem, movedFilesListPath.get(), FsOpenMode_Read, &movedFilesList)
       );
+
+      FsManager::forEachFolderInFilePath(atmoPath, [atmoRootPathSize, &atmoFolders](std::string path) {
+        if (path.size() <= atmoRootPathSize) {
+          return false;
+        }
+        if (atmoFolders.count(path) == 1) {
+          return false;
+        }
+        atmoFolders.insert(path);
+        return true;
+      });
+
+      newLinePos = pathBuilder.find('\n');
     }
 
     offset += FILE_LIST_BUFFER_SIZE;
@@ -529,6 +550,12 @@ void Controller::returnFiles(const std::string& mod) {
   MetaManager::tryResult(
     fsFsDeleteFile(&FsManager::sdSystem, movedFilesListPath.get())
   );
+
+  for (std::string path: atmoFolders) {
+    if (FsManager::doesFolderExist(path) && !FsManager::hasFilesDeep(path)) {
+      fsFsDeleteDirectoryRecursively(&FsManager::sdSystem, FsManager::toPathBuffer(path).get());
+    }
+  }
 }
 
 /*

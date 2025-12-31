@@ -80,7 +80,9 @@ bool FsManager::doesFileExist(const std::string& path) {
 
 
 bool FsManager::hasFilesDeep(const std::string& path) {
-  bool fileFound = false;
+  
+  // Just to be safe, always treat the path as having files until we finish navigating the entire path's tree:
+  bool hasFiles = true;
 
   FsDir dir = openFolder(path, FsDirOpenMode_ReadDirs);
 
@@ -126,12 +128,14 @@ bool FsManager::hasFilesDeep(const std::string& path) {
           entryIndex = 0;
           i = 0;
         } else {
-          fileFound = true;
-          break;
+          break; // File was found. No more work to do.
         }
       } else {
-        // If there's nothing left in our count storage, we've navigated everything, so we're done:
-        if (iStorage.size() == 0) { break; }
+        // If there's nothing left in our count storage, we've navigated everything, encountering no files:
+        if (iStorage.size() == 0) {
+          hasFiles = false;
+          break;
+        }
 
         // Otherwise, let's get back the count data of where we left off in the parent:
         i = iStorage.back();
@@ -151,7 +155,7 @@ bool FsManager::hasFilesDeep(const std::string& path) {
 
   fsDirClose(&dir);
 
-  return fileFound;
+  return hasFiles;
 }
 
 /**
@@ -255,6 +259,22 @@ void FsManager::moveFile(const std::string& fromPath, const std::string& toPath)
   MetaManager::tryResult(
     fsFsRenameFile(&sdSystem, toPathBuffer(fromPath).get(), toPathBuffer(toPath).get())
   );
+}
+
+void FsManager::forEachFolderInFilePath(const std::string& path, std::function<bool (const std::string& path)> fn) {
+  std::string currentPath = path;
+  int slashIndex = path.find_last_of("/");
+
+  while(slashIndex != std::string::npos) {
+    currentPath = currentPath.substr(0, slashIndex);
+
+    bool shouldContinue = fn(currentPath);
+    if (!shouldContinue) {
+      break;
+    }
+
+    int slashIndex = currentPath.find_last_of("/");
+  }
 }
 
 /**

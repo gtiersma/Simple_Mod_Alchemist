@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <functional>
+
 
 /**
  * Heper functions related to the filesystem
@@ -67,6 +69,18 @@ namespace FsManager {
    * Changes the fromPath file parameter's location to what's specified as the toPath parameter
    */
   void moveFile(const std::string& fromPath, const std::string& toPath);
+
+  /**
+   * Performs the provided function on every folder in the path of a file.
+   *
+   * Iteration order is from the deepest folder to the root-most one.
+   *
+   * This function itself performs no file system operations (just string operations),
+   * so it won't hit any exception itself regardless of the files existance or any of its folders.
+   *
+   * @param fn - return "false" to break the iteration, skipping the rest of the folders. "true" to continue.
+   */
+  void forEachFolderInFilePath(const std::string& path, std::function<bool (const std::string& path)> fn);
 
   /**
    * Formats a string as a char array that will work properly as a parameter for libnx's filesystem functions
