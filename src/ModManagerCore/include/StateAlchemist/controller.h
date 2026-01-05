@@ -14,7 +14,7 @@ class Controller {
     std::string group;
     std::string source;
 
-    void init();
+    Controller();
 
     void setTitleId(const u64& titleId);
 
@@ -137,8 +137,6 @@ class Controller {
      * Gets the file path for the specified group
      */
     std::string getGroupPath();
-
-    Controller() = default;
 
     /**
      * Unmount SD card when destroyed 

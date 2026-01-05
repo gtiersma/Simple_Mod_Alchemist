@@ -4,17 +4,21 @@
 #include "StateAlchemist/fs_manager.h"
 #include "StateAlchemist/meta_manager.h"
 
+#include <AlchemistLogger.h>
+
 #include <set>
 
 
 Controller controller;
 
 
-void Controller::init() {
+Controller::Controller() {
   pmdmntInitialize();
   pminfoInitialize();
 
   MetaManager::tryResult(fsOpenSdCardFileSystem(&FsManager::sdSystem));
+
+  alchemyLogger.init();
 }
 
 void Controller::setTitleId(const u64& titleId) {
@@ -253,6 +257,7 @@ void Controller::activateMod(const std::string& mod) {
 
       if (readCount > 0) {
         std::string nextPath = currentBasePath + "/" + entry.name;
+        alchemyLogger.log("CONTROL.activateMod: Read path: " + nextPath);
 
         // If the next entry is a file, we will move it and record it as moved as long as there isn't a conflict.
         //
@@ -282,6 +287,7 @@ void Controller::activateMod(const std::string& mod) {
           i = 0;
         }
       } else {
+        alchemyLogger.log("CONTROL.activateMod: Done in directory: " + modPath + currentBasePath);
         // If there's nothing left in our count storage, we've navigated everything, so we're done:
         if (iStorage.size() == 0) { break; }
 
@@ -517,14 +523,17 @@ void Controller::returnFiles(const std::string& mod) {
       pathBuilder = pathBuilder.substr(newLinePos + 1);
 
       // Move the file back to the mod's folder:
+      alchemyLogger.log("CONTROL.returnFiles: Moving file: " + modPath + basePath);
       FsManager::moveFile(atmoPath, modPath + basePath);
 
       // Not sure why, but the file needs to be re-opened after each time a file moved:
+      alchemyLogger.log("CONTROL.returnFiles: Re-opening file handle");
       fsFileClose(&movedFilesList);
       MetaManager::tryResult(
         fsFsOpenFile(&FsManager::sdSystem, movedFilesListPath.get(), FsOpenMode_Read, &movedFilesList)
       );
 
+      alchemyLogger.log("CONTROL.returnFiles: Iterating dir: " + atmoPath);
       FsManager::forEachFolderInFilePath(atmoPath, [atmoRootPathSize, &atmoFolders](std::string path) {
         if (path.size() <= atmoRootPathSize) {
           return false;

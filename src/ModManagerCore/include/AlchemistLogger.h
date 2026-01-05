@@ -10,16 +10,16 @@
 class AlchemistLogger {
 
 private:
-
   s64 offset;
   std::string rawPath;
   std::unique_ptr<char[]> path;
   FsFile file;
 
 public:
-
-    AlchemistLogger();
+    AlchemistLogger() = default;
     ~AlchemistLogger();
+
+    void init();
 
     void log(const std::string& message);
 };
