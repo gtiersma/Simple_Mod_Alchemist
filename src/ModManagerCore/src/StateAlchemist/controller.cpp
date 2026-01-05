@@ -278,17 +278,20 @@ void Controller::activateMod(const std::string& mod) {
         // If there's nothing left in our count storage, we've navigated everything, so we're done:
         if (iStorage.size() == 0) { break; }
 
-        // Delete the folder only if it's now empty. The folder should be empty, but if not for whatever reason, this should just silently break and skip it:
-        fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(modPath + currentBasePath).get());
-
         // Otherwise, let's get back the count data of where we left off in the parent:
         i = iStorage.back();
         iStorage.pop_back();
+
+        std::string oldBasePath = currentBasePath;
 
         // Remove the string portion after the last '/' to get the parent's path:
         std::size_t lastSlashIndex = currentBasePath.rfind('/');
         currentBasePath = currentBasePath.substr(0, lastSlashIndex);
         FsManager::changeFolder(dir, modPath + currentBasePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
+
+        // Delete the folder only if it's now empty. The folder should be empty,
+        // but if not for whatever reason, this should just silently break and skip it:
+        fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(modPath + oldBasePath).get());
 
         // Reset the entry index because it will start at the beginning again:
         entryIndex = 0;
@@ -479,8 +482,6 @@ void Controller::returnFiles(const std::string& mod) {
   std::string atmoRootPath = this->getAtmospherePath();
   int atmoRootPathSize = atmoRootPath.size();
 
-  std::set<std::string> atmoFolders;
-
   // Try to open the active mod's txt file to get the list of files that were moved to atmosphere's folder:
   FsFile movedFilesList;
   MetaManager::tryResult(
@@ -519,20 +520,18 @@ void Controller::returnFiles(const std::string& mod) {
       // Move the file back to the mod's folder:
       FsManager::moveFile(atmoPath, modPath + basePath);
 
-      // Not sure why, but the file needs to be re-opened after each time a file moved:
-      fsFileClose(&movedFilesList);
-      MetaManager::tryResult(
-        fsFsOpenFile(&FsManager::sdSystem, movedFilesListPath.get(), FsOpenMode_Read, &movedFilesList)
-      );
-
-      FsManager::forEachFolderInFilePath(atmoPath, [atmoRootPathSize, &atmoFolders](std::string path) {
+      // If there are any folders now empty after moving this file, delete them:
+      FsManager::forEachFolderInFilePathDeepestFirst(atmoPath, [atmoRootPathSize](std::string path) {
         if (path.size() <= atmoRootPathSize) {
-          return false;
+          return false; // If this point is reached, we are at the game's root folder, so stop deleting.
         }
-        if (atmoFolders.count(path) == 1) {
-          return false;
+
+        Result deleted = fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(path).get());
+        if (R_FAILED(deleted)) {
+          return false; // If the deletion failed, it's probably because the folder has content, so end the iteration.
         }
-        atmoFolders.insert(path);
+
+        // If this point is reached, go on to the next parent folder:
         return true;
       });
 
@@ -550,12 +549,6 @@ void Controller::returnFiles(const std::string& mod) {
   MetaManager::tryResult(
     fsFsDeleteFile(&FsManager::sdSystem, movedFilesListPath.get())
   );
-
-  for (std::string path: atmoFolders) {
-    if (FsManager::doesFolderExist(path) && !FsManager::hasFilesDeep(path)) {
-      fsFsDeleteDirectoryRecursively(&FsManager::sdSystem, FsManager::toPathBuffer(path).get());
-    }
-  }
 }
 
 /*

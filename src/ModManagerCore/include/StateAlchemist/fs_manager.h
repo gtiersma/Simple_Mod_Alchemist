@@ -66,9 +66,20 @@ namespace FsManager {
   void write(FsFile& file, const std::string& text, s64& offset);
 
   /**
-   * Changes the fromPath file parameter's location to what's specified as the toPath parameter
+   * Changes the fromPath file parameter's location to what's specified as the toPath parameter.
+   * If any folders in the "toPath" don't exist, it creates them.
    */
   void moveFile(const std::string& fromPath, const std::string& toPath);
+
+  /**
+   * Performs the provided function on every folder in the path of a file.
+   *
+   * Iteration order is from the root folder to the deepest in the path.
+   *
+   * This function itself performs no file system operations (just string operations),
+   * so it won't hit any exception itself regardless of the files existance or any of its folders.
+   */
+  void forEachFolderInFilePath(const std::string& path, std::function<bool (const std::string& path)> fn);
 
   /**
    * Performs the provided function on every folder in the path of a file.
@@ -80,7 +91,7 @@ namespace FsManager {
    *
    * @param fn - return "false" to break the iteration, skipping the rest of the folders. "true" to continue.
    */
-  void forEachFolderInFilePath(const std::string& path, std::function<bool (const std::string& path)> fn);
+  void forEachFolderInFilePathDeepestFirst(const std::string& path, std::function<bool (const std::string& path)> fn);
 
   /**
    * Formats a string as a char array that will work properly as a parameter for libnx's filesystem functions

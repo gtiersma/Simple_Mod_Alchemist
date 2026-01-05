@@ -77,8 +77,6 @@ bool FsManager::doesFileExist(const std::string& path) {
   }
 }
 
-
-
 bool FsManager::hasFilesDeep(const std::string& path) {
   
   // Just to be safe, always treat the path as having files until we finish navigating the entire path's tree:
@@ -131,6 +129,17 @@ bool FsManager::hasFilesDeep(const std::string& path) {
           break; // File was found. No more work to do.
         }
       } else {
+
+        // EDGE CASE: For some reason, sometimes fsDirRead gets a readCount of 0 when there should be an entry within it.
+        //            This can be dangerous since this method is often used with recursive empty folder deletions
+        //            that may delete a file if this function returns an incorrect result.
+        //            To avoid this, we're checking the actual count here to see if it matches up.
+        //            If it doesn't, this method returns "false" just to be safe.
+        s64 totalCount = 0;
+        if (R_SUCCEEDED(fsDirGetEntryCount(&dir, &totalCount)) && totalCount != i) {
+          break;
+        }
+
         // If there's nothing left in our count storage, we've navigated everything, encountering no files:
         if (iStorage.size() == 0) {
           hasFiles = false;
@@ -252,16 +261,36 @@ void FsManager::write(FsFile& file, const std::string& text, s64& offset) {
   offset += text.size();
 }
 
-/**
- * Changes the fromPath file parameter's location to what's specified as the toPath parameter
- */
 void FsManager::moveFile(const std::string& fromPath, const std::string& toPath) {
+  forEachFolderInFilePath(toPath, [](std::string path) {
+    createFolderIfNeeded(path);
+    return true;
+  });
+
   MetaManager::tryResult(
     fsFsRenameFile(&sdSystem, toPathBuffer(fromPath).get(), toPathBuffer(toPath).get())
   );
 }
 
 void FsManager::forEachFolderInFilePath(const std::string& path, std::function<bool (const std::string& path)> fn) {
+  std::string pathRemaining = path.substr(1); // Index 0 is a "/", so start at index 1
+  int slashIndex = pathRemaining.find_first_of("/");
+  std::string currentPath = "";
+
+  while(slashIndex != std::string::npos) {
+    currentPath = currentPath + "/" + pathRemaining.substr(0, slashIndex);
+
+    bool shouldContinue = fn(currentPath);
+    if (!shouldContinue) {
+      break;
+    }
+
+    pathRemaining.erase(0, slashIndex + 1);
+    slashIndex = pathRemaining.find_first_of("/");
+  }
+}
+
+void FsManager::forEachFolderInFilePathDeepestFirst(const std::string& path, std::function<bool (const std::string& path)> fn) {
   std::string currentPath = path;
   int slashIndex = path.find_last_of("/");
 
@@ -273,7 +302,7 @@ void FsManager::forEachFolderInFilePath(const std::string& path, std::function<b
       break;
     }
 
-    int slashIndex = currentPath.find_last_of("/");
+    slashIndex = currentPath.find_last_of("/");
   }
 }
 
