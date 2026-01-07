@@ -135,9 +135,9 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
     return true;
   });
 
-  selector->updateActionHint(brls::BUTTON_A, "Change Mod");
+  selector->updateActionHint(brls::BUTTON_A, "Change");
 
-  selector->registerAction("Randomly Pick", brls::BUTTON_X, [this, &mod](brls::View* view) {
+  selector->registerAction("Random", brls::BUTTON_X, [this, &mod](brls::View* view) {
     brls::SelectorCell* cell = dynamic_cast<brls::SelectorCell*>(view);
 
     controller.source = mod.getSource();
