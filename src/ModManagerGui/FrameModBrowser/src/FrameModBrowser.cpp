@@ -33,7 +33,7 @@ void FrameModBrowser::initialize() {
 
   appletFrame->setTitle(game.name);
 
-  tabs->registerAction("Back to Game List", brls::BUTTON_B, [](brls::View* view) {
+  tabs->registerAction("Back", brls::BUTTON_B, [](brls::View* view) {
     brls::Application::popActivity();
 
     // clear the group/source shown

@@ -130,7 +130,7 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
     gameBrowser.getModManager().loadSourcesIfNeeded(index);
   });
 
-  selector->registerAction("To Group List", brls::BUTTON_B, [this](brls::View* view) {
+  selector->registerAction("Back", brls::BUTTON_B, [this](brls::View* view) {
     brls::Application::giveFocus(this->_parent_cell_);
     return true;
   });

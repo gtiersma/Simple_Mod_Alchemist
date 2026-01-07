@@ -83,7 +83,7 @@ brls::IconCell* TabGames::buildGameCell(const Game& game) {
     return true;
   });
 
-  item->registerAction("Randomly Change Game's Mods", brls::BUTTON_X, [game](brls::View* view) {
+  item->registerAction("Randomly Change Mods", brls::BUTTON_X, [game](brls::View* view) {
     gameBrowser.selectGame(game.titleId);
     Util::buildConfirmDialog(
       "Enable/disable mods for " + game.name + " at random?",
@@ -93,7 +93,7 @@ brls::IconCell* TabGames::buildGameCell(const Game& game) {
     return true;
   });
 
-  item->updateActionHint(brls::BUTTON_A, "View Game's Mods");
+  item->updateActionHint(brls::BUTTON_A, "View Mods");
 
   return item;
 }

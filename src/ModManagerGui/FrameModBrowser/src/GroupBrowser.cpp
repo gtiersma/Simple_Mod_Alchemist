@@ -41,7 +41,7 @@ GroupBrowser::GroupBrowser() {
     });
   }
 
-  this->groupList->registerAction("Randomly Change Group's Mods", brls::BUTTON_X, [this](brls::View* view) {
+  this->groupList->registerAction("Randomly Change Mods", brls::BUTTON_X, [this](brls::View* view) {
     Util::buildConfirmDialog(
       "Enable/disable all mods in \"" + controller.group + "\" at random?",
       "Changing mods in \"" + controller.group + "\".",
