@@ -13,9 +13,6 @@ const int MAX_FS_ENTRY_LOAD = 50;
 // Substring to delimit the rating from the mod name in the folder name:
 const std::string RATING_DELIMITER = "~~";
 
-// Character at start of a folder name of a source to indicate that it's locked:
-const char LOCKED_CHAR = '~';
-
 const std::string TXT_EXT = ".txt";
 const std::string ALCHEMIST_FOLDER = "mod_alchemy";
 const std::string ALCHEMIST_PATH = "/" + ALCHEMIST_FOLDER;

@@ -80,7 +80,7 @@ std::string MetaManager::parseName(const std::string& folderName) {
   //
   // Locking is an old feature from State Alchemist no longer supported.
   // Some old mods brought over from that app could still have this character at the begining.
-  if (name[0] == '*') {
+  if (name[0] == '~') {
     name = name.substr(1);
   }
 
