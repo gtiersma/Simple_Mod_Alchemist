@@ -12,6 +12,15 @@ class TabAbout : public brls::Box {
 public:
   TabAbout();
   static brls::View* create();
+
+private:
+  brls::View* buildLeftBox();
+  brls::View* buildRightBox();
+
+  /**
+   * Essentially gives the view a brls::Header, spacing it properly, contained in a brls::Box
+   */
+  brls::Box* wrapWithHeader(brls::View* content, std::string header);
 };
 
 

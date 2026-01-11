@@ -15,7 +15,16 @@
         </brls:Tab>
 
         <brls:Tab label="About" >
-          <TabAbout/>
+            <brls:Box
+                width="auto"
+                height="auto">
+                <brls:ScrollingFrame
+                    width="auto"
+                    height="auto"
+                    grow="1.0" >
+                    <TabAbout/>
+                </brls:ScrollingFrame>
+            </brls:Box>
         </brls:Tab>
 
     </brls:TabFrame>
