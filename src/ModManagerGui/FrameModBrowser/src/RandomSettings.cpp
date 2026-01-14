@@ -75,8 +75,8 @@ brls::RecyclerCell* RandomDataSource::cellForRow(brls::RecyclerFrame* recycler, 
 std::map<std::string, u8> RandomDataSource::getChangedRatings() {
     std::map<std::string, u8> ratings;
 
-    for (int i = 0; i < this->modNames.size(); i++) {
-        ratings[this->modNames[i]] = static_cast<int>(this->fractionalRatings[i] * 100.0f);
+    for (auto& entry: this->changedFractionals) {
+        ratings[entry.first] = static_cast<int>(entry.second * 100.0f);
     }
 
     return ratings;

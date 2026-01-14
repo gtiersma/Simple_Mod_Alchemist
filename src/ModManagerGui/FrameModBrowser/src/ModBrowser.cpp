@@ -95,7 +95,7 @@ void ModBrowser::refreshSelections() {
   modList->reloadData();
 }
 
-void ModBrowser::handleModSelect(ModSource& mod, size_t selectedIndex) {
+void ModBrowser::handleModSelect(const ModSource& mod, size_t selectedIndex) {
 
   // Note: selection is -1 if backed out of selecting
   if (selectedIndex == -1) return;
@@ -151,7 +151,7 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
     return true;
   });
 
-  selector->registerAction("Random Settings", brls::BUTTON_Y, [this, &mod](brls::View* view) {
+  selector->registerAction("Random Settings", brls::BUTTON_Y, [this, mod](brls::View* view) {
     controller.source = mod.getSource();
     RandomSettings::showInDialog();
     return true;

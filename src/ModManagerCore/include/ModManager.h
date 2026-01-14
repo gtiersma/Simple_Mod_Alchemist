@@ -37,11 +37,11 @@ class ModSource {
 
     ModSource() : source(""), mods(), options(), activeIndex(-1) {}
 
-    std::string& getSource() { return this->source; }
-    std::vector<std::string>& getMods() { return this->mods; }
-    std::vector<std::string>& getOptions() { return this->options; }
+    const std::string& getSource() const { return this->source; }
+    const std::vector<std::string>& getMods() const { return this->mods; }
+    const std::vector<std::string>& getOptions() const { return this->options; }
 
-    size_t getActiveIndex() { return this->activeIndex; }
+    size_t getActiveIndex() const { return this->activeIndex; }
     void setActiveIndex(size_t index) { this->activeIndex = index; }
 
   private:

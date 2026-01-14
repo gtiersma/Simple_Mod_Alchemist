@@ -55,7 +55,7 @@ private:
    * @param mod The mod source that was changed
    * @param selectedIndex The index of the mod the user changed to
    */
-  void handleModSelect(ModSource& mod, size_t selectedIndex);
+  void handleModSelect(const ModSource& mod, size_t selectedIndex);
 
   /**
    * Configures a single selector cell in the mod list
