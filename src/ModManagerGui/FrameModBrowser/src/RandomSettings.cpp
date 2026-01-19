@@ -1,5 +1,7 @@
 #include "RandomSettings.h"
 
+#include <dismiss_dialog.hpp>
+
 #include <StateAlchemist/controller.h>
 #include <GameBrowser.h>
 
@@ -76,17 +78,18 @@ std::map<std::string, u8> RandomDataSource::getChangedRatings() {
     std::map<std::string, u8> ratings;
 
     for (auto& entry: this->changedFractionals) {
-        ratings[entry.first] = static_cast<int>(entry.second * 100.0f);
+        ratings[entry.first] = static_cast<u8>(std::round(entry.second * 100.0f));
     }
 
     return ratings;
 }
 
 u8 RandomDataSource::getChangedModlessRating() {
-    if (this->changedModlessFractional == -1.0f) {
-        return -1;
-    }
-    return static_cast<int>(this->changedModlessFractional * 100.0f);
+    return static_cast<u8>(std::round(this->changedModlessFractional * 100.0f));
+}
+
+bool RandomDataSource::hasModlessRatingChanged() {
+    return this->changedModlessFractional != -1.0f;
 }
 
 RandomSettings::RandomSettings() {
@@ -111,16 +114,25 @@ u8 RandomSettings::getChangedModlessRating() {
     return this->dataSource->getChangedModlessRating();
 }
 
+bool RandomSettings::hasModlessRatingChanged() {
+    return this->dataSource->hasModlessRatingChanged();
+}
+
 void RandomSettings::showInDialog() {
     RandomSettings* ui = new RandomSettings();
-    brls::Dialog* dialog = new brls::Dialog(ui);
+    brls::DismissDialog* dialog = new brls::DismissDialog(ui);
 
-    dialog->addButton("Save & Close", [ui]() {
+    dialog->setCancelable(true, [ui]() {
         controller.saveRatings(ui->getChangedRatings());
+        if (ui->hasModlessRatingChanged()) {
+            controller.saveDefaultRating(ui->getChangedModlessRating());
+        }
+    });
 
-        u8 modlessRating = ui->getChangedModlessRating();
-        if (modlessRating != -1) {
-            controller.saveDefaultRating(modlessRating);
+    dialog->addButton("Close", [ui]() {
+        controller.saveRatings(ui->getChangedRatings());
+        if (ui->hasModlessRatingChanged()) {
+            controller.saveDefaultRating(ui->getChangedModlessRating());
         }
     });
 

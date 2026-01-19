@@ -39,7 +39,18 @@ class RandomDataSource : public brls::RecyclerDataSource
      * From 0 - 100
      */
     std::map<std::string, u8> getChangedRatings();
+
+    /**
+     * Is something like 255 if the rating never changed (otherwise, from 0 - 100 like normal).
+     *
+     * Use `hasModlessRatingChanged` to determine if it changed or not.
+     */
     u8 getChangedModlessRating();
+
+    /**
+     * Whether the user has yet to change the "no mod" option rating (vs leaving it the same)
+     */
+    bool hasModlessRatingChanged();
 
   private:
 
@@ -84,9 +95,15 @@ class RandomSettings : public brls::Box
 
     /**
      * An unsaved change to the rating for using no mod (if there is an unsaved change).
-     * Otherwise, -1.
+     * I think it ends up being 255 if not changed (otherwise, 0 - 100 like normal).
+     * Use "hasModlessRatingChanged" before calling this to see if it has an actual rating.
      */
     u8 getChangedModlessRating();
+
+    /**
+     * Whether the user has yet to change the "no mod" option rating (vs leaving it the same)
+     */
+    bool hasModlessRatingChanged();
 
     /**
      * Displays this UI in a close-able dialog that's shown.
