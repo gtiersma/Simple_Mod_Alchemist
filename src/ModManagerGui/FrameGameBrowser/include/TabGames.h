@@ -21,6 +21,12 @@ class TabGames : public brls::ScrollingFrame {
 public:
   explicit TabGames();
 
+  /**
+   * Loads game list.
+   * Does not reload, so should only be called once.
+   */
+  void load();
+
   brls::IconCell* buildGameCell(const Game& game);
 
   static brls::View* create();
@@ -28,6 +34,7 @@ public:
 private:
   std::vector<GameItem> _gameItems_;
 
+  brls::Box* container;
 };
 
 struct GameItem{

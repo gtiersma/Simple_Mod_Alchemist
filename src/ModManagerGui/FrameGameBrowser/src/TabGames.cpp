@@ -4,6 +4,7 @@
 
 #include "TabGames.h"
 #include "FrameModBrowser.h"
+#include "NoGames.h"
 
 #include "GenericToolbox.Switch.h"
 #include "GenericToolbox.Vector.h"
@@ -20,36 +21,34 @@
 using namespace brls::literals;
 
 TabGames::TabGames() {
-  std::vector<Game> gameList = gameBrowser.getGameList();
+  this->container = new brls::Box(brls::Axis::COLUMN);
+  Util::padContent(this->container);
+  this->addView(this->container);
 
-  if (gameList.empty()) {
-    brls::NoteCell* message = new brls::NoteCell();
-    message->setText("No game folders found. Folders should be like this:");
-    message->setNote(
-      "SD:/mod-alchemy/<title-id-of-the-game>/<group>/<thing-being-replaced>/<mod-name>/<mod-files-and-folders>"
-    );
-    Util::padContent(message);
-    this->addView(message);
+  if (gameBrowser.getGameList().empty()) {
+    NoGames* noGamesHelp = new NoGames([this](){ load(); });
+    this->addView(noGamesHelp);
   } else {
-     brls::Box* container = new brls::Box(brls::Axis::COLUMN);
-     Util::padContent(container);
-     this->addView(container);
-
-    _gameItems_.reserve(gameList.size());
-
-    for(auto& gameEntry : gameList) {
-      _gameItems_.emplace_back();
-      _gameItems_.back().title = gameEntry.name;
-      _gameItems_.back().item = this->buildGameCell(gameEntry);
-    }
-
-    GenericToolbox::sortVector(_gameItems_, [](const GameItem& a_, const GameItem& b_){
-      return GenericToolbox::toLowerCase(a_.title) < GenericToolbox::toLowerCase(b_.title);
-    });
-  
-    // add to the view
-    for (auto& game : _gameItems_) { container->addView( game.item ); }
+    this->load();
   }
+}
+
+void TabGames::load() {
+  std::vector<Game> gameList = gameBrowser.getGameList();
+  _gameItems_.reserve(gameList.size());
+
+  for(auto& gameEntry : gameList) {
+    _gameItems_.emplace_back();
+    _gameItems_.back().title = gameEntry.name;
+    _gameItems_.back().item = this->buildGameCell(gameEntry);
+  }
+
+  GenericToolbox::sortVector(_gameItems_, [](const GameItem& a_, const GameItem& b_){
+    return GenericToolbox::toLowerCase(a_.title) < GenericToolbox::toLowerCase(b_.title);
+  });
+  
+  // add to the view
+  for (auto& game : _gameItems_) { this->container->addView(game.item); }
 }
 
 brls::IconCell* TabGames::buildGameCell(const Game& game) {

@@ -144,14 +144,8 @@ void ModMigrator::migrateMod(
 
   moveFiles(oldModTitleIdPath, newModPath);
 
-  // Delete the old mod folder.
-  // But we're checking if there are any files left in that folder.
-  //
-  // If there are, something went wrong and we'll pernamently delete some mod files if we do so,
-  // so then just leave everything there to be safe.
-  if (!FsManager::hasFilesDeep(oldModTitleIdPath)) {
-    fsFsDeleteDirectoryRecursively(&FsManager::sdSystem, FsManager::toPathBuffer(oldModPath).get());
-  }
+  // Have the old mod folder deleted if it's empty:
+  fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(oldModPath).get());
 }
 
 /**
@@ -223,10 +217,16 @@ void ModMigrator::moveFiles(const std::string& oldPath, const std::string& newPa
         i = iStorage.back();
         iStorage.pop_back();
 
+        std::string oldBasePath = currentBasePath;
+
         // Remove the string portion after the last '/' to get the parent's path:
         std::size_t lastSlashIndex = currentBasePath.rfind('/');
         currentBasePath = currentBasePath.substr(0, lastSlashIndex);
         FsManager::changeFolder(dir, oldPath + currentBasePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
+
+        // Delete the folder only if it's now empty. The folder should be empty,
+        // but if not for whatever reason, this should just silently break and skip it:
+        fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(oldPath + oldBasePath).get());
 
         // Reset the entry index because it will start at the beginning again:
         entryIndex = 0;

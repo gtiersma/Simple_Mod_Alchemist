@@ -1,0 +1,23 @@
+<brls:Box
+  width="auto"
+  height="auto"
+  axis="column"
+  grow="1.0">
+
+  <brls:NoteCell
+    title="No game folders found. Folders should be organized like this:"
+    note="SD:/mod-alchemy/[title-id-of-the-game]/[group]/[thing-being-replaced]/[mod-name]/[mod-files-and-folders]"
+  />
+
+  <brls:Separator/>
+
+  <brls:Label text="For those that are upgrading from the original SimpleModManager:"/>
+
+  <brls:Button
+    id="migrate"
+    text="Bring over old SimpleModManager mods"
+  />
+
+  <brls:Label text="This will automatically move all mods on the SD card that were set up for the original SimpleModManager to work with this manager."/>
+
+</brls:Box>

@@ -13,6 +13,7 @@
 #include <TabModOptions.h>
 
 #include <icon_applet.hpp>
+#include <note_cell.hpp>
 
 #include "ConfigHandler.h"
 
@@ -45,6 +46,7 @@ int main(int argc, char* argv[])
     brls::Application::registerXMLView("TabModOptions", TabModOptions::create);
 
     brls::Application::registerXMLView("brls:IconApplet", brls::IconApplet::create);
+    brls::Application::registerXMLView("brls:NoteCell", brls::NoteCell::create);
 
     nsInitialize();
 
