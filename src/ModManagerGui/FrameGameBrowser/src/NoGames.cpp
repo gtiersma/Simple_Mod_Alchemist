@@ -8,7 +8,7 @@
 #include <GameBrowser.h>
 
 
-NoGames::NoGames(brls::VoidEvent::Callback migrateCb) {
+NoGames::NoGames(brls::VoidEvent::Callback migrateCb): brls::Box(brls::Axis::COLUMN) {
   this->inflateFromXMLRes("xml/FrameGameBrowser/no_games.xml");
 
   this->migrateCb = migrateCb;
@@ -27,6 +27,8 @@ NoGames::NoGames(brls::VoidEvent::Callback migrateCb) {
     )->open();
     return true;
   });
+
+  this->topNote->setFocusable(false);
 }
 
 brls::Dialog* NoGames::buildMigrateFinishedDialog() {

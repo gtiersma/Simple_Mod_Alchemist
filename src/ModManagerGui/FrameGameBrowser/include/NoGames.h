@@ -2,6 +2,8 @@
 
 #include "borealis.hpp"
 
+#include <note_cell.hpp>
+
 
 class NoGames : public brls::Box {
   public:
@@ -12,6 +14,7 @@ class NoGames : public brls::Box {
     explicit NoGames(brls::VoidEvent::Callback migrateCb);
 
   private:
+    BRLS_BIND(brls::NoteCell, topNote, "top-note");
     BRLS_BIND(brls::Button, migrateButton, "migrate");
 
     brls::VoidEvent::Callback migrateCb;
