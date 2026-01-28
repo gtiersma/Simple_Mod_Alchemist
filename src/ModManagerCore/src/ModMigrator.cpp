@@ -144,7 +144,9 @@ void ModMigrator::migrateMod(
 
   moveFiles(oldModTitleIdPath, newModPath);
 
-  // Have the old mod folder deleted if it's empty:
+  // Have the old mod folders deleted if they're empty:
+  fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(oldModTitleIdPath).get());
+  fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(oldModPath + "/" + LEGACY_MOD_ROOT_FOLDER).get());
   fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(oldModPath).get());
 }
 

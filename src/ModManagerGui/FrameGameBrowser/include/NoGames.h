@@ -7,17 +7,11 @@
 
 class NoGames : public brls::Box {
   public:
-
-    /**
-     * @param migrateCb Functionality to call after a mod migration completes
-     */
-    explicit NoGames(brls::VoidEvent::Callback migrateCb);
+    explicit NoGames();
 
   private:
     BRLS_BIND(brls::NoteCell, topNote, "top-note");
     BRLS_BIND(brls::Button, migrateButton, "migrate");
-
-    brls::VoidEvent::Callback migrateCb;
 
     /**
      * Builds a dialog to show for after the migration finishes

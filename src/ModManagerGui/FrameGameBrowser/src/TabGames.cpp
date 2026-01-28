@@ -26,8 +26,7 @@ TabGames::TabGames() {
   this->addView(this->container);
 
   if (gameBrowser.getGameList().empty()) {
-    NoGames* noGamesHelp = new NoGames([this](){ load(); });
-    this->addView(noGamesHelp);
+    this->addView(new NoGames());
   } else {
     this->load();
   }

@@ -2,16 +2,19 @@
 
 #include <atomic>
 
+#include <switch.h>
+
 #include <util.hpp>
 
-#include <ModMigrator.h>
 #include <GameBrowser.h>
+#include <ModMigrator.h>
+#include <FrameRoot.h>
+
+#include "StateAlchemist/constants.h"
 
 
-NoGames::NoGames(brls::VoidEvent::Callback migrateCb): brls::Box(brls::Axis::COLUMN) {
+NoGames::NoGames(): brls::Box(brls::Axis::COLUMN) {
   this->inflateFromXMLRes("xml/FrameGameBrowser/no_games.xml");
-
-  this->migrateCb = migrateCb;
 
   this->migrateButton->registerClickAction([this](brls::View* view) {
     Util::buildConfirmDialog(
@@ -22,7 +25,14 @@ NoGames::NoGames(brls::VoidEvent::Callback migrateCb): brls::Box(brls::Axis::COL
       [](std::atomic<float>& progress) { ModMigrator().begin(progress); },
       [this]() {
         gameBrowser.loadGames();
-        buildMigrateFinishedDialog()->open();
+
+        if (gameBrowser.getGameList().empty()) {
+          brls::Dialog* dialog = new brls::Dialog("No game mods were found to transfer.");
+          dialog->addButton("OK", [](){});
+          dialog->open();
+        } else {
+          buildMigrateFinishedDialog()->open();
+        }
       }
     )->open();
     return true;
@@ -34,13 +44,20 @@ NoGames::NoGames(brls::VoidEvent::Callback migrateCb): brls::Box(brls::Axis::COL
 brls::Dialog* NoGames::buildMigrateFinishedDialog() {
   brls::Dialog* completeDialog = new brls::Dialog(
     "Finished moving mod files & folders.\n\n"\
-    "The mods are ready to use, but are currently uncategorized. "\
-    "On your PC, move mod folders out of \"uncategorized\" into new folders to organize them. "\
-    "Any folders with files that couldn't be moved should have been left where they were."
+    "The mods are ready to use, but are uncategorized. "\
+    "Create folders for groups in \"SD:/mod-alchemy/[ game title ID ]\", and move mod folders out of \"_Uncategorized\" into the new folders to organize them. "\
+    "Any files that couldn't be moved have been left where they were."
   );
-  completeDialog->addButton("OK", [this]() {
-    this->setVisibility(brls::Visibility::GONE);
-    this->migrateCb();
+
+  completeDialog->addButton("OK", []() {
+
+    // TODO: Just refresh the game list. That was causing the app to crash though, so right now we're just working around it by pushing another main activity.
+    brls::Activity* mainActivity = new FrameRoot();
+    brls::Application::pushActivity(mainActivity);
+    mainActivity->registerExitAction(brls::BUTTON_B);
+    brls::AppletFrame* appFrame = (brls::AppletFrame*)mainActivity->getContentView();
+    appFrame->setTitle("Simple Mod Alchemist (v" + APP_VERSION + ")");
   });
+
   return completeDialog;
 }

@@ -4,6 +4,8 @@
 
 #include "FrameModBrowser.h"
 
+#include <switch.h>
+
 #include <TabModOptions.h>
 #include <GroupBrowser.h>
 

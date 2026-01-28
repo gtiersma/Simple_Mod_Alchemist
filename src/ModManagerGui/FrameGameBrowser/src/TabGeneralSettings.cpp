@@ -20,26 +20,33 @@ TabGeneralSettings::TabGeneralSettings() {
 void TabGeneralSettings::rebuildLayout() {
   Util::padContent(this);
 
+  // TODO: Quite a bit of duplicate code from NoGames.cpp
   brls::NoteCell* migrationItem = new brls::NoteCell();
   migrationItem->setText("Bring over old SimpleModManager mods");
   migrationItem->setNote(
-    "This will take any mods on the SD card that were set up for the original SimpleModManager to work with this manager."
+    "This will automatically move all mods on the SD card that were set up for the original SimpleModManager to work with this manager."
   );
   migrationItem->registerClickAction([this](brls::View* view) {
     Util::buildConfirmDialog(
       "Migrate the mods from SimpleModManager?\n\n"\
       "This action cannot easily be undone.\n"\
-      "Turn all the mods off in SimpleModManager first to clear them out before running this.",
+      "Make sure to turn all mods off in the original SimpleModManager first before running this.",
       "Moving mods from the old SimpleModManager to this app.",
       [](std::atomic<float>& progress) { ModMigrator().begin(progress); },
       [this]() {
         gameBrowser.loadGames();
-        buildMigrateFinishedDialog()->open();
+
+        if (gameBrowser.getGameList().empty()) {
+          brls::Dialog* dialog = new brls::Dialog("No game mods were found to transfer.");
+          dialog->addButton("OK", [](){});
+          dialog->open();
+        } else {
+          buildMigrateFinishedDialog()->open();
+        }
       }
     )->open();
     return true;
   });
-  migrationItem->updateActionHint(brls::BUTTON_A, "Move Mods");
   this->addView(migrationItem);
 }
 
@@ -49,9 +56,9 @@ void TabGeneralSettings::rebuildLayout() {
 brls::Dialog* TabGeneralSettings::buildMigrateFinishedDialog() {
   brls::Dialog* completeDialog = new brls::Dialog(
     "Finished moving mod files & folders.\n\n"\
-    "The mods have been grouped in an \"uncategorized\" folder. "\
-    "It's recommended to reorganize them into group folders on your pc to make them easy to use, but you don't have to. "\
-    "Some empty folders with any files that couldn't be moved have been left where they were."
+    "The mods are ready to use, but are uncategorized. "\
+    "Create folders for groups in \"SD:/mod-alchemy/[ game title ID ]\", and move mod folders out of \"_Uncategorized\" into the new folders to organize them. "\
+    "Any files that couldn't be moved have been left where they were."
   );
   completeDialog->addButton("OK", []() {});
   return completeDialog;
