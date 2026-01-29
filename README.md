@@ -17,6 +17,7 @@ Simple Mod Alchemist is the definitive Nintendo Switch mod management solution. 
 * Can automatically bring over mods from SimpleModManager to start using right away
 * Scalable - works with lists of hundreds of mods
 * Change mods at random
+  * Set how likely each mod gets picked at random
 * More to come!
 
 
@@ -29,6 +30,8 @@ Simple Mod Alchemist is the definitive Nintendo Switch mod management solution. 
 
 ![](./screenshots/1.jpg)
 ![](./screenshots/3.jpg)
+![](./screenshots/4.jpg)
+
 
 </details>
 
@@ -92,9 +95,11 @@ Disabling the mod is necessary because enabled mods have their files mixed in wi
 
 Have the mods be picked for you at random.
 
-Mods can be changed individually, by group or by an entire game.
+They can be randomly changed by an individual mod, by group, or by an entire game.
 
 To do so, highlight a game, group or individual mod and press *X*.
+
+The odds of each mod being chosen at random can also be adjusted. Highlight a mod and press **Y** to do so.
 
 
 ## Help / FAQs
@@ -159,12 +164,6 @@ If the mod doesn't consist of that many files, you may want to double-check it b
 
 ---
 
-### I was taken to an error screen while using the app
-
-Please file a GitHub issue with the exact error you see. Also describe how you came across the error, the folders that contain the related mod (if it was related to a specific mod), and any other details you think may be helpful.
-
----
-
 ### When using the app, it closed abruptly, claiming it closed from an error
 
 See if it continues to happen.
@@ -172,6 +171,8 @@ See if it continues to happen.
 If it was working fine at one point, but suddenly this issue began happening, try restoring from a backup if you have one. To do so, use the **Disable All Mods** option for the game that's having issues. Then delete the game's folder from within the `mod_alchemy` folder, copying the backup into its place.
 
 If it still continues to be a problem, please file a GitHub issue, describing how you came across the error, how the folders that contain the related mod are organized (if it was related to a specific mod), and any other details you think may be helpful.
+
+---
 
 ### I want to remove the app and all mods it is using from my SD card
 
@@ -242,6 +243,22 @@ Once there is no mod enabled in the `mod_alchemy/<title_id>/<group_name>/<thing_
 3. Move all folder(s) in `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/` to `/atmosphere/contents/<title_id>/`.
 
 4. The next time you open Simple Mod Alchemist, it will show the mod as enabled, and the mod will be able to disable and re-enable itself properly.
+
+### Likelihoods of mods being randomly picked
+
+To the see what is set as the likelihood of a mod being picked, navigate to that mods folder in `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/`.
+
+There may be `~~##` at the end of the folder name, where `##` could be two of any digit. That number is the likelihood on a scale from 0 to 100, with `00` being never.
+
+If there is no `~~##` at the end of the folder name, that means that mod is set to the default likelihood of `100`.
+
+The likelihood of no mod being picked can be found at the end of the folder containing the mod folders (in other words, the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/` folder).
+
+To change the likelihood, simply change the last two digits on the end of the folder name. But keep in mind there must be two digits after the `~~`.
+
+* `~~100` will not be interpreted correctly. If you want to set it to `100`, remove the `~~##` from the folder name entirely.
+
+* `~~5` will also not be interpreted correctly. If you want to set it to `5`, the folder name should end with two digits: `~~05`.
 
 
 # Super Advanced: Build From Source
