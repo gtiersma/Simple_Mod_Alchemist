@@ -4,31 +4,37 @@
     axis="column"
     paddingLeft="48px"
     paddingRight="48px"
-    paddingTop="32px"
-    paddingBottom="32px">
+    paddingTop="16px"
+    paddingBottom="16px">
 
     <brls:Box
         width="auto"
         height="auto"
         alignItems="center"
-        justifyContent="center"
-        paddingTop="24px"
-        paddingBottom="24px">
-        <brls:Rectangle
-            width="auto"
-            height="2px"
-            color="@theme/brls/sidebar/separator"/>
+        paddingTop="12px"
+        paddingBottom="15px">
         <brls:Label
             id="title"
             width="auto"
             height="auto"
-            fontSize="30"
-            horizontalAlign="center"/>
+            maxWidth="60%"
+            fontSize="24"
+            singleLine="true"
+            animated="true"/>
+        <brls:Label
+            width="auto"
+            height="auto"
+            marginLeft="20px"
+            fontSize="16"
+            horizontalAlign="right"
+            text="Set how likely each mod is to get picked at random."/>
     </brls:Box>
 
-    <brls:Label
-        text="Adjust the likelihood of a mod being enabled when randomly changing it."
-        marginBottom="30px"/>
+    
+    <brls:Rectangle
+        width="auto"
+        height="2px"
+        color="@theme/brls/sidebar/separator"/>
 
     <brls:Box
         width="auto"
