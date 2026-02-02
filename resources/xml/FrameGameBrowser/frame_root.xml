@@ -13,6 +13,10 @@
         <brls:Tab label="Settings" >
           <TabGeneralSettings/>
         </brls:Tab>
+        
+        <brls:Tab label="Help" >
+          <TabHelp/>
+        </brls:Tab>
 
         <brls:Tab label="About" >
             <brls:Box
