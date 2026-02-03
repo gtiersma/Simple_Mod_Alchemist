@@ -2,15 +2,14 @@
 // Created by Adrien BLANCHET on 20/06/2020.
 //
 
-#ifndef SIMPLEMODMANAGER_TABABOUT_H
-#define SIMPLEMODMANAGER_TABABOUT_H
+#pragma once
 
 #include <borealis.hpp>
 
-class TabAbout : public brls::Box {
+class About : public brls::Box {
 
 public:
-  TabAbout();
+  About();
   static brls::View* create();
 
 private:
@@ -22,6 +21,3 @@ private:
    */
   brls::Box* wrapWithHeader(brls::View* content, std::string header);
 };
-
-
-#endif //SIMPLEMODMANAGER_TABABOUT_H

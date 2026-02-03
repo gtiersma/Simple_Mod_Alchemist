@@ -1,0 +1,11 @@
+<brls:Box
+    width="auto"
+    height="auto"
+    axis="row">
+
+    <brls:Sidebar
+        id="topic-list"
+        width="25%"
+        height="auto"/>
+
+</brls:Box>

@@ -4,16 +4,17 @@
 
 #include <ctime>
 
-#include "TabAbout.h"
+#include "help/About.h"
 #include <StateAlchemist/constants.h>
 #include <util.hpp>
 
 using namespace brls::literals;
 
-TabAbout::TabAbout(): brls::Box(brls::Axis::COLUMN) {
+About::About(): brls::Box(brls::Axis::COLUMN) {
   Util::padContent(this);
   this->setJustifyContent(brls::JustifyContent::SPACE_BETWEEN);
   this->setHeight(1080.0);
+  this->setGrow(1.0);
   
   // Subtitle
   brls::Label* shortDescription = new brls::Label();
@@ -69,7 +70,7 @@ TabAbout::TabAbout(): brls::Box(brls::Axis::COLUMN) {
   this->addView(verse);
 }
 
-brls::View* TabAbout::buildLeftBox() {
+brls::View* About::buildLeftBox() {
   brls::Box* leftBox = new brls::Box(brls::Axis::COLUMN);
   leftBox->setJustifyContent(brls::JustifyContent::SPACE_BETWEEN);
   leftBox->setWidth(500);
@@ -100,7 +101,7 @@ brls::View* TabAbout::buildLeftBox() {
   return leftBox;
 }
 
-brls::View* TabAbout::buildRightBox() {
+brls::View* About::buildRightBox() {
   brls::Box* rightBox = new brls::Box(brls::Axis::COLUMN);
   rightBox->setJustifyContent(brls::JustifyContent::CENTER);
   rightBox->setWidth(200);
@@ -121,7 +122,7 @@ brls::View* TabAbout::buildRightBox() {
   return rightBox;
 }
 
-brls::Box* TabAbout::wrapWithHeader(brls::View* content, std::string title) {
+brls::Box* About::wrapWithHeader(brls::View* content, std::string title) {
   brls::Box* container = new brls::Box(brls::Axis::COLUMN);
 
   brls::Header* header = new brls::Header();
@@ -133,4 +134,4 @@ brls::Box* TabAbout::wrapWithHeader(brls::View* content, std::string title) {
   return container;
 }
 
-brls::View* TabAbout::create() { return new TabAbout(); }
+brls::View* About::create() { return new About(); }

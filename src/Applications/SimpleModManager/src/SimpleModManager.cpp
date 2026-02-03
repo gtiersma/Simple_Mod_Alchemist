@@ -8,8 +8,7 @@
 #include <FrameRoot.h>
 #include <TabGames.h>
 #include <TabGeneralSettings.h>
-#include <TabHelp.h>
-#include <TabAbout.h>
+#include <help/TabHelp.h>
 #include <GroupBrowser.h>
 #include <TabModOptions.h>
 
@@ -41,7 +40,6 @@ int main(int argc, char* argv[])
     brls::Application::registerXMLView("TabGames", TabGames::create);
     brls::Application::registerXMLView("TabGeneralSettings", TabGeneralSettings::create);
     brls::Application::registerXMLView("TabHelp", TabHelp::create);
-    brls::Application::registerXMLView("TabAbout", TabAbout::create);
     brls::Application::registerXMLView("GroupBrowser", GroupBrowser::create);
     brls::Application::registerXMLView("TabModOptions", TabModOptions::create);
 
