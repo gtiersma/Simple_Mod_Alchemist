@@ -7,9 +7,7 @@ class TabHelp : public brls::Box {
 
 private:
   BRLS_BIND(brls::Sidebar, topicList, "topic-list");
-
-  brls::GenericEvent::Callback createRenderFn(std::function<brls::View* ()> buildViewFn);
-  brls::View* toScrollable(brls::View* content);
+  BRLS_BIND(brls::ScrollingFrame, scrollFrame, "scroll-frame");
 
 public:
   explicit TabHelp();

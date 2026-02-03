@@ -8,4 +8,15 @@
         width="25%"
         height="auto"/>
 
+    <brls:Box
+        width="auto"
+        height="auto"
+        grow="1.0">
+        <brls:ScrollingFrame
+            id="scroll-frame"
+            width="auto"
+            height="auto"
+            grow="1.0"/>
+    </brls:Box>
+
 </brls:Box>
