@@ -11,6 +11,10 @@
     <brls:Box
         width="auto"
         height="auto"
+        paddingTop="32px"
+        paddingRight="32px"
+        paddingBottom="47px"
+        paddingLeft="20px"
         grow="1.0">
         <brls:ScrollingFrame
             id="scroll-frame"

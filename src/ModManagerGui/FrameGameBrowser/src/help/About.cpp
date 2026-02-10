@@ -6,15 +6,11 @@
 
 #include "help/About.h"
 #include <StateAlchemist/constants.h>
-#include <util.hpp>
 
 using namespace brls::literals;
 
 About::About(): brls::Box(brls::Axis::COLUMN) {
-  Util::padContent(this);
-  this->setJustifyContent(brls::JustifyContent::SPACE_BETWEEN);
-  this->setHeight(1080.0);
-  this->setGrow(1.0);
+  this->setPaddingRight(20.0);
   
   // Subtitle
   brls::Label* shortDescription = new brls::Label();
@@ -22,18 +18,20 @@ About::About(): brls::Box(brls::Axis::COLUMN) {
     "Simple Mod Alchemist is a Nintendo Switch homebrew app for changing game mods.\n"\
     "It's the fusion of two other modding apps: SimpleModManager and State Alchemist.\n"
   );
-  shortDescription->setMarginLeft(30.0);
-  shortDescription->setMarginRight(30.0);
+  shortDescription->setMarginTop(10.0);
+  shortDescription->setMarginLeft(20.0);
+  shortDescription->setMarginBottom(50.0);
   shortDescription->setHorizontalAlign(brls::HorizontalAlign::CENTER);
   shortDescription->setIsWrapping(true);
-  shortDescription->setFontSize(20.0);
+  shortDescription->setFontSize(18.0);
   this->addView(shortDescription);
 
   // Two columns of content
   brls::Box* columns = new brls::Box();
-  columns->setHeight(405.0);
+  columns->setHeight(250.0);
+  columns->setMarginRight(10.0);
+  columns->setMarginBottom(30.0);
   columns->setJustifyContent(brls::JustifyContent::SPACE_BETWEEN);
-  // todo: Set grow?
   columns->addView(this->buildLeftBox());
   columns->addView(this->buildRightBox());
   this->addView(columns);
@@ -48,6 +46,7 @@ About::About(): brls::Box(brls::Axis::COLUMN) {
   );
   credits->setFontSize(15.0f);
   credits->setIsWrapping(true);
+  credits->setMarginBottom(80.0);
   this->addView(this->wrapWithHeader(credits, "Credits"));
 
   std::time_t now;
@@ -64,16 +63,35 @@ About::About(): brls::Box(brls::Axis::COLUMN) {
       "\"So do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you; I will uphold you with my righteous right hand.\" - (Isaiah 41:10)"
     );
   }
-  verse->setFontSize(15.0f);
+  verse->setFontSize(13.0f);
   verse->setHorizontalAlign(brls::HorizontalAlign::CENTER);
   verse->setIsWrapping(true);
+  verse->setMarginBottom(50.0);
+  verse->setMarginLeft(20.0);
   this->addView(verse);
+
+  brls::Label* copyright = new brls::Label();
+  copyright->setText(
+    "Simple Mod Alchemist is licensed under GPL-v3.0\n" \
+        "\u00A9 SimpleModManager 2019 - 2023 Nadrino\n"\
+        "\u00A9 Simple Mod Alchemist 2025 - 2026 gtiersma"
+  );
+  copyright->setFontSize(12.0f);
+  copyright->setMarginBottom(20.0);
+  copyright->setMarginLeft(20.0);
+  this->addView(copyright);
+
+  brls::Label* disclaimer = new brls::Label();
+  disclaimer->setText("This software is not licensed by Nintendo Co. Ltd. Nintendo Co. Ltd is not affiliated with the creation of this software in any way. This software is an unofficial application, provided free of charge or payment of any kind for all Nintendo Switch owners.");
+  disclaimer->setFontSize(12.0f);
+  disclaimer->setMarginLeft(20.0);
+  this->addView(disclaimer);
 }
 
 brls::View* About::buildLeftBox() {
   brls::Box* leftBox = new brls::Box(brls::Axis::COLUMN);
   leftBox->setJustifyContent(brls::JustifyContent::SPACE_BETWEEN);
-  leftBox->setWidth(500);
+  leftBox->setWidthPercentage(60.0);
 
   brls::Label* changelog = new brls::Label();
   changelog->setText(
@@ -83,20 +101,10 @@ brls::View* About::buildLeftBox() {
     " - General stability improvements!\n"
   );
   changelog->setHorizontalAlign(brls::HorizontalAlign::LEFT);
-  changelog->setFontSize(18.0f);
+  changelog->setFontSize(15.0f);
   leftBox->addView(
     this->wrapWithHeader(changelog, "Version " + APP_VERSION + " - What's new ?")
   );
-
-  brls::Label* copyright = new brls::Label();
-  copyright->setText(
-    "Simple Mod Alchemist is licensed under GPL-v3.0\n" \
-        "\u00A9 SimpleModManager 2019 - 2023 Nadrino\n"\
-        "\u00A9 Simple Mod Alchemist 2025 - 2026 gtiersma"
-  );
-  copyright->setHorizontalAlign(brls::HorizontalAlign::CENTER);
-  copyright->setFontSize(15.0f);
-  leftBox->addView(this->wrapWithHeader(copyright, "Copyright"));
 
   return leftBox;
 }
@@ -104,7 +112,7 @@ brls::View* About::buildLeftBox() {
 brls::View* About::buildRightBox() {
   brls::Box* rightBox = new brls::Box(brls::Axis::COLUMN);
   rightBox->setJustifyContent(brls::JustifyContent::CENTER);
-  rightBox->setWidth(200);
+  rightBox->setWidthPercentage(30.0);
 
   brls::Image* portrait = new brls::Image();
   portrait->setImageFromRes("img/portrait.jpg");
@@ -114,7 +122,7 @@ brls::View* About::buildRightBox() {
 
   brls::Label* portraitLabel = new brls::Label();
   portraitLabel->setText("SimpleModManager Original Author: Nadrino");
-  portraitLabel->setFontSize(15.0f);
+  portraitLabel->setFontSize(12.0f);
   portraitLabel->setHorizontalAlign(brls::HorizontalAlign::CENTER);
   portraitLabel->setMarginTop(10.0f);
   rightBox->addView(portraitLabel);
