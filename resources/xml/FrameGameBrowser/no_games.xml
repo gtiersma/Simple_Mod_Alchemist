@@ -16,6 +16,12 @@
     note="SD:/mod-alchemy/[title-id-of-the-game]/[group]/[thing-being-replaced]/[mod-name]/[mod-files-and-folders]"
   />
 
+  <brls:NoteCell
+    id="bottom-note"
+    width="100%"
+    title="After mods are set up, see the Help Tab for how to make a proper backup."
+  />
+
   <brls:Label
     width="100%"
     text="For those upgrading from the original SimpleModManager:"

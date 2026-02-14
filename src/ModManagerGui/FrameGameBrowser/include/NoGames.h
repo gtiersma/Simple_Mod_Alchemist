@@ -12,6 +12,7 @@ class NoGames : public brls::Box {
   private:
     BRLS_BIND(brls::NoteCell, topNote, "top-note");
     BRLS_BIND(brls::Button, migrateButton, "migrate");
+    BRLS_BIND(brls::NoteCell, bottomNote, "bottom-note");
 
     /**
      * Builds a dialog to show for after the migration finishes

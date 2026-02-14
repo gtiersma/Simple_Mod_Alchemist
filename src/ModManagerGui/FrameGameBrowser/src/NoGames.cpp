@@ -39,6 +39,7 @@ NoGames::NoGames(): brls::Box(brls::Axis::COLUMN) {
   });
 
   this->topNote->setFocusable(false);
+  this->bottomNote->setFocusable(false);
 }
 
 brls::Dialog* NoGames::buildMigrateFinishedDialog() {

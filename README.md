@@ -50,6 +50,8 @@ Simple Mod Alchemist is the definitive Nintendo Switch mod management solution. 
 
 6. Within those folders, move each mod's folder structure into its corresponding folder. The folder structure should typically begin with the `romfs` folder (which should then contain the other folders and files that comprise the mod).
 
+7. Recommended, but optional: To backup mods properly, see the **Backups** section.
+
 7. Have fun!
 
 8. If this **Quick Start** guide doesn't make sense, read the detailed instructions below for a more thorough explanation.
@@ -75,9 +77,56 @@ Simple Mod Alchemist is the definitive Nintendo Switch mod management solution. 
 
 9. Remove any files that are currently in the `/atmosphere/contents/<title_id>/` folder that may conflict with files from any mods that you set up in step 8. If you want to keep them, move them to a mod folder within `mod_alchemy` created in the manner described in steps 5-8. If you don't feel very sure of what you're doing, it's a good idea to create a backup of `/atmosphere/contents/<title_id>/`.
 
-10. Create a backup of the `mod_alchemy/<title_id>/`. The app operates by moving files between `mod_alchemy/<title_id>/` and `/atmosphere/contents/<title_id>/`. If you ever disable all the mods through the app, it should bring all the mod files back to the folders under `mod_alchemy/<title_id>/`, but I make no guarantee that there won't be a problem that will prevent that, so I recommend backing up those folders and files **before you start using Simple Mod Alchemist** just to be safe.
+10. Create a backup. See the **Backups** section below.
 
 11. You're ready to use Simple Mod Alchemist! You can access it the same as you would any other Switch homebrew application.
+
+## Backups
+
+It is highly recommended to backup the mods. It should be rare that any mod files get disorganized, but there's no guarantee it won't happen. If something ever begins to not work right in Simple Mod Alchemist or it begins crashing at some point, you can try restoring a backup if you have one.
+
+When dealing with backups, it's important to keep in mind that the app operates by **moving mod files between `mod_alchemy` and `/atmosphere/contents/`**. Because of this, it's important that mods are being backed up ***properly***.
+
+There are two options for proper backups:
+
+### Dual Folders
+
+This method is safer and will also backup the current enabled/disabled statuses of mods, but it involves backing up *all* mods (not just those used with this app).
+
+* **Creating the backup**
+  * Copy both the `mod_alchemy` and `/atmosphere/contents/` folders from your SD card to a safe place.
+
+* **Maintaining the backup:**
+  * Any time mods are added for Simple Mod Alchemist, the backup will need to be updated with those new files.
+  * Any time any mod files are *manually* added to ***any*** game under `/atmosphere/contents/`, the backup will need to be updated with those new files.
+  * If you ever wish to recreate an entire new backup, both of the old backup folders must be deleted *first* before copying the new folders from the SD card. No merging folders.
+
+* **Restoring the backup:**
+  1. Delete both of the `mod_alchemy` and `/atmosphere/contents/` folders off of your SD card.
+    * Don't skip this. Merging won't work right.
+  2. Paste the folder backups onto the SD card in their place.
+
+### Single Folder
+
+* **Creating the backup:**
+  1. In the app, run the **Disable All Mods** option on each game.
+    * It can be found in the mod settings.
+    * This puts all mod files back within the `mod_alchemy` folder, ensuring they can all be backed-up from that single folder.
+  2. Now only the `mod_alchemy` folder needs to be copied from the SD card to a safe place.
+
+* **Maintaining the backup:**
+  * Any time mods are added for Simple Mod Alchemist, the backup will need to be updated with those new files.
+  * If you ever wish to recreate an entire new backup, the old backup folder must be deleted *first* before copying the new folders from the SD card. No merging folders.
+
+* **Restoring the backup:**
+  1. In the app, run the **Disable All Mods** option on each game.
+    * This puts all mod files back within the `mod_alchemy` folder, ensuring no old files will linger behind when replaced by the backup.
+  2. Delete the `mod_alchemy` folder on the SD card.
+    * Don't skip this. Merging won't work right.
+  3. Paste the backup folder in its place.
+
+
+## Mod Management
 
 ### Adding Mods
 
