@@ -1,0 +1,63 @@
+<brls:Box
+    width="auto"
+    height="auto"
+    axis="column">
+
+    <brls:Label
+        width="100%"
+        text="Installing Mods"
+        fontSize="30"
+        horizontalAlign="center"
+        marginTop="20px"
+        marginBottom="100px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="1. A folder named `mod_alchemy` now exists on your SD root. In 'mod_alchemy', create a folder. Give that folder the name of a game's Title ID you want to mod. You can find title IDs of games at nswdb.com"
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="2. In the folder you created in step 1, create a folder for each 'group' you wish to categorize your mods in. Some typical examples of names you may want to use would be 'Characters', 'Levels', 'Music', etc."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="3. In each of those folders created in step 2, create a folder for each thing you want to mod in the game. For example, if you have a mod that would replace Mario in a game, you would want to create a folder named 'Mario' in a folder like 'mod_alchemy/[-PUT-TITLE-ID-HERE-]/Characters/'. Then create folders for the names of any other characters you have mods for in the 'Characters' folder."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="4. In each of those folders created in step 3, create a folder for each mod you have. For example, if you have a mod that replaces Mario with Spongebob, you would want to created a folder named 'Spongebob' in a folder like 'mod_alchemy/[-PUT-TITLE-ID-HERE-]/Characters/Mario/'. Then create folders for the names of any other mods you have that replace Mario in the 'Mario' folder."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="5. In each of those folders created in step 4, place the folders and files for each mod in each folder. For example, if you have a mod that replaces Mario with Spongebob, you would want to place the folder structure for the 'Spongebob' mod in a folder like 'mod_alchemy/[-PUT-TITLE-ID-HERE-]/Characters/Mario/Spongebob/'. In most cases, a mod's file structure should start with a folder named 'romfs', so there should be a 'mod_alchemy/[-PUT-TITLE-ID-HERE-]/Characters/Mario/Spongebob/romfs/' folder which would then contain the rest of the folders and files that make up the mod. The folder structure should match the game's folders and files."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="6. Remove any files that are currently in the '/atmosphere/contents/[-PUT-TITLE-ID-HERE-]/' folder that may conflict with files from any mods that you set up in step 5. If you want to keep them, move them to a mod folder within 'mod_alchemy' created in the manner described in steps 2-5. If you don't feel very sure of what you're doing, it's a good idea to create a backup of '/atmosphere/contents/[-PUT-TITLE-ID-HERE-]/'."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="7. It is highly recommended to create a proper backup. See 'Backups'."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="8. You're ready to use Simple Mod Alchemist!"
+        marginBottom="20px"
+    />
+
+</brls:Box>

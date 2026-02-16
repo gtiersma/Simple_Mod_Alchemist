@@ -1,0 +1,63 @@
+<brls:Box
+    width="auto"
+    height="auto"
+    axis="column">
+
+    <brls:Label
+        width="100%"
+        text="Quick Start"
+        fontSize="30"
+        horizontalAlign="center"
+        marginTop="20px"
+        marginBottom="80px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="1. A folder named `mod_alchemy` now exists on your SD root. Within it, create a folder with the name of a game's title ID."
+        marginBottom="40px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="2. Within that folder, create folders for each group you want to categorize your mods in. Example: 'mod_alchemy/[ PUT TITLE ID HERE ]/Characters/'"
+        marginBottom="40px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="3. Within those folders, create folders for each thing in the game that you plan to replace with a mod. Example: 'mod_alchemy/[ PUT TITLE ID HERE ]/Characters/Mario/'"
+        marginBottom="40px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="4. Within those folders, create folders for each mod you have. Example: 'mod_alchemy/[ PUT TITLE ID HERE ]/Characters/Mario/Spongebob/'"
+        marginBottom="40px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="5. Within those folders, move each mod's folder structure into its corresponding folder. The folder structure should typically begin with the 'romfs' folder (which should then contain the other folders and files that comprise the mod)."
+        marginBottom="40px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="6. Recommended, but optional: To backup mods properly, see 'Backups'."
+        marginBottom="40px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="7. Have fun!"
+        marginBottom="40px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="8. If this 'Quick Start' guide doesn't make sense, see 'Setup' for a more thorough explanation."
+        marginBottom="20px"
+    />
+
+</brls:Box>

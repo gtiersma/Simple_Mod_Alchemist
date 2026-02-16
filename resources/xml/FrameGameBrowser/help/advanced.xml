@@ -1,0 +1,161 @@
+<brls:Box
+    width="auto"
+    height="auto"
+    axis="column">
+
+    <brls:Label
+        width="100%"
+        text="Working Manually with Mods"
+        fontSize="30"
+        horizontalAlign="center"
+        marginTop="20px"
+        marginBottom="100px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="By understanding how Simple Mod Alchemist interacts with files and folders on the SD card, you can change the app's mods from any file explorer and maybe a text editor. This means it's also possible to create a script for PC to automatically change/add/remove the app's mods as well."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If doing anything manually as described here, be careful and don't make mistakes. If anything isn't named perfectly, it could brake how Simple Mod Alchemist manages mods, even causing it to crash."
+        marginBottom="80px"
+    />
+
+    <brls:Label
+        width="100%"
+        fontSize="24"
+        text="Enabled Mods"
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="To see which mod is currently enabled, navigate to 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]'."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="In that directory, you may see a '.txt' file that shares a name with one of the mod folders. That is the active mod. The '.txt' contains the paths of each file belonging to that mod that was moved to '/atmosphere/contents/[-GAME-TITLE-ID-]/'. Keep in mind that not all the mod's files may have been moved if there were conflicting files."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If there is no '.txt' file, that means no mod is enabled."
+        marginBottom="50px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="To manually disable a mod:"
+        marginBottom="50px"
+    />
+
+    <brls:Box
+        width="auto"
+        height="auto"
+        axis="column"
+        paddingLeft="20px">
+        <brls:Label
+            width="100%"
+            text="1. Move each file listed in the '.txt' file from within the '/atmosphere/contents/[-GAME-TITLE-ID-]/' folder to the same corresponding location within the 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]' folder, creating new folders as needed."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="2. Once you are sure you moved all the files listed in the '.txt' file, delete the '.txt' file."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="3. The next time you open Simple Mod Alchemist, it won't show the mod as being enabled, and the mod will be able change between other mods properly."
+            marginBottom="50px"
+        />
+    </brls:Box>
+
+    <brls:Header
+        width="100%"
+        title="To manually enable a mod:"
+        marginBottom="50px"
+    />
+
+    <brls:Box
+        width="auto"
+        height="auto"
+        axis="column"
+        paddingLeft="20px">
+        <brls:Label
+            width="100%"
+            text="1. Create a '.txt' file directly in 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/', naming it with the exact same name as the name of the folder of the mod you wish to enable."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="2. Within that '.txt' file, include every file belonging to that mod (including the folder path beginning in 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]' leading to each file). In most cases, the path will always begin with 'romfs'. Each mod file with its folder path should be on a new line."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="3. Move all folder(s) in 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]' to '/atmosphere/contents/[-GAME-TITLE-ID-]/'."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="4. The next time you open Simple Mod Alchemist, it will show the mod as enabled, and the mod will be able change between other mods properly."
+            marginBottom="80px"
+        />
+    </brls:Box>
+
+    <brls:Label
+        width="100%"
+        fontSize="24"
+        text="Mod Random Likelihoods"
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="To see what the current mod liklihood is set at (for when the mods are being picked at random), navigate to that mods folder in 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/'."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="There may be '~~##' at the end of the folder name, where '##' could be two of any digit. That number is the likelihood on a scale from 0 to 100, with '00' being never."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If there is no '~~##' at the end of the folder name, that means that mod is set to the default likelihood of '100'."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="The likelihood of no mod being picked can be found at the end name of the 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/' folder."
+        marginBottom="30px"
+    />
+
+    <brls:Box
+        width="auto"
+        height="auto"
+        axis="column"
+        paddingLeft="20px">
+        <brls:Label
+            width="100%"
+            text="- '~~100' will not be interpreted correctly. If you want to set it to '100', remove the '~~##' from the folder name entirely."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="- '~~5' will also not be interpreted correctly. If you want to set it to '5', the folder name should end with two digits: '~~05'."
+            marginBottom="20px"
+        />
+    </brls:Box>
+
+</brls:Box>

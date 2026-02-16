@@ -1,0 +1,259 @@
+<brls:Box
+    width="auto"
+    height="auto"
+    axis="column">
+
+    <brls:Header
+        width="100%"
+        title="There's a game that isn't appearing in the game list."
+        marginTop="20px"
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Only games that you created a folder for (named with the game's title ID) will appear in the game list."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Make sure you named the folder you created in step 1 in the 'Setup' section correctly. Make sure the folder's name really is the correct title ID for that game."
+        marginBottom="80px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="After enabling a mod, I don't notice it in the game."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Keep the mod enabled in the app, then use a file explorer to go to that mod's folder in the 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/' folder."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Those mod files should be currently in use, so there should be no files and folders in there. If there are still files and folders, that means the mod couldn't be enabled because another mod that changes the same files is already in use. Double-check that there's no other mod enabled that uses the same files. You'll need to disable that one first and then re-enable this one for the mod's files to actually be picked up."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If there were no mod files and folders currently under 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]/', turn the mod off in the app. That should move the mod's files back in 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]/' where they originally were. Then in a file explorer, go to that mod's folder to inspect its folders and files. Make sure the folders and files are named properly. The first folder should usually be named 'romfs'."
+        marginBottom="80px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="A mod is only being partially enabled. Not all files belonging to that mod are being used."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Use a file explorer to go within '/atmosphere/contents/[-GAME-TITLE-ID-]/' and find the places the files should be located at (matching the locations of any files that are still being left in 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]/'."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If there is already a file within '/atmosphere/contents/[-GAME-TITLE-ID-]/' with the same name and location as a file that's not being moved from within 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]/', then that is the reason it's not using the file. There's already a file for another mod in its place. There's a conflict. If you really want the mod to be fully enabled, you will need to find out where that file came from. It may have come from another mod that was enabled through the app."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Try using 'Disable All Mods' in the game's settings in the app. Then try searching your SD card for that file's name. You should be able to see all the mods that use it. If some of those mods may have been enabled at the same time, that would've been the problem. You will need to try to sort out the conflicting files between them."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If the file is still located within '/atmosphere/contents/[-GAME-TITLE-ID-]/' even after disabling all mods through the app, then that file does not belong to any of the mods in Simple Mod Alchemist. It was put there manually, so you will need to figure out why it's there and if you need it."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Once the conflicting files are sorted out so that the files can now be moved to their spots within  '/atmosphere/contents/[-GAME-TITLE-ID-]/', the mod should now be able to be enabled fully."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If there was no conflict to begin with, it could be from an infrequent bug that causes specific files to not be moved. This particular problem seems to be outside the Simple Mod Alchemist code, so there may be nothing that can be done about it at the moment, but it's infrequent, so it shouldn't happen often. But even if this bug occurs, the rest of the files should still be moving properly when enabling or disabling the mod, so there should be no need to worry about lost files."
+        marginBottom="80px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="The menu options are weird or messed up. Maybe I'm seeing an option named 'romfs' in the menu."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="The folder structure in the 'mod_alchemy' folder is probably not set up correctly."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If you tried enabling any mods in the menu (or if you're not sure if you did), first use the 'Disable All Mods' option in the game's options menu to fix any folders or files that may have been improperly moved from the 'mod_alchemy' folder."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Review steps 2-6 in the installation instructions."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Make sure all the mods are set up in the following manner in the following folder structure: 'mod_alchemy/[-GAME-TITLE-ID-]/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]/romfs/[ MOD FOLDERS AND FILES HERE ]`"
+        marginBottom="80px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="Everything froze for a long time when I tried to enable a mod."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="This can happen if a mod consists of a really large number files (even if those files are tiny)."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Wait for it to finish. Interrupting it could corrupt your mods or even your SD card, and then you would need to restore it from a backup. It may take up to 10 minutes if the mod consists of over 1,000 files."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Using such large mods (such as mod packs) is slow at the moment. It would be better to split the mod pack into smaller, individual mods that would be comprised of under ~100 files."
+        marginBottom="80px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="When using the app, it closed abruptly, claiming it closed from an error."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="See if it continues to happen."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If it was working fine at one point, but suddenly this issue began happening, try restoring from a backup if you have one. See the 'Backing Up' section."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If it still continues to be a problem, feel free to file a GitHub Issue for this app. In it, describe how you came across the error, how the folders that contain the related mod are organized (if it was related to a specific mod), and any other details you think may be helpful."
+        marginBottom="80px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="After restoring a backup, the app is crashing or not working right."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="When restoring a backup, make sure to delete the old folder(s) on the SD card before pasting the backup folder(s). No pasting and merging."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="See the 'Backups' section to make sure it's being restored properly."
+        marginBottom="80px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="I want to remove the app and all mods it is using from my SD card."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="For each game in app's game list, run the 'Disable All Mods' option before you delete anything."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Only after doing so, delete the 'mod_alchemy' folder from the root of your SD card, along with the Simple Mod Alchemist app file from the 'switch' directory."
+        marginBottom="80px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="I want to remove the app and all mods it is using from my SD card, but I can't access the 'Disable All Mods' option in the app for some reason."
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="You'll need to manually handle the mod files. Please see the 'Advanced' section."
+        marginBottom="80px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="I want to have a mod always in use, and I don't want to set it up in this app. Will the app still work fine if I just put its files under '/atmosphere/contents/[-GAME-TITLE-ID-]/'?"
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="Yes."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="The app will only touch its own mod files (including those that it moved into the '/atmosphere/contents/[-GAME-TITLE-ID-]/' folder)."
+        marginBottom="80px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="How does the app handle conflicts between files?"
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If it tries to enable a mod that uses files that another mod is already using (whether that other mod is managed by Simple Mod Alchemist or not), the mod will be enabled to the best extent it can be, but any conflicting files will not be used. The other mod's files will remain in use."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="The app only moves non-conflicting files belonging to the mod being enabled. Whatever files are currently in '/atmosphere/contents/[-GAME-TITLE-ID-]/' will stay there."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="For example, if you enable a mod with a file named 'mario', but there's already a file named 'mario' in the same spot within the '/atmosphere/contents/[-GAME-TITLE-ID-]/' folder, the 'mario' file for the mod enabled won't be used. The other 'mario' file that's already there will continue to be used."
+        marginBottom="20px"
+    />
+
+</brls:Box>

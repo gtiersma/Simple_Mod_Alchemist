@@ -52,9 +52,9 @@ Simple Mod Alchemist is the definitive Nintendo Switch mod management solution. 
 
 7. Recommended, but optional: To backup mods properly, see the **Backups** section.
 
-7. Have fun!
+8. Have fun!
 
-8. If this **Quick Start** guide doesn't make sense, read the detailed instructions below for a more thorough explanation.
+9. If this **Quick Start** guide doesn't make sense, read the detailed instructions below for a more thorough explanation.
 
 
 ## Installation
@@ -93,7 +93,7 @@ There are two options for proper backups:
 
 This method is safer and will also backup the current enabled/disabled statuses of mods, but it involves backing up *all* mods (not just those used with this app).
 
-* **Creating the backup**
+* **Creating the backup:**
   * Copy both the `mod_alchemy` and `/atmosphere/contents/` folders from your SD card to a safe place.
 
 * **Maintaining the backup:**
@@ -142,9 +142,9 @@ Disabling the mod is necessary because enabled mods have their files mixed in wi
 
 ### Changing Mods at Random
 
-Have the mods be picked for you at random.
+You can have the app pick modes for you at random.
 
-They can be randomly changed by an individual mod, by group, or by an entire game.
+Mods can be randomly changed individually, by group, or by an entire game.
 
 To do so, highlight a game, group or individual mod and press *X*.
 
@@ -153,7 +153,7 @@ The odds of each mod being chosen at random can also be adjusted. Highlight a mo
 
 ## Help / FAQs
 
-### There's a game that isn't appearing in the game list
+### There's a game that isn't appearing in the game list.
 
 Only games that you created a folder for (named with the game's title ID) will appear in the game list.
 
@@ -173,19 +173,15 @@ Make sure the folders and files are all named correctly. The folder directly in 
 
 Use a file explorer to go within `/atmosphere/contents/<title_id>/` and find the places the files should be located at (matching the locations of the files that weren't moved in `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/`.
 
-If there is already a file within `/atmosphere/contents/<title_id>/` with the same name and location as a file that's not being moved from within `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/`, then that is the reason it's not enabling. There's already a file for another mod in its place. There's a conflict. If you really want the mod to be fully enabled, you will need to find out where that file came from. It may have come from another mod that was enabled by the app.
+If there is already a file within `/atmosphere/contents/<title_id>/` with the same name and location as a file that's not being moved from within `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/`, then that is the reason it's not enabling. There's already a file for another mod in its place. There's a conflict. If you really want the mod to be fully enabled, you will need to find out where that file came from. It may have come from another mod that was enabled through the app.
 
 Try using **Disable All Mods** in the app. Then try searching your SD card for that file's name. You should be able to see all the mods that use it. If some of those mods may have been enabled at the same time, that would've been the problem. You will need to try to sort out the conflicting files between them.
 
 If the file is still located within `/atmosphere/contents/<title_id>/` even after disabling all mods through the app, then that file does not belong to any of the mods in Simple Mod Alchemist. It was put there manually, so you will need to figure out why it's there and if you need it.
 
-Once the conflicting files are sorted out so that the files can now be moved to their spots within `/atmosphere/contents/<title_id>/`, the mod should be enabling itself fully.
+Once the conflicting files are sorted out so that the files can now be moved to their spots within `/atmosphere/contents/<title_id>/`, the mod should now be able to be enabled fully.
 
-If there was no conflict to begin with, there is a bug that can be encountered infrequently that causes specific files to not be moved.
-
-This bug seems to be outside Simple Mod Alchemist, so there may be nothing that can be done about it at the moment. It's infrequent, so it shouldn't happen often.
-
-But even if this bug occurs, the rest of the files should still be moving properly when enabling or disabling the mod, so there should be no need to worry about lost files.
+If there was no conflict to begin with, it could be from an infrequent bug that causes specific files to not be moved. This particular problem seems to be outside the Simple Mod Alchemist code, so there may be nothing that can be done about it at the moment, but it's infrequent, so it shouldn't happen often. But even if this bug occurs, the rest of the files should still be moving properly when enabling or disabling the mod, so there should be no need to worry about lost files.
 
 ---
 
@@ -209,11 +205,9 @@ Wait for it to finish. Interrupting it could corrupt your mods or even your SD c
 
 Using such large mods (such as mod packs) is slow at the moment. It would be better to split the mod pack into smaller, individual mods that would be comprised of under ~100 files.
 
-If the mod doesn't consist of that many files, you may want to double-check it because it can be an easy thing to miss. Go to the `/atmosphere/contents/<title_id>/` folder on your SD card if the mod is active (`mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/` if it's not active) and look through the folders and files the mod consists of. See if there are a large number of files that shouldn't be there. Follow the instructions in the **Deleting Mods** section to remove it.
-
 ---
 
-### When using the app, it closed abruptly, claiming it closed from an error
+### When using the app, it closed abruptly, claiming it closed from an error.
 
 See if it continues to happen.
 
@@ -223,7 +217,15 @@ If it still continues to be a problem, please file a GitHub issue, describing ho
 
 ---
 
-### I want to remove the app and all mods it is using from my SD card
+### After restoring a backup, the app is crashing or not working right.
+
+When restoring a backup, make sure to **delete** the old folder(s) on the SD card before pasting the backup folder(s). No pasting and merging.
+
+See the **Backups** section to make sure it's being restored properly.
+
+---
+
+### I want to remove the app and all mods it is using from my SD card.
 
 For each game in app's game list, choose the **Disable All Mods** option before you delete anything.
 
@@ -231,35 +233,33 @@ After doing so, delete the `mod_alchemy` folder from the root of your SD card, a
 
 ---
 
-### I want to remove the app and all mods it is using from my SD card, but I can't access the Disable-All-Mods option in the app for some reason
+### I want to remove the app and all mods it is using from my SD card, but I can't access the Disable-All-Mods option in the app for some reason.
 
 You'll need to manually handle the mod files. Please see the **Advanced** section.
 
 ---
 
-### Can files from other mods be left in the game's title ID folder under the Atmosphere folder?
+### I want to have a mod always in use, and I don't want to set it up in this app. Will the app still work fine if I just put its files under `/atmosphere/contents/<title_id>/`?
 
 Yes.
 
 The app will only touch its own mod files (including those that it moved into the `/atmosphere/contents/<title_id>/` folder).
 
-If there are any mod files you put directly within the `/atmosphere/contents/<title_id>/` folder, those mods will stay there and will not show up in the app.
-
 ---
 
 ### How does the app handle conflicts between files?
 
-If it tries to enable a mod that uses the same files as a mod that already exists within the `/atmosphere/contents/<title_id>/` folder (whether those files are managed by Simple Mod Alchemist or not), those files won't be activated.
+If it tries to enable a mod that uses files that another mod is already using (whether that other mod is managed by Simple Mod Alchemist or not), the mod will be enabled to the best extent it can be, but any conflicting files will not be used. The other mod's files will remain in use.
 
 The app only moves non-conflicting files belonging to the mod being enabled. Whatever files are currently in `/atmosphere/contents/<title_id>/` will stay there.
 
-For example, if you enable a mod with a file named `mario`, but there's already a file named `mario` in the same spot within the `/atmosphere/contents/<title_id>/` folder, the `mario` file for the mod you enabled won't be used. The other `mario` file that's already there will be used.
+For example, if you enable a mod with a file named `mario`, but there's already a file named `mario` in the same spot within the `/atmosphere/contents/<title_id>/` folder, the `mario` file for the mod enabled won't be used. The other `mario` file that's already there will continue to be used.
 
 ---
 
-# Advanced: Managing the App's Mods Manually
+# Advanced: Working Manually with Mods
 
-By understanding how Simple Mod Alchemist interacts with files and folders on the SD card, you can change the app's mods from any file explorer and maybe a text editor. This also means it's also possible to create a script to automatically change/add/remove the app's mods as well.
+By understanding how Simple Mod Alchemist interacts with files and folders on the SD card, you can change the app's mods from any file explorer and maybe a text editor. This means it's also possible to create a script to automatically change/add/remove the app's mods as well.
 
 If doing any manual changing between mods as described here, be careful and don't make mistakes. If anything isn't named perfectly, it could brake how Simple Mod Alchemist manages mods, even causing it to crash.
 
@@ -267,19 +267,17 @@ If doing any manual changing between mods as described here, be careful and don'
 
 To see which mod is currently enabled over something, navigate to `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/`.
 
-In that directory, you may see a `.txt` file that shares a name with one of the mod folders. That is the active mod. The `.txt` contains the paths of each file belonging to that mod that was moved to `/atmosphere/contents/<title_id>/`. Keep in mind that not all the mod's files may have been moved if there was a conflicting file in `/atmosphere/contents/<title_id>/`, but the `.txt` records only those that *were* moved.
-
-Within the mod's folder, you'll notice that the folders remain even though the files are gone.
+In that directory, you may see a `.txt` file that shares a name with one of the mod folders. That is the active mod. The `.txt` contains the paths of each file belonging to that mod that was moved to `/atmosphere/contents/<title_id>/`. Keep in mind that not all the mod's files may have been moved if there were conflicting files, but the `.txt` records only those that *were* moved.
 
 If there is no `.txt` file, that means no mod is enabled.
 
 **To manually disable a mod**:
 
-1. Move each file listed in the `.txt` file from within the `/atmosphere/contents/<title_id>/` folder to the same corresponding folder within the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/` folder.
+1. Move each file listed in the `.txt` file from within the `/atmosphere/contents/<title_id>/` folder to the same corresponding folder within the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/` folder, creating new folders as needed.
 
 2. Once you are sure you moved all the files listed in the `.txt` file, delete the `.txt` file.
 
-3. The next time you open Simple Mod Alchemist, it will show the mod as disabled, and the mod will be able to enable and re-disable itself properly.
+3. The next time you open Simple Mod Alchemist, it won't show the mod as being enabled, and the mod will be able change between other mods properly.
 
 Once there is no mod enabled in the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/` folder, you can now manually enable a different mod if desired:
 
@@ -291,17 +289,17 @@ Once there is no mod enabled in the `mod_alchemy/<title_id>/<group_name>/<thing_
 
 3. Move all folder(s) in `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/` to `/atmosphere/contents/<title_id>/`.
 
-4. The next time you open Simple Mod Alchemist, it will show the mod as enabled, and the mod will be able to disable and re-enable itself properly.
+4. The next time you open Simple Mod Alchemist, it will show the mod as enabled, and the mod will be able change between other mods properly.
 
 ### Likelihoods of mods being randomly picked
 
-To the see what is set as the likelihood of a mod being picked, navigate to that mods folder in `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/`.
+To see what the current mod liklihood is set at (for when the mods are being picked at random), navigate to that mods folder in `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/`.
 
 There may be `~~##` at the end of the folder name, where `##` could be two of any digit. That number is the likelihood on a scale from 0 to 100, with `00` being never.
 
 If there is no `~~##` at the end of the folder name, that means that mod is set to the default likelihood of `100`.
 
-The likelihood of no mod being picked can be found at the end of the folder containing the mod folders (in other words, the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/` folder).
+The likelihood of no mod being picked can be found at the end of the name of the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/` folder.
 
 To change the likelihood, simply change the last two digits on the end of the folder name. But keep in mind there must be two digits after the `~~`.
 

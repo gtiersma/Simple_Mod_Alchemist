@@ -1,0 +1,226 @@
+<brls:Box
+    width="auto"
+    height="auto"
+    axis="column">
+
+    <brls:Label
+        width="100%"
+        text="Backing Up"
+        fontSize="30"
+        horizontalAlign="center"
+        marginTop="20px"
+        marginBottom="100px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="It is highly recommended to backup the mods. It should be rare that any mod files get disorganized, but there's no guarantee it won't happen. If something ever begins to not work right in Simple Mod Alchemist or it begins crashing at some point, you can try restoring a backup if you have one."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="When dealing with backups, it's important to keep in mind that the app operates by MOVING mod files between 'mod_alchemy' and '/atmosphere/contents/'. Because of this, it's important that mods are being backed up properly."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="There are two options for proper backups:"
+        marginBottom="80px"
+    />
+
+    <brls:Label
+        width="100%"
+        fontSize="24"
+        text="Dual Folders"
+        marginBottom="50px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="This method is safer and will also backup the current enabled/disabled statuses of mods, but it involves backing up ALL mods (not just those used with this app)."
+        marginBottom="50px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="Creating the backup:"
+        marginBottom="30px"
+    />
+
+    <brls:Box
+        width="auto"
+        height="auto"
+        axis="column"
+        paddingLeft="20px">
+        <brls:Label
+            width="100%"
+            text="- Copy both the 'mod_alchemy' and '/atmosphere/contents/' folders from your SD card to a safe place."
+            marginBottom="50px"
+        />
+    </brls:Box>
+
+    <brls:Header
+        width="100%"
+        title="Maintaining the backup:"
+        marginBottom="30px"
+    />
+
+    <brls:Box
+        width="auto"
+        height="auto"
+        axis="column"
+        paddingLeft="20px">
+        <brls:Label
+            width="100%"
+            text="- Any time mods are added for Simple Mod Alchemist, the backup will need to be updated with those new files."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="- Any time any mod files are manually added to any game under `/atmosphere/contents/`, the backup will need to be updated with those new files."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="- If you ever wish to recreate an entire new backup, both of the old backup folders must be deleted first before copying the new folders from the SD card. No merging folders."
+            marginBottom="50px"
+        />
+    </brls:Box>
+
+    <brls:Header
+        width="100%"
+        title="Restoring the backup:"
+        marginBottom="30px"
+    />
+
+    <brls:Box
+        width="auto"
+        height="auto"
+        axis="column"
+        paddingLeft="20px">
+        <brls:Label
+            width="100%"
+            text="1. Delete both of the 'mod_alchemy' and '/atmosphere/contents/' folders off of your SD card."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="- Don't skip this. Merging won't work right."
+            marginBottom="30px"
+            marginLeft="20px"
+        />
+        <brls:Label
+            width="100%"
+            text="2. Paste the folder backups onto the SD card in their place."
+            marginBottom="80px"
+        />
+    </brls:Box>
+
+    <brls:Label
+        width="100%"
+        fontSize="24"
+        text="Single Folders"
+        marginBottom="50px"
+    />
+
+    <brls:Header
+        width="100%"
+        title="Creating the backup:"
+        marginBottom="30px"
+    />
+
+    <brls:Box
+        width="auto"
+        height="auto"
+        axis="column"
+        paddingLeft="20px">
+        <brls:Label
+            width="100%"
+            text="1. Run the 'Disable All Mods' option on each game."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="- It can be found in this app's mod settings."
+            marginBottom="30px"
+            marginLeft="20px"
+        />
+        <brls:Label
+            width="100%"
+            text="- This puts all mod files back within the 'mod_alchemy' folder, ensuring they can all be backed-up from that single folder."
+            marginBottom="30px"
+            marginLeft="20px"
+        />
+        <brls:Label
+            width="100%"
+            text="2. Now only the 'mod_alchemy' folder needs to be copied from the SD card to a safe place."
+            marginBottom="50px"
+        />
+    </brls:Box>
+
+    <brls:Header
+        width="100%"
+        title="Maintaining the backup:"
+        marginBottom="30px"
+    />
+
+    <brls:Box
+        width="auto"
+        height="auto"
+        axis="column"
+        paddingLeft="20px">
+        <brls:Label
+            width="100%"
+            text="- Any time mods are added to Simple Mod Alchemist, the backup will need to be updated with those new files."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="- If you ever wish to recreate an entire new backup, the old backup folder must be deleted first before copying the new folders from the SD card. No merging folders."
+            marginBottom="50px"
+        />
+    </brls:Box>
+
+    <brls:Header
+        width="100%"
+        title="Restoring the backup:"
+        marginBottom="30px"
+    />
+
+    <brls:Box
+        width="auto"
+        height="auto"
+        axis="column"
+        paddingLeft="20px">
+        <brls:Label
+            width="100%"
+            text="1. In the app, run the 'Disable All Mods' option on each game."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="- This puts all mod files back within the 'mod_alchemy' folder, ensuring no old files will linger behind when replaced by the backup."
+            marginBottom="20px"
+            marginLeft="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="2. Delete the 'mod_alchemy' folder on the SD card."
+            marginBottom="30px"
+        />
+        <brls:Label
+            width="100%"
+            text="- Don't skip this. Merging won't work right."
+            marginBottom="30px"
+            marginLeft="20px"
+        />
+        <brls:Label
+            width="100%"
+            text="3. Paste the backup folder in its place."
+            marginBottom="20px"
+        />
+    </brls:Box>
+
+</brls:Box>
