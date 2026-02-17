@@ -6,4 +6,5 @@
 class Setup: public brls::Box {
   public:
     explicit Setup();
+    static brls::View* create();
 };

@@ -6,4 +6,5 @@
 class Manage: public brls::Box {
   public:
     explicit Manage();
+    static brls::View* create();
 };

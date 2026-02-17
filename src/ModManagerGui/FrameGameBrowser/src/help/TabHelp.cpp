@@ -13,57 +13,44 @@ TabHelp::TabHelp() {
   this->inflateFromXMLRes("xml/FrameGameBrowser/help/tab_help.xml");
 
   this->topicList->addItem("TL;DR", [this](brls::View* view) {
-    // Only trigger when the sidebar item gains focus
-    if (view->isFocused()) {
-      this->scrollFrame->addView(new Tldr());
-    }
+    this->handleTopicChange(view, Tldr::create);
   });
 
   this->topicList->addSeparator();
 
   this->topicList->addItem("Setup", [this](brls::View* view) {
-    // Only trigger when the sidebar item gains focus
-    if (view->isFocused()) {
-      this->scrollFrame->addView(new Setup());
-    }
+    this->handleTopicChange(view, Setup::create);
   });
 
   this->topicList->addItem("Backups", [this](brls::View* view) {
-    // Only trigger when the sidebar item gains focus
-    if (view->isFocused()) {
-      this->scrollFrame->addView(new Backups());
-    }
+    this->handleTopicChange(view, Backups::create);
   });
 
-  this->topicList->addItem("Using", [this](brls::View* view) {
-    // Only trigger when the sidebar item gains focus
-    if (view->isFocused()) {
-      this->scrollFrame->addView(new Manage());
-    }
+  this->topicList->addItem("General", [this](brls::View* view) {
+    this->handleTopicChange(view, Manage::create);
   });
 
   this->topicList->addItem("FAQs", [this](brls::View* view) {
-    // Only trigger when the sidebar item gains focus
-    if (view->isFocused()) {
-      this->scrollFrame->addView(new Faqs());
-    }
+    this->handleTopicChange(view, Faqs::create);
   });
 
   this->topicList->addItem("Advanced", [this](brls::View* view) {
-    // Only trigger when the sidebar item gains focus
-    if (view->isFocused()) {
-      this->scrollFrame->addView(new Advanced());
-    }
+    this->handleTopicChange(view, Advanced::create);
   });
 
   this->topicList->addSeparator();
 
   this->topicList->addItem("About", [this](brls::View* view) {
-    // Only trigger when the sidebar item gains focus
-    if (view->isFocused()) {
-      this->scrollFrame->addView(new About());
-    }
+    this->handleTopicChange(view, About::create);
   });
+}
+
+void TabHelp::handleTopicChange(brls::View* tab, std::function<brls::View* (void)> createContentFn) {
+  // Only trigger when the sidebar item gains focus
+  if (tab->isFocused()) {
+    this->scrollFrame->addView(createContentFn());
+    this->scrollFrame->setContentOffsetY(0, false); // Reset scroll
+  }
 }
 
 brls::View* TabHelp::create() { return new TabHelp(); }

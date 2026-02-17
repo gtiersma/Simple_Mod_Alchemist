@@ -6,4 +6,5 @@
 class Advanced: public brls::Box {
   public:
     explicit Advanced();
+    static brls::View* create();
 };
