@@ -43,6 +43,11 @@ TabHelp::TabHelp() {
   this->topicList->addItem("About", [this](brls::View* view) {
     this->handleTopicChange(view, About::create);
   });
+
+  this->scrollFrame->registerAction("Back", brls::BUTTON_B, [this](brls::View* view) {
+    brls::Application::giveFocus(this->topicList);
+    return true;
+  });
 }
 
 void TabHelp::handleTopicChange(brls::View* tab, std::function<brls::View* (void)> createContentFn) {
