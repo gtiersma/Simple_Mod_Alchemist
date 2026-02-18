@@ -13,8 +13,14 @@ public:
   static brls::View* create();
 
 private:
-  brls::View* buildLeftBox();
-  brls::View* buildRightBox();
+
+  /**
+   * These make up a 2x2 grid in the middle of the document.
+   */
+  brls::View* buildTopLeftBox();
+  brls::View* buildTopRightBox();
+  brls::View* buildBottomLeftBox();
+  brls::View* buildBottomRightBox();
 
   /**
    * Essentially gives the view a brls::Header, spacing it properly, contained in a brls::Box

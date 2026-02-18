@@ -27,27 +27,21 @@ About::About(): brls::Box(brls::Axis::COLUMN) {
   this->addView(shortDescription);
 
   // Two columns of content
-  brls::Box* columns = new brls::Box();
-  columns->setHeight(250.0);
-  columns->setMarginRight(10.0);
-  columns->setMarginBottom(30.0);
-  columns->setJustifyContent(brls::JustifyContent::SPACE_BETWEEN);
-  columns->addView(this->buildLeftBox());
-  columns->addView(this->buildRightBox());
-  this->addView(columns);
+  brls::Box* topColumns = new brls::Box();
+  topColumns->setHeight(300.0);
+  topColumns->setMarginRight(10.0);
+  topColumns->setJustifyContent(brls::JustifyContent::SPACE_BETWEEN);
+  topColumns->addView(this->buildTopLeftBox());
+  topColumns->addView(this->buildTopRightBox());
+  this->addView(topColumns);
 
-  brls::Label* credits = new brls::Label();
-  credits->setText(
-    "- Maintained by gtiersma.\n"\
-    "- Built upon SimpleModManager, developed by Nadrino.\n"\
-    "- Powered by Borealis, provided by the RetroNX team.\n"\
-    "- Special thanks to RetroNX, devkitPro, the ethical homebrew development community in general, and Nintendo.\n"\
-    "- This software is unofficial. It is not protected under any license by Nintendo.\n"
-  );
-  credits->setFontSize(15.0f);
-  credits->setIsWrapping(true);
-  credits->setMarginBottom(80.0);
-  this->addView(this->wrapWithHeader(credits, "Credits"));
+  brls::Box* bottomColumns = new brls::Box();
+  bottomColumns->setHeight(300.0);
+  bottomColumns->setMarginRight(10.0);
+  bottomColumns->setJustifyContent(brls::JustifyContent::SPACE_BETWEEN);
+  bottomColumns->addView(this->buildBottomLeftBox());
+  bottomColumns->addView(this->buildBottomRightBox());
+  this->addView(bottomColumns);
 
   std::time_t now;
   struct std::tm* current;
@@ -66,7 +60,7 @@ About::About(): brls::Box(brls::Axis::COLUMN) {
   verse->setFontSize(13.0f);
   verse->setHorizontalAlign(brls::HorizontalAlign::CENTER);
   verse->setIsWrapping(true);
-  verse->setMarginBottom(50.0);
+  verse->setMarginBottom(80.0);
   verse->setMarginLeft(20.0);
   this->addView(verse);
 
@@ -77,18 +71,18 @@ About::About(): brls::Box(brls::Axis::COLUMN) {
         "\u00A9 Simple Mod Alchemist 2025 - 2026 gtiersma"
   );
   copyright->setFontSize(12.0f);
-  copyright->setMarginBottom(20.0);
+  copyright->setMarginBottom(30.0);
   copyright->setMarginLeft(20.0);
   this->addView(copyright);
 
   brls::Label* disclaimer = new brls::Label();
-  disclaimer->setText("This software is not licensed by Nintendo Co. Ltd. Nintendo Co. Ltd is not affiliated with the creation of this software in any way. This software is an unofficial application, provided free of charge or payment of any kind for all Nintendo Switch owners.");
+  disclaimer->setText("This software is not licensed by Nintendo Co. Ltd, nor are they affiliated with the creation of this software in any way. This software is an unofficial application, provided free of charge, payment, or donation of any kind for all Nintendo Switch owners.");
   disclaimer->setFontSize(12.0f);
   disclaimer->setMarginLeft(20.0);
   this->addView(disclaimer);
 }
 
-brls::View* About::buildLeftBox() {
+brls::View* About::buildTopLeftBox() {
   brls::Box* leftBox = new brls::Box(brls::Axis::COLUMN);
   leftBox->setJustifyContent(brls::JustifyContent::SPACE_BETWEEN);
   leftBox->setWidthPercentage(60.0);
@@ -109,7 +103,49 @@ brls::View* About::buildLeftBox() {
   return leftBox;
 }
 
-brls::View* About::buildRightBox() {
+brls::View* About::buildTopRightBox() {
+  brls::Box* rightBox = new brls::Box(brls::Axis::COLUMN);
+  rightBox->setJustifyContent(brls::JustifyContent::CENTER);
+  rightBox->setWidthPercentage(30.0);
+
+  brls::Image* qr = new brls::Image();
+  qr->setImageFromRes("img/linkbreakers-io_qr.png");
+  qr->setScalingType(brls::ImageScalingType::FIT);
+  qr->setImageAlign(brls::ImageAlignment::BOTTOM);
+  rightBox->addView(qr);
+
+  brls::Label* qrLabel = new brls::Label();
+  qrLabel->setText("Visit the GitHub repo");
+  qrLabel->setFontSize(12.0f);
+  qrLabel->setHorizontalAlign(brls::HorizontalAlign::CENTER);
+  qrLabel->setMarginTop(10.0f);
+  rightBox->addView(qrLabel);
+
+  return rightBox;
+}
+
+brls::View* About::buildBottomLeftBox() {
+  brls::Box* leftBox = new brls::Box(brls::Axis::COLUMN);
+  leftBox->setJustifyContent(brls::JustifyContent::SPACE_BETWEEN);
+  leftBox->setWidthPercentage(60.0);
+
+  brls::Label* credits = new brls::Label();
+  credits->setText(
+    "- Maintained by gtiersma.\n"\
+    "- Built upon SimpleModManager, developed by Nadrino.\n"\
+    "- Powered by Borealis, provided by the RetroNX team.\n"\
+    "- Special thanks to RetroNX, devkitPro, the ethical homebrew development community in general, and Nintendo.\n"\
+  );
+  credits->setHorizontalAlign(brls::HorizontalAlign::LEFT);
+  credits->setFontSize(15.0f);
+  leftBox->addView(
+    this->wrapWithHeader(credits, "Credits")
+  );
+
+  return leftBox;
+}
+
+brls::View* About::buildBottomRightBox() {
   brls::Box* rightBox = new brls::Box(brls::Axis::COLUMN);
   rightBox->setJustifyContent(brls::JustifyContent::CENTER);
   rightBox->setWidthPercentage(30.0);
