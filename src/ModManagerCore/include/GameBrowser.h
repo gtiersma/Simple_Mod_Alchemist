@@ -32,7 +32,7 @@ public:
   std::optional<Game> getGame(const u64 &titleId_);
 
   // browse
-  void selectGame(const u64 &gameName_);
+  void selectGame(const Game& game);
 
 private:
   ModManager _modManager_{this};

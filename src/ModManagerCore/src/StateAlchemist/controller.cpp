@@ -17,11 +17,8 @@ void Controller::setTitleId(const u64& titleId) {
   FsManager::createFolderIfNeeded(this->getAtmospherePath());
 }
 
-/**
- * Formats u64 title ID into a hexidecimal string
- */
-std::string Controller::getHexTitleId() {
-  return MetaManager::getHexTitleId(this->titleId);
+void Controller::setGameFolderName(const std::string& name) {
+  this->gameFolderName = name;
 }
 
 /**
@@ -555,7 +552,7 @@ void Controller::returnFiles(const std::string& mod) {
  * Gets Mod Alchemist's game directory:
  */
 std::string Controller::getGamePath() {
-  return ALCHEMIST_PATH + "/" + MetaManager::getHexTitleId(this->titleId);
+  return ALCHEMIST_PATH + "/" + this->gameFolderName;
 }
 
 /*

@@ -10,7 +10,6 @@
 #include <StateAlchemist/fs_manager.h>
 #include <StateAlchemist/meta_manager.h>
 #include <StateAlchemist/constants.h>
-#include <Game.h>
 
 GameBrowser gameBrowser;
 
@@ -44,8 +43,9 @@ std::optional<Game> GameBrowser::getGame(const u64 &titleId_) {
 }
 
 // Browse
-void GameBrowser::selectGame(const u64 &titleId_) {
-  controller.setTitleId(titleId_);
+void GameBrowser::selectGame(const Game& game) {
+  controller.setTitleId(game.titleId);
+  controller.setGameFolderName(game.folderName);
 }
 
 // protected
@@ -87,10 +87,11 @@ void GameBrowser::loadGames() {
 
       // If the folder's name is just the title ID, rename it so it has the game name in it too (for user conveniency):
       if (folder.size() == 16) {
+        game->folderName = ALCHEMIST_PATH + "/" + game->name + " (" + folder + ")";
         fsFsRenameDirectory(
           &FsManager::sdSystem,
           FsManager::toPathBuffer(ALCHEMIST_PATH + "/" + folder),
-          FsManager::toPathBuffer(ALCHEMIST_PATH + "/" + game->name + " (" + folder + ")")
+          FsManager::toPathBuffer(game->folderName)
         );
       }
 

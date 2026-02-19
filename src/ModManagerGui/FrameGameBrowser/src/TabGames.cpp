@@ -59,7 +59,7 @@ brls::IconCell* TabGames::buildGameCell(const Game& game) {
   }
 
   item->registerClickAction([game](brls::View* view) {
-    gameBrowser.selectGame(game.titleId);
+    gameBrowser.selectGame(game);
 
     // Let the user know if there's no mods:
     // TODO: Groups are loaded only to check if they exist here. Not efficient.

@@ -11,15 +11,12 @@
 class Controller {
   public:
     u64 titleId; // The current Game's Title ID
+    std::string gameFolderName;
     std::string group;
     std::string source;
 
     void setTitleId(const u64& titleId);
-
-    /**
-     * Formats u64 title ID into a hexidecimal string
-     */
-    std::string getHexTitleId();
+    void setGameFolderName(const std::string& name);
 
     bool doesGameHaveFolder();
 
