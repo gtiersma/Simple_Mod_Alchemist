@@ -64,6 +64,34 @@ bool MetaManager::isTitleId(const std::string& titleId) {
   return true;
 }
 
+bool MetaManager::hasTitleId(const std::string& folderName) {
+  int size = folderName.size();
+
+  if (size < 16) {
+    return false;
+  }
+
+  if (size == 16) {
+    return isTitleId(folderName);
+  }
+
+  if (folderName.back() == ')' && folderName[size - 18] == '(') {
+    return isTitleId(folderName.substr(size - 17, 16));
+  }
+}
+
+u64 MetaManager::parseTitleId(const std::string& folderName) {
+  int size = folderName.size();
+
+  if (size == 16) {
+    return getNumericTitleId(folderName);
+  }
+
+  return getNumericTitleId(
+    folderName.substr(size - 17, 16)
+  );
+}
+
 /**
  * Parses the name of an entity from a folder name
  */

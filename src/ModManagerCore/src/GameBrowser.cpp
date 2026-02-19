@@ -7,6 +7,7 @@
 #include <switch.h>
 
 #include <StateAlchemist/controller.h>
+#include <StateAlchemist/fs_manager.h>
 #include <StateAlchemist/meta_manager.h>
 #include <StateAlchemist/constants.h>
 #include <Game.h>
@@ -55,8 +56,8 @@ void GameBrowser::loadGames() {
   
   // Filter out any folders that are definitely no Switch Title ID:
   for (auto& folder : folderList) {
-    if (MetaManager::isTitleId(folder)) {
-      u64 titleId = MetaManager::getNumericTitleId(folder);
+    if (MetaManager::hasTitleId(folder)) {
+      u64 titleId = MetaManager::parseTitleId(folder);
       auto game = std::make_unique<Game>(titleId, folder);
 
       // Load the icon for the game:
@@ -82,6 +83,15 @@ void GameBrowser::loadGames() {
       NacpLanguageEntry* nameData;
       if (R_SUCCEEDED(nsGetApplicationDesiredLanguage(&gameData->nacp, &nameData))) {
         game->name = nameData->name;
+      }
+
+      // If the folder's name is just the title ID, rename it so it has the game name in it too (for user conveniency):
+      if (folder.size() == 16) {
+        fsFsRenameDirectory(
+          &FsManager::sdSystem,
+          FsManager::toPathBuffer(ALCHEMIST_PATH + "/" + folder),
+          FsManager::toPathBuffer(ALCHEMIST_PATH + "/" + game->name + " (" + folder + ")")
+        );
       }
 
       _gameList_.push_back(std::move(*game));

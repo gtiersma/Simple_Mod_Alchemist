@@ -23,6 +23,18 @@ namespace MetaManager {
   bool isTitleId(const std::string& titleId);
 
   /**
+   * Checks if a folder name for a possible game contains a parsable title ID.
+   */
+  bool hasTitleId(const std::string& folderName);
+
+  /**
+   * Parses a game's title ID from a game's folder name.
+   *
+   * @param folderName Assumes it certainly has a parsable title ID (can be checked with hasTitleId).
+   */
+  u64 parseTitleId(const std::string& folderName);
+
+  /**
    * Parses the name of an entity from a folder name
    */
   std::string parseName(const std::string& folderName);
