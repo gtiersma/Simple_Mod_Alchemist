@@ -1,4 +1,8 @@
 #include "ModMigrator.h"
+
+#include <Game.h>
+#include <GameBrowser.h>
+
 #include "StateAlchemist/fs_manager.h"
 #include "StateAlchemist/meta_manager.h"
 #include "StateAlchemist/constants.h"
@@ -92,9 +96,7 @@ bool ModMigrator::migrateGame(const std::string& gameFolder, std::atomic<float>&
   if (titleId.size() != 1) return false;
   if (!MetaManager::isTitleId(titleId[0])) return false;
 
-  // Create the new game folder
-  std::string newGamePath = ALCHEMIST_PATH + "/" + titleId[0];
-  FsManager::createFolderIfNeeded(newGamePath);
+  std::string newGamePath = gameBrowser.getOrCreateGamePath(titleId[0]);
 
   // Create a group for that game to store the migrated mods
   std::string groupPath = newGamePath + "/" + MIGRATION_GROUP;

@@ -42,6 +42,21 @@ std::optional<Game> GameBrowser::getGame(const u64 &titleId_) {
   return std::nullopt;
 }
 
+std::string GameBrowser::getOrCreateGamePath(const std::string& titleId) {
+  std::string path = ALCHEMIST_PATH + "/";
+
+  std::optional<Game> game = getGame(MetaManager::getNumericTitleId(titleId));
+
+  if (game == std::nullopt) {
+    path = path + titleId;
+    FsManager::createFolderIfNeeded(path);
+  } else {
+    path = path + game.value().folderName;
+  }
+
+  return path;
+}
+
 // Browse
 void GameBrowser::selectGame(const Game& game) {
   controller.setTitleId(game.titleId);

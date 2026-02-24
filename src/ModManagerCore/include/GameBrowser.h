@@ -31,6 +31,12 @@ public:
 
   std::optional<Game> getGame(const u64 &titleId_);
 
+  /**
+   * Gets the path to a game's folder by a string title ID,
+   * creating the folder for the title ID if one doesn't already exist.
+   */
+  std::string getOrCreateGamePath(const std::string& titleId);
+
   // browse
   void selectGame(const Game& game);
 
