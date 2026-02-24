@@ -105,8 +105,8 @@ void GameBrowser::loadGames() {
         game->folderName = ALCHEMIST_PATH + "/" + game->name + " (" + folder + ")";
         fsFsRenameDirectory(
           &FsManager::sdSystem,
-          FsManager::toPathBuffer(ALCHEMIST_PATH + "/" + folder),
-          FsManager::toPathBuffer(game->folderName)
+          FsManager::toPathBuffer(ALCHEMIST_PATH + "/" + folder).get(),
+          FsManager::toPathBuffer(game->folderName).get()
         );
       }
 

@@ -78,6 +78,8 @@ bool MetaManager::hasTitleId(const std::string& folderName) {
   if (folderName.back() == ')' && folderName[size - 18] == '(') {
     return isTitleId(folderName.substr(size - 17, 16));
   }
+
+  return false;
 }
 
 u64 MetaManager::parseTitleId(const std::string& folderName) {
