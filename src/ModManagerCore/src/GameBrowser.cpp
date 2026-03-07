@@ -43,24 +43,21 @@ std::optional<Game> GameBrowser::getGame(const u64 &titleId_) {
 }
 
 std::string GameBrowser::getOrCreateGamePath(const std::string& titleId) {
-  std::string path = ALCHEMIST_PATH + "/";
-
   std::optional<Game> game = getGame(MetaManager::getNumericTitleId(titleId));
 
   if (game == std::nullopt) {
-    path = path + titleId;
+    std::string path = ALCHEMIST_PATH + "/" + titleId;
     FsManager::createFolderIfNeeded(path);
-  } else {
-    path = path + game.value().folderName;
+    return path;
   }
 
-  return path;
+  return game.value().path;
 }
 
 // Browse
 void GameBrowser::selectGame(const Game& game) {
   controller.setTitleId(game.titleId);
-  controller.setGameFolderName(game.folderName);
+  controller.setGamePath(game.path);
 }
 
 // protected
@@ -102,11 +99,11 @@ void GameBrowser::loadGames() {
 
       // If the folder's name is just the title ID, rename it so it has the game name in it too (for user conveniency):
       if (folder.size() == 16) {
-        game->folderName = ALCHEMIST_PATH + "/" + game->name + " (" + folder + ")";
+        game->path = ALCHEMIST_PATH + "/" + MetaManager::makeFolderNameSafe(game->name, 50) + " (" + folder + ")";
         fsFsRenameDirectory(
           &FsManager::sdSystem,
           FsManager::toPathBuffer(ALCHEMIST_PATH + "/" + folder).get(),
-          FsManager::toPathBuffer(game->folderName).get()
+          FsManager::toPathBuffer(game->path).get()
         );
       }
 

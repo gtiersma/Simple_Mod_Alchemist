@@ -1,6 +1,10 @@
 #include "StateAlchemist/meta_manager.h"
 #include "StateAlchemist/constants.h"
+
 #include <string.h>
+#include <algorithm> 
+#include <cctype>
+#include <locale>
 
 /**
  * Formats a u64 title ID into a hexidecimal string
@@ -170,19 +174,46 @@ bool MetaManager::namesMatch(char* folderName, const std::string& entityName) {
   return parseName(folderNameStr) == entityName;
 }
 
-/**
- * Throws an error if the Result fails
- */
-void MetaManager::tryResult(Result result) {
-  if (R_FAILED(result)) {
-    fatalThrow(result);
+std::string MetaManager::makeFolderNameSafe(const std::string& dirtyName, const int softLimit) {
+
+  // Create a new name of only letters, numbers, and allowed symbols.
+  // All other chars are replaced with a space (combining spaces to never have 2 next to each other).
+  std::string safeName;
+  bool isStartingNewWord = true;
+  for (char c : dirtyName) {
+    if (std::isalnum(c) || ALLOWED_FOLDER_SYMBOLS.count(c)) {
+      safeName += c;
+      isStartingNewWord = false;
+    } else if (!isStartingNewWord) {
+      safeName += ' ';
+      isStartingNewWord = true;
+    }
   }
+
+  // Remove the last char added above if it happened to be a space:
+  if (std::isspace(safeName.back())) {
+    safeName.pop_back();
+  }
+
+  // If the name is too long, try to cut it off at the end of a word:
+  std::string limitedName = safeName;
+  if (safeName.length() > softLimit) {
+    std::string::iterator hardLimit = std::find_if(
+      safeName.begin() + softLimit,
+      safeName.end(),
+      [](char c) { return std::isspace(c); }
+    );
+
+    if (hardLimit == safeName.end()) {
+      limitedName = safeName.substr(0, softLimit);
+    } else {
+      limitedName = safeName.substr(0, hardLimit - safeName.begin());
+    }
+  }
+
+  return limitedName;
 }
 
-/**
- * Limit string size of the options used by a SelectItem.
- * Needed for the UI. It hangs if strings get to be too excessively long.
- */
 std::vector<std::string> MetaManager::limitSelectLabels(std::vector<std::string>& rawNames) {
   std::vector<std::string> limitedNames;
 
@@ -195,4 +226,10 @@ std::vector<std::string> MetaManager::limitSelectLabels(std::vector<std::string>
   }
 
   return limitedNames;
+}
+
+void MetaManager::tryResult(Result result) {
+  if (R_FAILED(result)) {
+    fatalThrow(result);
+  }
 }

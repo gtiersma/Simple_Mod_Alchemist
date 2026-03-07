@@ -7,11 +7,11 @@
 
 class Game {
   public:
-    Game(u64 titleId_, std::string folderName_);
+    Game(u64 titleId_, std::string path_);
 
     u64 titleId;
     std::string name;
-    std::string folderName;
+    std::string path;
     std::vector<u8> icon;
 };
 

@@ -2,6 +2,8 @@
 #define MYLIB_CONSTANTS_H 1
 
 #include <string>
+#include <set>
+
 
 const std::string APP_VERSION = "1.1";
 
@@ -20,5 +22,11 @@ const std::string ATMOSPHERE_PATH = "/atmosphere/contents/";
 
 // UI seems likely to hang if a control's label is much longer than this number
 const int MAX_LABEL_SIZE = 25;
+
+// Just some symbols that I think libnx's filesystem operations will allow in folder and file names.
+//
+// TODO: I just came up with these on a wim. There's probably more that can be added to these.
+//       Maybe a couple of these will even cause errors. It would be nice to have this set be more definitive.
+const std::set<char> ALLOWED_FOLDER_SYMBOLS = {'-', '_', '(', ')', '#', '%', '&', '!', '+', '='};
 
 #endif

@@ -17,8 +17,8 @@ void Controller::setTitleId(const u64& titleId) {
   FsManager::createFolderIfNeeded(this->getAtmospherePath());
 }
 
-void Controller::setGameFolderName(const std::string& name) {
-  this->gameFolderName = name;
+void Controller::setGamePath(const std::string& name) {
+  this->gamePath = name;
 }
 
 /**
@@ -551,9 +551,7 @@ void Controller::returnFiles(const std::string& mod) {
 /*
  * Gets Mod Alchemist's game directory:
  */
-std::string Controller::getGamePath() {
-  return ALCHEMIST_PATH + "/" + this->gameFolderName;
-}
+std::string Controller::getGamePath() { return this->gamePath; }
 
 /*
  * Gets the file path for the specified group
