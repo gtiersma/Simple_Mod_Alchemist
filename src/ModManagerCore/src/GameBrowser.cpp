@@ -11,6 +11,9 @@
 #include <StateAlchemist/meta_manager.h>
 #include <StateAlchemist/constants.h>
 
+#include <cstring>
+
+
 GameBrowser gameBrowser;
 
 GameBrowser::GameBrowser(){}
@@ -93,18 +96,21 @@ void GameBrowser::loadGames() {
 
       // Load the title of the game:
       NacpLanguageEntry* nameData;
-      if (R_SUCCEEDED(nsGetApplicationDesiredLanguage(&gameData->nacp, &nameData))) {
+      if (R_SUCCEEDED(nsGetApplicationDesiredLanguage(&gameData->nacp, &nameData)) && strlen(nameData->name) != 0) {
         game->name = nameData->name;
-      }
 
-      // If the folder's name is just the title ID, rename it so it has the game name in it too (for user conveniency):
-      if (folder.size() == 16) {
-        game->path = ALCHEMIST_PATH + "/" + MetaManager::makeFolderNameSafe(game->name, 50) + " (" + folder + ")";
-        fsFsRenameDirectory(
-          &FsManager::sdSystem,
-          FsManager::toPathBuffer(ALCHEMIST_PATH + "/" + folder).get(),
-          FsManager::toPathBuffer(game->path).get()
-        );
+        // If the folder's name is just the title ID, rename it so it has the game name in it too (for user conveniency):
+        if (folder.size() == 16) {
+          std::string path(ALCHEMIST_PATH + "/" + MetaManager::makeFolderNameSafe(game->name, 50) + " (" + folder + ")");
+
+          Result r = fsFsRenameDirectory(
+            &FsManager::sdSystem,
+            FsManager::toPathBuffer(ALCHEMIST_PATH + "/" + folder).get(),
+            FsManager::toPathBuffer(path).get()
+          )
+
+          if (R_SUCCEEDED(r)) { game->path = path; }
+        }
       }
 
       _gameList_.push_back(std::move(*game));

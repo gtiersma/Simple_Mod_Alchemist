@@ -7,7 +7,7 @@
 
 class Game {
   public:
-    Game(u64 titleId_, std::string path_);
+    Game(u64 titleId_, std::string name_);
 
     u64 titleId;
     std::string name;
