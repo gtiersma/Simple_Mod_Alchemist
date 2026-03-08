@@ -12,11 +12,11 @@ RandomDataSource::RandomDataSource(
     const std::map<std::string, u8>& ratings,
     u8 modlessRating
 ) {
-    this->modlessFractionalRating = static_cast<float>(modlessRating) / 100.0f;
+    this->modlessOriginalFractional = static_cast<float>(modlessRating) / 100.0f;
 
     for (auto& entry: ratings) {
         this->modNames.push_back(entry.first);
-        this->fractionalRatings.push_back(static_cast<float>(entry.second) / 100.0f);
+        this->originalFractionals.push_back(static_cast<float>(entry.second) / 100.0f);
     }
 }
 
@@ -26,7 +26,7 @@ int RandomDataSource::numberOfRows(brls::RecyclerFrame* recycler, int section) {
 
 int RandomDataSource::numberOfSections(brls::RecyclerFrame* recycler) {
     // Additional +1 for the modless option row:
-    return this->fractionalRatings.size() + 1;
+    return this->originalFractionals.size() + 1;
 }
 
 std::string RandomDataSource::titleForHeader(brls::RecyclerFrame* recycler, int section) {
@@ -45,8 +45,8 @@ brls::RecyclerCell* RandomDataSource::cellForRow(brls::RecyclerFrame* recycler, 
 
     if (indexPath.section == 0) {
         cell->init(
-            Util::toPercentLabel(this->modlessFractionalRating),
-            this->modlessFractionalRating,
+            Util::toPercentLabel(this->getModlessFractional()),
+            this->getModlessFractional(),
             [this, cell](float value) {
                 this->changedModlessFractional = value;
                 cell->setText(Util::toPercentLabel(value));
@@ -54,7 +54,7 @@ brls::RecyclerCell* RandomDataSource::cellForRow(brls::RecyclerFrame* recycler, 
         );
     } else {
         std::string name = this->modNames[indexPath.section - 1];
-        float rating = this->fractionalRatings[indexPath.section - 1];
+        float rating = this->getFractionalRating(name, indexPath.section - 1);
         cell->init(
             Util::toPercentLabel(rating),
             rating,
@@ -90,6 +90,21 @@ u8 RandomDataSource::getChangedModlessRating() {
 
 bool RandomDataSource::hasModlessRatingChanged() {
     return this->changedModlessFractional != -1.0f;
+}
+
+float RandomDataSource::getFractionalRating(const std::string& modName, const int index) {
+    auto changedRating = this->changedFractionals.find(modName);
+    if (changedRating == this->changedFractionals.end()) {
+        return this->originalFractionals[index];
+    }
+    return changedRating->second;
+}
+
+float RandomDataSource::getModlessFractional() {
+    if (this->hasModlessRatingChanged()) {
+        return this->changedModlessFractional;
+    }
+    return this->modlessOriginalFractional;
 }
 
 RandomSettings::RandomSettings() {

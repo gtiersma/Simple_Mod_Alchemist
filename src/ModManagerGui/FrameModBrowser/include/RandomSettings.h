@@ -57,9 +57,9 @@ class RandomDataSource : public brls::RecyclerDataSource
     std::vector<std::string> modNames;
 
     /**
-     * From 0.0 - 1.0
+     * Ratings with a value from 0.0 - 1.0
      */
-    std::vector<float> fractionalRatings;
+    std::vector<float> originalFractionals;
 
     /**
      * Unsaved changes made to ratings are stored here (0.0 - 1.0).
@@ -71,12 +71,26 @@ class RandomDataSource : public brls::RecyclerDataSource
      * Option for using no mod.
      * From 0.0 - 1.0.
      */
-    float modlessFractionalRating;
+    float modlessOriginalFractional;
 
     /**
      * This will remain -1 if not changed. Otherwise, 0.0 - 1.0.
      */
     float changedModlessFractional{-1.0f};
+
+    /**
+     * Gets the rating that is to be shown in the UI (the changed value if there is one; otherwise the original).
+     * The percentage is between 0.0 - 1.0.
+     *
+     * (this function could technically just take the name or the index, but for efficiency and code clarity, it's better to take both.)
+     */
+    float getFractionalRating(const std::string& modName, const int index);
+
+    /**
+     * Gets the rating for the modless option that is to be shown in the UI (the changed value if there is one; otherwise the original).
+     * The percentage is between 0.0 - 1.0.
+     */
+    float getModlessFractional();
 };
 
 /**
