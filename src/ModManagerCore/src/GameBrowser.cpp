@@ -107,7 +107,7 @@ void GameBrowser::loadGames() {
             &FsManager::sdSystem,
             FsManager::toPathBuffer(ALCHEMIST_PATH + "/" + folder).get(),
             FsManager::toPathBuffer(path).get()
-          )
+          );
 
           if (R_SUCCEEDED(r)) { game->path = path; }
         }
