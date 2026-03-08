@@ -69,7 +69,6 @@ brls::IconCell* TabGames::buildGameCell(const Game& game) {
         "No mod group folders exist in \"" + controller.getGamePath() +
         "\". Within that folder, organize the mods in this manner: ./<group>/<thing-being-replaced>/<mod-name>/<mod-file-structure>"
       );
-      dialog->setCancelable(true);
       dialog->addButton("OK", []() {});
       dialog->open();
       return true;
