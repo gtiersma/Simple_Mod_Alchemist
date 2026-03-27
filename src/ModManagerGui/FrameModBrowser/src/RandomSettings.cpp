@@ -8,129 +8,76 @@
 #include <util.hpp>
 
 
-RandomDataSource::RandomDataSource(
-    const std::map<std::string, u8>& ratings,
-    u8 modlessRating
-) {
-    this->modlessOriginalFractional = static_cast<float>(modlessRating) / 100.0f;
+RandomSettings::RandomSettings() {
+    this->inflateFromXMLRes("xml/FrameModBrowser/random_settings.xml");
 
-    for (auto& entry: ratings) {
-        this->modNames.push_back(entry.first);
-        this->originalFractionals.push_back(static_cast<float>(entry.second) / 100.0f);
+    this->ratings = controller.loadRatings();
+    this->modlessRating = controller.loadDefaultRating();
+
+    this->buildUi();
+
+    title->setText(controller.source);
+}
+
+void RandomSettings::buildUi() {
+    std::vector<brls::SliderCell*> cells;
+
+    this->buildRating(
+        "Default " + controller.source + " (No Mod)",
+        this->modlessRating,
+        [this](float value) {
+            this->changedModlessRating = static_cast<u8>(std::round(value * 100.0f));
+        }
+    );
+
+    for (const auto& entry: this->ratings) {
+        this->buildRating(entry.first, entry.second, [this, entry](float value) {
+            this->changedRatings[entry.first] = static_cast<u8>(std::round(value * 100.0f));
+        });
     }
 }
 
-int RandomDataSource::numberOfRows(brls::RecyclerFrame* recycler, int section) {
-    return 1; // Each section has one row
-}
+void RandomSettings::buildRating(const std::string& name, u8 rating, const std::function<void(float)>& updateFn) {
+    brls::Label* header = new brls::Label();
+    header->setText(name);
 
-int RandomDataSource::numberOfSections(brls::RecyclerFrame* recycler) {
-    // Additional +1 for the modless option row:
-    return this->originalFractionals.size() + 1;
-}
+    float fractionalRating = static_cast<float>(rating) / 100.0f;
+    brls::SliderCell* cell = new brls::SliderCell();
+    cell->init(
+        Util::toPercentLabel(fractionalRating),
+        fractionalRating,
+        [updateFn, cell](float value) {
+            updateFn(value);
+            cell->setText(Util::toPercentLabel(value));
+        }
+    );
 
-std::string RandomDataSource::titleForHeader(brls::RecyclerFrame* recycler, int section) {
-    if (section == 0) {
-        return "Default " + controller.source + " (No Mod)";
-    }
-    return this->modNames[section - 1];
-}
-
-float RandomDataSource::heightForHeader(brls::RecyclerFrame* recycler, int section) {
-    return 44.0f;
-}
-
-brls::RecyclerCell* RandomDataSource::cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath indexPath) {
-    brls::SliderCell* cell = (brls::SliderCell*)recycler->dequeueReusableCell("Slider");
-
-    if (indexPath.section == 0) {
-        cell->init(
-            Util::toPercentLabel(this->getModlessFractional()),
-            this->getModlessFractional(),
-            [this, cell](float value) {
-                this->changedModlessFractional = value;
-                cell->setText(Util::toPercentLabel(value));
-            }
-        );
-    } else {
-        std::string name = this->modNames[indexPath.section - 1];
-        float rating = this->getFractionalRating(name, indexPath.section - 1);
-        cell->init(
-            Util::toPercentLabel(rating),
-            rating,
-            [this, cell, name](float value) {
-                this->changedFractionals[name] = value;
-                cell->setText(Util::toPercentLabel(value));
-            }
-        );
-    }
-
-    // Extra spacing to push the cell below a little further away.
+    // Extra spacing to push the UI for this mod a little further away from others.
     // This ensures each slider is spaced closer to the header that belongs to it.
     // Otherwise, it's more difficult to quickly distinguish which slider belongs to which.
-    cell->setPaddingTop(60);
-    cell->setPaddingBottom(50);
+    header->setMarginTop(60);
+    cell->setMarginBottom(50);
 
-    return cell;
+    list->addView(header);
+    list->addView(cell);
 }
 
-std::map<std::string, u8> RandomDataSource::getChangedRatings() {
+std::map<std::string, u8> RandomSettings::getChangedRatings() {
     std::map<std::string, u8> ratings;
 
-    for (auto& entry: this->changedFractionals) {
+    for (const auto& entry: this->changedRatings) {
         ratings[entry.first] = static_cast<u8>(std::round(entry.second * 100.0f));
     }
 
     return ratings;
 }
 
-u8 RandomDataSource::getChangedModlessRating() {
-    return static_cast<u8>(std::round(this->changedModlessFractional * 100.0f));
-}
-
-bool RandomDataSource::hasModlessRatingChanged() {
-    return this->changedModlessFractional != -1.0f;
-}
-
-float RandomDataSource::getFractionalRating(const std::string& modName, const int index) {
-    auto changedRating = this->changedFractionals.find(modName);
-    if (changedRating == this->changedFractionals.end()) {
-        return this->originalFractionals[index];
-    }
-    return changedRating->second;
-}
-
-float RandomDataSource::getModlessFractional() {
-    if (this->hasModlessRatingChanged()) {
-        return this->changedModlessFractional;
-    }
-    return this->modlessOriginalFractional;
-}
-
-RandomSettings::RandomSettings() {
-    this->inflateFromXMLRes("xml/FrameModBrowser/random_settings.xml");
-
-    this->ratings = controller.loadRatings();
-    this->modlessRating = controller.loadDefaultRating();
-    this->dataSource = new RandomDataSource(this->ratings, this->modlessRating);
-
-    title->setText(controller.source);
-
-    list->estimatedRowHeight = 160;
-    list->registerCell("Slider", []() { return new brls::SliderCell(); });
-    list->setDataSource(this->dataSource);
-}
-
-std::map<std::string, u8> RandomSettings::getChangedRatings() {
-    return this->dataSource->getChangedRatings();
-}
-
 u8 RandomSettings::getChangedModlessRating() {
-    return this->dataSource->getChangedModlessRating();
+    return static_cast<u8>(std::round(this->changedModlessRating * 100.0f));
 }
 
 bool RandomSettings::hasModlessRatingChanged() {
-    return this->dataSource->hasModlessRatingChanged();
+    return this->changedModlessRating != -1.0f;
 }
 
 void RandomSettings::showInDialog() {

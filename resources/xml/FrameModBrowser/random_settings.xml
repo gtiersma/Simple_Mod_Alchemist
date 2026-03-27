@@ -37,13 +37,20 @@
         color="@theme/brls/sidebar/separator"/>
 
     <brls:Box
-        width="auto"
+        width="100%"
         height="auto"
         grow="1">
-        <brls:RecyclerFrame
-          id="list"
-          width="100%"
-          height="auto"/>
+        <brls:ScrollingFrame
+            width="auto"
+            height="auto"
+            grow="1">
+            <brls:Box
+                id="list"
+                width="auto"
+                height="auto"
+                axis="column"
+            />
+        </brls:ScrollingFrame>
     </brls:Box>
 
 </brls:Box>
