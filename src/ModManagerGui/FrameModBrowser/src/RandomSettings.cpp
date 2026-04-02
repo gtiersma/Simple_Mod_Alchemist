@@ -25,20 +25,33 @@ void RandomSettings::buildUi() {
     this->buildRating(
         "Default " + controller.source + " (No Mod)",
         this->modlessRating,
+        false,
         [this](float value) {
             this->changedModlessRating = static_cast<u8>(std::round(value * 100.0f));
         }
     );
 
+    // Have the rating alternate between different background colors:
+    bool useAltBackColor = true;
     for (const auto& entry: this->ratings) {
-        this->buildRating(entry.first, entry.second, [this, entry](float value) {
+        this->buildRating(entry.first, entry.second, useAltBackColor, [this, entry](float value) {
             this->changedRatings[entry.first] = static_cast<u8>(std::round(value * 100.0f));
         });
+        useAltBackColor = !useAltBackColor;
     }
 }
 
-void RandomSettings::buildRating(const std::string& name, u8 rating, const std::function<void(float)>& updateFn) {
+void RandomSettings::buildRating(const std::string& name, u8 rating, bool useAltBackColor, const std::function<void(float)>& updateFn) {
+    brls::Box* ratingItem = new brls::Box(brls::Axis::COLUMN);
+    ratingItem->setPadding(30, 10, 0, 10);
+
+    if (useAltBackColor) {
+        ratingItem->setBackgroundColor(RGB(57, 58, 60));
+    }
+
     brls::Label* header = new brls::Label();
+    header->setMarginLeft(5);
+    header->setFontSize(14);
     header->setText(name);
 
     float fractionalRating = static_cast<float>(rating) / 100.0f;
@@ -52,14 +65,9 @@ void RandomSettings::buildRating(const std::string& name, u8 rating, const std::
         }
     );
 
-    // Extra spacing to push the UI for this mod a little further away from others.
-    // This ensures each slider is spaced closer to the header that belongs to it.
-    // Otherwise, it's more difficult to quickly distinguish which slider belongs to which.
-    header->setMarginTop(60);
-    cell->setMarginBottom(50);
-
-    list->addView(header);
-    list->addView(cell);
+    ratingItem->addView(header);
+    ratingItem->addView(cell);
+    list->addView(ratingItem);
 }
 
 std::map<std::string, u8> RandomSettings::getChangedRatings() {

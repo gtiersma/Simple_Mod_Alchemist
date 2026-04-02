@@ -57,5 +57,17 @@ class RandomSettings : public brls::Box
     float changedModlessRating = -1.0f;
 
     void buildUi();
-    void buildRating(const std::string& name, u8 rating, const std::function<void(float)>& updateFn);
+
+    /**
+     * Builds a view for a single rating in the list.
+     *
+     * TODO: This really should be turned into a View class instead of being a method.
+     *
+     * @param name            - The label for the mod this rating belongs to.
+     * @param rating          - The current "random" rating for the mod.
+     * @param useAltBackColor - Gives the rating a different background color.
+     *                          Use in an alternating fashion to help make it easier for the user to visually tell the ratings apart.
+     * @param updateFn        - Callback for when the user changes the rating. The parameter is the new rating.
+     */
+    void buildRating(const std::string& name, u8 rating, bool useAltBackColor, const std::function<void(float)>& updateFn);
 };
