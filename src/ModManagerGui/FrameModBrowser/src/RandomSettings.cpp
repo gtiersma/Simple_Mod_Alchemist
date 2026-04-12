@@ -14,12 +14,16 @@ RandomSettings::RandomSettings() {
     this->ratings = controller.loadRatings();
     this->modlessRating = controller.loadDefaultRating();
 
-    this->buildUi();
+    this->buildRatingList();
 
     title->setText(controller.source);
+
+    this->addView(
+        new brls::Hint(std::make_shared<brls::GamepadAction>(brls::BUTTON_B, 0, "Back", true, false, false, brls::Sound::SOUND_NONE, nullptr), true)
+    );
 }
 
-void RandomSettings::buildUi() {
+void RandomSettings::buildRatingList() {
     std::vector<brls::SliderCell*> cells;
 
     this->buildRating(
@@ -93,13 +97,6 @@ void RandomSettings::showInDialog() {
     brls::DismissDialog* dialog = new brls::DismissDialog(ui);
 
     dialog->setCancelable(true, [ui]() {
-        controller.saveRatings(ui->getChangedRatings());
-        if (ui->hasModlessRatingChanged()) {
-            controller.saveDefaultRating(ui->getChangedModlessRating());
-        }
-    });
-
-    dialog->addButton("Close", [ui]() {
         controller.saveRatings(ui->getChangedRatings());
         if (ui->hasModlessRatingChanged()) {
             controller.saveDefaultRating(ui->getChangedModlessRating());

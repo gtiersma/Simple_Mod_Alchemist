@@ -1,6 +1,6 @@
 <brls:Box
-    width="720px"
-    height="600px"
+    width="780px"
+    height="660px"
     axis="column"
     paddingLeft="48px"
     paddingRight="48px"
@@ -11,8 +11,7 @@
         width="auto"
         height="auto"
         alignItems="center"
-        paddingTop="12px"
-        paddingBottom="15px">
+        paddingTop="12px">
         <brls:Label
             id="title"
             width="auto"
@@ -30,15 +29,11 @@
             text="Set how likely each mod is to get picked at random."/>
     </brls:Box>
 
-    
-    <brls:Rectangle
-        width="auto"
-        height="2px"
-        color="@theme/brls/sidebar/separator"/>
-
     <brls:Box
         width="100%"
         height="auto"
+        paddingTop="12px"
+        paddingBottom="16px"
         grow="1">
         <brls:ScrollingFrame
             width="auto"

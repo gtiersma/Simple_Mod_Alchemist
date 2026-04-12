@@ -56,7 +56,7 @@ class RandomSettings : public brls::Box
     std::map<std::string, float> changedRatings;
     float changedModlessRating = -1.0f;
 
-    void buildUi();
+    void buildRatingList();
 
     /**
      * Builds a view for a single rating in the list.
