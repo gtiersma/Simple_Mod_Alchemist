@@ -1,17 +1,19 @@
 <brls:Box
-    width="780px"
+    width="720px"
     height="660px"
     axis="column"
-    paddingLeft="48px"
-    paddingRight="48px"
+    paddingLeft="36px"
+    paddingRight="36px"
     paddingTop="16px"
     paddingBottom="16px">
 
     <brls:Box
-        width="auto"
+        width="100%"
         height="auto"
-        alignItems="center"
-        paddingTop="12px">
+        justifyContent="spaceBetween"
+        alignItems="baseline"
+        paddingTop="12px"
+        paddingBottom="16px">
         <brls:Label
             id="title"
             width="auto"
@@ -32,8 +34,12 @@
     <brls:Box
         width="100%"
         height="auto"
-        paddingTop="12px"
-        paddingBottom="16px"
+        paddingTop="8px"
+        paddingBottom="6px"
+        marginBottom="10px"
+        lineTop="2px"
+        lineBottom="2px"
+        lineColor="#D0D0D0"
         grow="1">
         <brls:ScrollingFrame
             width="auto"
