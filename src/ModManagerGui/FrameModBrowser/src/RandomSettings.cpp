@@ -30,16 +30,14 @@ void RandomSettings::buildRatingList() {
         "Default " + controller.source + " (No Mod)",
         this->modlessRating,
         false,
-        [this](float value) {
-            this->changedModlessRating = static_cast<u8>(std::round(value * 100.0f));
-        }
+        [this](float value) { this->changedModlessRating = value; }
     );
 
     // Have the rating alternate between different background colors:
     bool useAltBackColor = true;
     for (const auto& entry: this->ratings) {
         this->buildRating(entry.first, entry.second, useAltBackColor, [this, entry](float value) {
-            this->changedRatings[entry.first] = static_cast<u8>(std::round(value * 100.0f));
+            this->changedRatings[entry.first] = value;
         });
         useAltBackColor = !useAltBackColor;
     }
