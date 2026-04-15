@@ -61,7 +61,7 @@ Simple Mod Alchemist is the definitive Nintendo Switch mod management solution. 
 
 1. This assumes you already have a Nintendo Switch set up with Atmosphere CFW installed.
 
-2. Download the latest release of Simple Mod Alchemist, extracting its contents to the root of your SD card.
+2. Download the latest release of Simple Mod Alchemist, extracting its contents to the root of your SD card. The app can also be found on the homebrew app store.
 
 3. There should now be a `mod_alchemy` folder in your SD card root.
 
@@ -136,9 +136,9 @@ Mods can be added to the app at any time by following the same instructions list
 
 If there ever is a mod you're using that you want to delete permanently, **make sure to disable that mod in Simple Mod Alchemist first** if it isn't already disabled. This will make sure all files for that mod are returned to their original locations within the folders in `mod_alchemy`.
 
-Once you're sure it's disabled, deleting the mod is as easy as deleting the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>` folder belonging to it from your SD card.
+Once you're sure it's disabled, deleting the mod is as easy as deleting the `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>` folder belonging to it from your SD card.
 
-Disabling the mod is necessary because enabled mods have their files mixed in with all the other enabled mod files within the `/atmosphere/contents/<title_id>/` folder. Disabling the mod will move its files back to the original folder they were in: `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>`, that way, when you delete the folder, you can be sure all files for that mod are being deleted as well.
+Disabling the mod is necessary because enabled mods have their files mixed in with all the other enabled mod files within the `/atmosphere/contents/<title_id>/` folder. Disabling the mod will move its files back to the original folder they were in: `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>`, that way, when you delete the folder, you can be sure all files for that mod are being deleted as well.
 
 ### Changing Mods at Random
 
@@ -161,19 +161,29 @@ Make sure you named the folder you created in step 4 in the **Installation Instr
 
 ---
 
-### After enabling a mod, I don't notice it in the game.
+### I named each game's folder as the title ID, but they were somehow renamed to also have the game's name. Why? Will this break anything?
 
-Disable the mod in the app. Then in a file explorer, go to that mod's folder in the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/` folder to inspect its folders and files.
+No, that's expected.
 
-Make sure the folders and files are all named correctly. The folder directly in the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/` folder should usually be named `romfs`. `romfs` should contain more folders matching the game's file system.
+After starting the app, it will rename any game folders it can to also have the game's name. This is just for making it easier to know which ID belongs to which game when adding mods.
+
+Everything will work as long as the title ID in the parenthesis isn't changed.
 
 ---
 
-### Mod is only being partially enabled. Not all files belonging to that mod were enabled.
+### After enabling a mod, I don't notice it in the game.
 
-Use a file explorer to go within `/atmosphere/contents/<title_id>/` and find the places the files should be located at (matching the locations of the files that weren't moved in `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/`.
+Disable the mod in the app. Then in a file explorer, go to that mod's folder in the `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/` folder to inspect its folders and files.
 
-If there is already a file within `/atmosphere/contents/<title_id>/` with the same name and location as a file that's not being moved from within `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/`, then that is the reason it's not enabling. There's already a file for another mod in its place. There's a conflict. If you really want the mod to be fully enabled, you will need to find out where that file came from. It may have come from another mod that was enabled through the app.
+Make sure the folders and files are all named correctly. The folder directly in the `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/` folder should usually be named `romfs`. `romfs` should contain more folders matching the game's file system.
+
+---
+
+### A mod is only being partially enabled. Not all files belonging to that mod were enabled.
+
+Use a file explorer to go within `/atmosphere/contents/<title_id>/` and find the places the files should be located at (matching the locations of the files that weren't moved in `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/`).
+
+If there is already a file within `/atmosphere/contents/<title_id>/` with the same name and location as a file that's not being moved from within `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/`, then that is the reason it's not enabling. There's already a file for another mod in its place. There's a conflict. If you really want the mod to be fully enabled, you will need to find out where that file came from. It may have come from another mod that was enabled through the app.
 
 Try using **Disable All Mods** in the app. Then try searching your SD card for that file's name. You should be able to see all the mods that use it. If some of those mods may have been enabled at the same time, that would've been the problem. You will need to try to sort out the conflicting files between them.
 
@@ -193,7 +203,7 @@ If you tried enabling any mods in the menu (or if you're not sure if you did), f
 
 Review steps 5-9 in the installation instructions.
 
-Make sure all the mods are set up in the following manner in the following folder structure: `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/romfs/<mod folders and files here>`
+Make sure all the mods are set up in the following manner in the following folder structure: `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/romfs/<mod folders and files here>`
 
 ---
 
@@ -265,7 +275,7 @@ If doing any manual changing between mods as described here, be careful and don'
 
 ### Enabled Mods
 
-To see which mod is currently enabled over something, navigate to `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/`.
+To see which mod is currently enabled over something, navigate to `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/`.
 
 In that directory, you may see a `.txt` file that shares a name with one of the mod folders. That is the active mod. The `.txt` contains the paths of each file belonging to that mod that was moved to `/atmosphere/contents/<title_id>/`. Keep in mind that not all the mod's files may have been moved if there were conflicting files, but the `.txt` records only those that *were* moved.
 
@@ -273,33 +283,33 @@ If there is no `.txt` file, that means no mod is enabled.
 
 **To manually disable a mod**:
 
-1. Move each file listed in the `.txt` file from within the `/atmosphere/contents/<title_id>/` folder to the same corresponding folder within the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/` folder, creating new folders as needed.
+1. Move each file listed in the `.txt` file from within the `/atmosphere/contents/<title_id>/` folder to the same corresponding folder within the `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/` folder, creating new folders as needed.
 
 2. Once you are sure you moved all the files listed in the `.txt` file, delete the `.txt` file.
 
 3. The next time you open Simple Mod Alchemist, it won't show the mod as being enabled, and the mod will be able change between other mods properly.
 
-Once there is no mod enabled in the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/` folder, you can now manually enable a different mod if desired:
+Once there is no mod enabled in the `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/` folder, you can now manually enable a different mod if desired:
 
 **To manually enable a mod**:
 
-1. Create a `.txt` file directly in `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/`, naming it **the exact same** as the name of the folder of the mod you wish to enable.
+1. Create a `.txt` file directly in `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/`, naming it **the exact same** as the name of the folder of the mod you wish to enable.
 
-2. Within that `.txt` file, include every file belonging to that mod (including the folder path beginning in `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/` leading to each file). In most cases, the path will always begin with `romfs`. Each mod file with its folder path should be on a new line.
+2. Within that `.txt` file, include every file belonging to that mod (including the folder path beginning in `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/` leading to each file). In most cases, the path will always begin with `romfs`. Each mod file with its folder path should be on a new line.
 
-3. Move all folder(s) in `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/<mod_name>/` to `/atmosphere/contents/<title_id>/`.
+3. Move all folder(s) in `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/` to `/atmosphere/contents/<title_id>/`.
 
 4. The next time you open Simple Mod Alchemist, it will show the mod as enabled, and the mod will be able change between other mods properly.
 
 ### Likelihoods of mods being randomly picked
 
-To see what the current mod liklihood is set at (for when the mods are being picked at random), navigate to that mods folder in `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/`.
+To see what the current mod liklihood is set at (for when the mods are being picked at random), navigate to that mods folder in `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/`.
 
 There may be `~~##` at the end of the folder name, where `##` could be two of any digit. That number is the likelihood on a scale from 0 to 100, with `00` being never.
 
 If there is no `~~##` at the end of the folder name, that means that mod is set to the default likelihood of `100`.
 
-The likelihood of no mod being picked can be found at the end of the name of the `mod_alchemy/<title_id>/<group_name>/<thing_being_modded>/` folder.
+The likelihood of *no* mod being picked can be found at the end of the name of the `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/` folder.
 
 To change the likelihood, simply change the last two digits on the end of the folder name. But keep in mind there must be two digits after the `~~`.
 

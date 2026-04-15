@@ -27,13 +27,16 @@
     <brls:Label
         width="100%"
         text="There are two options for proper backups:"
-        marginBottom="80px"
+        paddingBottom="60px"
+        marginBottom="20px"
+        lineTop="2px"
+        lineColor="#D0D0D0"
     />
 
     <brls:Label
         width="100%"
         fontSize="24"
-        text="Dual Folders"
+        text="Option #1: Dual Folders"
         marginBottom="50px"
     />
 
@@ -114,14 +117,17 @@
         <brls:Label
             width="100%"
             text="2. Paste the folder backups onto the SD card in their place."
-            marginBottom="80px"
+            paddingBottom="60px"
+            marginBottom="20px"
+            lineTop="2px"
+            lineColor="#D0D0D0"
         />
     </brls:Box>
 
     <brls:Label
         width="100%"
         fontSize="24"
-        text="Single Folders"
+        text="Option #2: Single Folder"
         marginBottom="50px"
     />
 

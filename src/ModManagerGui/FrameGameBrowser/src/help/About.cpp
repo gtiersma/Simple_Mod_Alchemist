@@ -36,7 +36,7 @@ About::About(): brls::Box(brls::Axis::COLUMN) {
   this->addView(topColumns);
 
   brls::Box* bottomColumns = new brls::Box();
-  bottomColumns->setHeight(300.0);
+  bottomColumns->setHeight(350.0);
   bottomColumns->setMarginRight(10.0);
   bottomColumns->setJustifyContent(brls::JustifyContent::SPACE_BETWEEN);
   bottomColumns->addView(this->buildBottomLeftBox());
@@ -89,9 +89,9 @@ brls::View* About::buildTopLeftBox() {
 
   brls::Label* changelog = new brls::Label();
   changelog->setText(
-    " - Dialog for changing how likely each mod is to be picked at random.\n"\
-    " - The game being viewed can be started from the app.\n"\
-    " - Empty folders are now being removed as files get moved.\n"\
+    " - Help info is now in the app.\n"\
+    " - Fixed the mod random settings, making it easier to use as well.\n"\
+    " - Game folders are now automatically given the game's name with the title ID number.\n"\
     " - General stability improvements!\n"
   );
   changelog->setHorizontalAlign(brls::HorizontalAlign::LEFT);

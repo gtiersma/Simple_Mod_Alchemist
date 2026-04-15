@@ -13,7 +13,10 @@
     <brls:Label
         width="100%"
         text="See 'Setup'."
-        marginBottom="80px"
+        paddingBottom="60px"
+        marginBottom="20px"
+        lineTop="2px"
+        lineColor="#D0D0D0"
     />
 
     <brls:Header
@@ -30,14 +33,17 @@
 
     <brls:Label
         width="100%"
-        text="Only once the mod NOT currently being used, deleting the mod is as easy as deleting the `mod_alchemy/[-TITLE-ID-]/[-GROUP-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]` folder belonging to it from your SD card."
+        text="Only once the mod is NOT in use, it can be removed as easy as deleting the `mod_alchemy/[-GAME-NAME-] ([-TITLE-ID-])/[-GROUP-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]` folder belonging to it from your SD card."
         marginBottom="30px"
     />
 
     <brls:Label
         width="100%"
-        text="This is necessary because when a mod is currently being used, its files are currently mixed in with all the other enabled mod files within the '/atmosphere/contents/[-TITLE-ID-]/' folder. When the mod is changed to something else, the app will move the mod's files back to the original folder they were in: 'mod_alchemy/[-TITLE-ID-]/[-GROUP-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]`. Then when you delete that folder, you can be sure all files for that mod are being deleted as well."
-        marginBottom="80px"
+        text="This is necessary because when a mod is currently being used, its files are currently mixed in with all the other enabled mod files within the '/atmosphere/contents/[-TITLE-ID-]/' folder. When the mod is changed to something else, the app will move the mod's files back to the original folder they were in: 'mod_alchemy/[-GAME-NAME-] ([-TITLE-ID-])/[-GROUP-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]`. Then when you delete that folder, you can be sure all files for that mod are being deleted as well."
+        paddingBottom="60px"
+        marginBottom="20px"
+        lineTop="2px"
+        lineColor="#D0D0D0"
     />
 
     <brls:Header
