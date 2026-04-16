@@ -19,9 +19,13 @@
     <brls:Label
         width="100%"
         text="Make sure you named the folder you created in step 1 in the 'Setup' section correctly. Make sure the folder's name really is the correct title ID for that game."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -47,9 +51,13 @@
     <brls:Label
         width="100%"
         text="Everything will work as long as the title ID in the parenthesis isn't changed."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -74,9 +82,13 @@
     <brls:Label
         width="100%"
         text="If there were no mod files and folders currently under 'mod_alchemy/[-GAME-NAME-] ([-TITLE-ID-])/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]/', turn the mod off in the app. That should move the mod's files back in 'mod_alchemy/[-GAME-NAME-] ([-TITLE-ID-])/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]/' where they originally were. Then in a file explorer, go to that mod's folder to inspect its folders and files. Make sure the folders and files are named properly. The first folder should usually be named 'romfs'."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -119,9 +131,13 @@
     <brls:Label
         width="100%"
         text="If there was no conflict to begin with, it could be from an infrequent bug that causes specific files to not be moved. This particular problem seems to be outside the Simple Mod Alchemist code, so there may be nothing that can be done about it at the moment, but it's infrequent, so it shouldn't happen often. But even if this bug occurs, the rest of the files should still be moving properly when enabling or disabling the mod, so there should be no need to worry about lost files."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -152,9 +168,13 @@
     <brls:Label
         width="100%"
         text="Make sure all the mods are set up in the following manner in the following folder structure: 'mod_alchemy/[-GAME-NAME-] ([-TITLE-ID-])/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]/romfs/[ MOD FOLDERS AND FILES HERE ]`"
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -179,9 +199,13 @@
     <brls:Label
         width="100%"
         text="Using such large mods (such as mod packs) is slow at the moment. It would be better to split the mod pack into smaller, individual mods that would be comprised of under ~100 files."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -206,9 +230,13 @@
     <brls:Label
         width="100%"
         text="If it still continues to be a problem, feel free to file a GitHub Issue for this app. In it, describe how you came across the error, how the folders that contain the related mod are organized (if it was related to a specific mod), and any other details you think may be helpful."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -227,9 +255,13 @@
     <brls:Label
         width="100%"
         text="See the 'Backups' section to make sure it's being restored properly."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -248,9 +280,13 @@
     <brls:Label
         width="100%"
         text="Only after doing so, delete the 'mod_alchemy' folder from the root of your SD card, along with the Simple Mod Alchemist app file from the 'switch' directory."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -263,9 +299,13 @@
     <brls:Label
         width="100%"
         text="You'll need to manually handle the mod files. Please see the 'Advanced' section."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -284,9 +324,13 @@
     <brls:Label
         width="100%"
         text="The app will only touch its own mod files (including those that it moved into the '/atmosphere/contents/[-GAME-TITLE-ID-]/' folder)."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 

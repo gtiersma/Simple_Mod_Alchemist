@@ -27,9 +27,13 @@
     <brls:Label
         width="100%"
         text="There are two options for proper backups:"
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="20px"
+        marginBottom="60px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -117,12 +121,16 @@
         <brls:Label
             width="100%"
             text="2. Paste the folder backups onto the SD card in their place."
-            paddingBottom="60px"
-            marginBottom="20px"
-            lineTop="2px"
-            lineColor="#D0D0D0"
         />
     </brls:Box>
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
+        lineColor="#D0D0D0"
+    />
 
     <brls:Label
         width="100%"

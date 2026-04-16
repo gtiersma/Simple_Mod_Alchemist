@@ -13,9 +13,13 @@
     <brls:Label
         width="100%"
         text="See 'Setup'."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
@@ -40,9 +44,13 @@
     <brls:Label
         width="100%"
         text="This is necessary because when a mod is currently being used, its files are currently mixed in with all the other enabled mod files within the '/atmosphere/contents/[-TITLE-ID-]/' folder. When the mod is changed to something else, the app will move the mod's files back to the original folder they were in: 'mod_alchemy/[-GAME-NAME-] ([-TITLE-ID-])/[-GROUP-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]`. Then when you delete that folder, you can be sure all files for that mod are being deleted as well."
-        paddingBottom="60px"
-        marginBottom="20px"
-        lineTop="2px"
+    />
+
+    <brls:Box
+        width="100%"
+        height="50px"
+        marginBottom="30px"
+        lineBottom="2px"
         lineColor="#D0D0D0"
     />
 
