@@ -166,95 +166,47 @@ void ModMigrator::migrateMod(
 void ModMigrator::moveFiles(const std::string& oldPath, const std::string& newPath) {
   FsDir dir = FsManager::openFolder(oldPath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
 
-  // Iterartor for current entry in the current directory:
-  short i = 0;
-
-  // Used for "storing" where the iteration left off at when traversing deeper into the hierarchy:
-  std::vector<u64> iStorage;
-
-  // The path we are currently at relative to the mod path.
-  // Empty string is mod path itself:
-  std::string currentBasePath = "";
-
-  // The index of the current entry we're iterating over in the current directory:
-  short entryIndex = 0;
-
-  // The current number of files read at a time
-  // It reads 1 at a time, so it will always be either 1 or 0 (0 if all have been read)
+  std::vector<FsDirectoryEntry> entries(MAX_FS_ENTRY_LOAD);
   s64 readCount = 0;
 
-  FsDirectoryEntry entry;
+  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, MAX_FS_ENTRY_LOAD, entries.data())) && readCount) {
+    for (s64 i = 0; i < readCount; i++) {
+      FsDirectoryEntry& entry = entries[i];
 
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, 1, &entry))) {
+      const std::string sourcePath = oldPath + "/" + entry.name;
+      const std::string targetPath = newPath + "/" + entry.name;
 
-    // Continue iterating the index until it catches up with the iteration we should be on (if needed):
-    entryIndex++;
-    if (entryIndex > i) {
-      i++;
+      // If the next entry is a file, we will move it.
+      //
+      // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
+      // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
+      // since some filesystems can report corrupt or unexpected entry types.
+      bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
+      bool isDirectory = entry.type == FsDirEntryType_Dir;
 
-      if (readCount > 0) {
-        std::string nextPath = currentBasePath + "/" + entry.name;
-        const std::string sourcePath = oldPath + nextPath;
-        const std::string targetPath = newPath + nextPath;
+      if (!isFile && !isDirectory) {
+        isDirectory = FsManager::doesFolderExist(sourcePath);
 
-        // If the next entry is a file, we will move it.
-        //
-        // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
-        // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
-        // since some filesystems can report corrupt or unexpected entry types.
-        bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
-        bool isDirectory = entry.type == FsDirEntryType_Dir;
-
-        if (!isFile && !isDirectory) {
-          isDirectory = FsManager::doesFolderExist(sourcePath);
-
-          if (!isDirectory) {
-            isFile = FsManager::doesFileExist(sourcePath);
-          }
+        if (!isDirectory) {
+          isFile = FsManager::doesFileExist(sourcePath);
         }
+      }
 
-        if (isFile) {
-          FsManager::moveFile(sourcePath, targetPath);
-        // If the next entry is a folder, we will traverse within it:
-        } else if (isDirectory) {
-          FsManager::createFolderIfNeeded(targetPath);
+      if (isFile) {
+        FsManager::moveFile(sourcePath, targetPath);
+      // If the next entry is a folder, we will traverse within it:
+      } else if (isDirectory) {
+        FsManager::createFolderIfNeeded(targetPath);
 
-          // Add the current count to the storage:
-          iStorage.push_back(i);
-
-          currentBasePath = nextPath;
-          FsManager::changeFolder(dir, sourcePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
-
-          // Reset the index & iterator because we're starting in a new folder:
-          entryIndex = 0;
-          i = 0;
-        } else {
-          brls::Logger::warning("Mod Migrator: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
-        }
-      } else {
-        // If there's nothing left in our count storage, we've navigated everything, so we're done:
-        if (iStorage.size() == 0) { break; }
-
-        // Otherwise, let's get back the count data of where we left off in the parent:
-        i = iStorage.back();
-        iStorage.pop_back();
-
-        std::string oldBasePath = currentBasePath;
-
-        // Remove the string portion after the last '/' to get the parent's path:
-        std::size_t lastSlashIndex = currentBasePath.rfind('/');
-        currentBasePath = currentBasePath.substr(0, lastSlashIndex);
-        FsManager::changeFolder(dir, oldPath + currentBasePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
+        ModMigrator::moveFiles(sourcePath, targetPath);
 
         // Delete the folder only if it's now empty. The folder should be empty,
         // but if not for whatever reason, this should just silently break and skip it:
-        fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(oldPath + oldBasePath).get());
-
-        // Reset the entry index because it will start at the beginning again:
-        entryIndex = 0;
+        fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(sourcePath).get());
+      } else {
+        brls::Logger::warning("Mod Migrator: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
       }
     }
-
   }
 
   fsDirClose(&dir);

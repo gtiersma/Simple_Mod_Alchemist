@@ -143,6 +143,26 @@ class Controller {
   private:
 
     /**
+     * Recursively moves the files of a mod from its folder into the atmosphere folder for the game.
+     *
+     * Each folder is opened with its own fresh FsDir handle and fully enumerated before recursing,
+     * which avoids the premature "end of directory" reads that can occur when reusing a single
+     * handle across folders (see FsManager::hasFilesDeep).
+     *
+     * @param modPath The path to the mod folder in alchemy's directory
+     * @param currentBasePath The path relative to modPath of the folder currently being processed.
+     *                        Empty string is the mod folder itself.
+     * @param movedFilesFile The txt file that records every moved file
+     * @param txtOffset The current write offset in the txt file
+     */
+    void moveModFiles(
+      const std::string& modPath,
+      const std::string& currentBasePath,
+      FsFile& movedFilesFile,
+      s64& txtOffset
+    );
+
+    /**
      * Returns all files belonging to a mod from the atmosphere active mods folder to their original location
      * 
      * Essentially the same as deactivating the mod, except this can't be used with the default mod option.
