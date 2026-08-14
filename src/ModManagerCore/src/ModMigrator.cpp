@@ -164,50 +164,42 @@ void ModMigrator::migrateMod(
  * @param newPath The path to the new folder where the folder structure under "oldPath" should be moved to
  */
 void ModMigrator::moveFiles(const std::string& oldPath, const std::string& newPath) {
-  FsDir dir = FsManager::openFolder(oldPath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
+  std::vector<FsDirectoryEntry> entries;
+  FsManager::readAllEntries(oldPath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
 
-  std::vector<FsDirectoryEntry> entries(MAX_FS_ENTRY_LOAD);
-  s64 readCount = 0;
+  for (FsDirectoryEntry& entry : entries) {
+    const std::string sourcePath = oldPath + "/" + entry.name;
+    const std::string targetPath = newPath + "/" + entry.name;
 
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, MAX_FS_ENTRY_LOAD, entries.data())) && readCount) {
-    for (s64 i = 0; i < readCount; i++) {
-      FsDirectoryEntry& entry = entries[i];
+    // If the next entry is a file, we will move it.
+    //
+    // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
+    // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
+    // since some filesystems can report corrupt or unexpected entry types.
+    bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
+    bool isDirectory = entry.type == FsDirEntryType_Dir;
 
-      const std::string sourcePath = oldPath + "/" + entry.name;
-      const std::string targetPath = newPath + "/" + entry.name;
+    if (!isFile && !isDirectory) {
+      isDirectory = FsManager::doesFolderExist(sourcePath);
 
-      // If the next entry is a file, we will move it.
-      //
-      // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
-      // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
-      // since some filesystems can report corrupt or unexpected entry types.
-      bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
-      bool isDirectory = entry.type == FsDirEntryType_Dir;
-
-      if (!isFile && !isDirectory) {
-        isDirectory = FsManager::doesFolderExist(sourcePath);
-
-        if (!isDirectory) {
-          isFile = FsManager::doesFileExist(sourcePath);
-        }
-      }
-
-      if (isFile) {
-        FsManager::moveFile(sourcePath, targetPath);
-      // If the next entry is a folder, we will traverse within it:
-      } else if (isDirectory) {
-        FsManager::createFolderIfNeeded(targetPath);
-
-        ModMigrator::moveFiles(sourcePath, targetPath);
-
-        // Delete the folder only if it's now empty. The folder should be empty,
-        // but if not for whatever reason, this should just silently break and skip it:
-        fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(sourcePath).get());
-      } else {
-        brls::Logger::warning("Mod Migrator: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
+      if (!isDirectory) {
+        isFile = FsManager::doesFileExist(sourcePath);
       }
     }
-  }
 
-  fsDirClose(&dir);
+    if (isFile) {
+      FsManager::moveFile(sourcePath, targetPath);
+    // If the next entry is a folder, we will traverse within it:
+    } else if (isDirectory) {
+      FsManager::createFolderIfNeeded(targetPath);
+
+      ModMigrator::moveFiles(sourcePath, targetPath);
+
+      // Delete the folder only if it's now empty. The folder should be empty,
+      // but if not for whatever reason, this should just silently break and skip it:
+      fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(sourcePath).get());
+    } else {
+      brls::Logger::warning("Mod Migrator: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
+    }
+  }
 }

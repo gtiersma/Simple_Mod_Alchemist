@@ -235,59 +235,51 @@ void Controller::moveModFiles(
   FsFile& movedFilesFile,
   s64& txtOffset
 ) {
-  FsDir dir = FsManager::openFolder(modPath + currentBasePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
+  std::vector<FsDirectoryEntry> entries;
+  FsManager::readAllEntries(modPath + currentBasePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
 
-  std::vector<FsDirectoryEntry> entries(MAX_FS_ENTRY_LOAD);
-  s64 readCount = 0;
+  for (FsDirectoryEntry& entry : entries) {
+    std::string nextPath = currentBasePath + "/" + entry.name;
+    const std::string sourcePath = modPath + nextPath;
+    const std::string targetPath = this->getAtmospherePath() + nextPath;
 
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, MAX_FS_ENTRY_LOAD, entries.data())) && readCount) {
-    for (s64 i = 0; i < readCount; i++) {
-      FsDirectoryEntry& entry = entries[i];
+    // If the next entry is a file, we will move it and record it as moved as long as there isn't a conflict.
+    //
+    // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
+    // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
+    // since some filesystems can report corrupt or unexpected entry types.
+    bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
+    bool isDirectory = entry.type == FsDirEntryType_Dir;
 
-      std::string nextPath = currentBasePath + "/" + entry.name;
-      const std::string sourcePath = modPath + nextPath;
-      const std::string targetPath = this->getAtmospherePath() + nextPath;
+    if (!isFile && !isDirectory) {
+      isDirectory = FsManager::doesFolderExist(sourcePath);
 
-      // If the next entry is a file, we will move it and record it as moved as long as there isn't a conflict.
-      //
-      // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
-      // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
-      // since some filesystems can report corrupt or unexpected entry types.
-      bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
-      bool isDirectory = entry.type == FsDirEntryType_Dir;
-
-      if (!isFile && !isDirectory) {
-        isDirectory = FsManager::doesFolderExist(sourcePath);
-
-        if (!isDirectory) {
-          isFile = FsManager::doesFileExist(sourcePath);
-        }
-      }
-
-      if (isFile) {
-        // If a file already exists in the location we'll move it to, there's a conflict:
-        bool fileConflict = FsManager::doesFileExist(targetPath);
-        if (!fileConflict) {
-          // Record the file we're moving, and move it:
-          FsManager::write(movedFilesFile, nextPath + "\n", txtOffset);
-          FsManager::moveFile(sourcePath, targetPath);
-        }
-      // If the next entry is a folder, we will traverse within it:
-      } else if (isDirectory) {
-        FsManager::createFolderIfNeeded(targetPath);
-
-        this->moveModFiles(modPath, nextPath, movedFilesFile, txtOffset);
-
-        // Delete the folder only if it's now empty. The folder should be empty,
-        // but if not for whatever reason, this should just silently break and skip it:
-        fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(sourcePath).get());
-      } else {
-        brls::Logger::warning("Mod Alchemist: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
+      if (!isDirectory) {
+        isFile = FsManager::doesFileExist(sourcePath);
       }
     }
-  }
 
-  fsDirClose(&dir);
+    if (isFile) {
+      // If a file already exists in the location we'll move it to, there's a conflict:
+      bool fileConflict = FsManager::doesFileExist(targetPath);
+      if (!fileConflict) {
+        // Record the file we're moving, and move it:
+        FsManager::write(movedFilesFile, nextPath + "\n", txtOffset);
+        FsManager::moveFile(sourcePath, targetPath);
+      }
+    // If the next entry is a folder, we will traverse within it:
+    } else if (isDirectory) {
+      FsManager::createFolderIfNeeded(targetPath);
+
+      this->moveModFiles(modPath, nextPath, movedFilesFile, txtOffset);
+
+      // Delete the folder only if it's now empty. The folder should be empty,
+      // but if not for whatever reason, this should just silently break and skip it:
+      fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(sourcePath).get());
+    } else {
+      brls::Logger::warning("Mod Alchemist: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
+    }
+  }
 }
 
 /**
