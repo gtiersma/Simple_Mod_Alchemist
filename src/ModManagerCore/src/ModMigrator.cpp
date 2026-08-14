@@ -7,6 +7,8 @@
 #include "StateAlchemist/meta_manager.h"
 #include "StateAlchemist/constants.h"
 
+#include <borealis/core/logger.hpp>
+
 #include <switch.h>
 
 #include <vector>
@@ -192,26 +194,42 @@ void ModMigrator::moveFiles(const std::string& oldPath, const std::string& newPa
 
       if (readCount > 0) {
         std::string nextPath = currentBasePath + "/" + entry.name;
+        const std::string sourcePath = oldPath + nextPath;
+        const std::string targetPath = newPath + nextPath;
 
         // If the next entry is a file, we will move it.
         //
         // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
-        // In these cases, the entry loaded is corrupt, so we have to skip it and not load the mod files within it.
-        if (entry.type == FsDirEntryType_File && entry.file_size > 0) {
-          FsManager::moveFile(oldPath + nextPath, newPath + nextPath);
+        // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
+        // since some filesystems can report corrupt or unexpected entry types.
+        bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
+        bool isDirectory = entry.type == FsDirEntryType_Dir;
+
+        if (!isFile && !isDirectory) {
+          isDirectory = FsManager::doesFolderExist(sourcePath);
+
+          if (!isDirectory) {
+            isFile = FsManager::doesFileExist(sourcePath);
+          }
+        }
+
+        if (isFile) {
+          FsManager::moveFile(sourcePath, targetPath);
         // If the next entry is a folder, we will traverse within it:
-        } else if (entry.type == FsDirEntryType_Dir) {
-          FsManager::createFolderIfNeeded(newPath + nextPath);
+        } else if (isDirectory) {
+          FsManager::createFolderIfNeeded(targetPath);
 
           // Add the current count to the storage:
           iStorage.push_back(i);
 
           currentBasePath = nextPath;
-          FsManager::changeFolder(dir, oldPath + nextPath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
+          FsManager::changeFolder(dir, sourcePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
 
           // Reset the index & iterator because we're starting in a new folder:
           entryIndex = 0;
           i = 0;
+        } else {
+          brls::Logger::warning("Mod Migrator: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
         }
       } else {
         // If there's nothing left in our count storage, we've navigated everything, so we're done:

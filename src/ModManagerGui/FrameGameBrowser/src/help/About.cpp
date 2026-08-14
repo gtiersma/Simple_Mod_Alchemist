@@ -67,6 +67,7 @@ About::About(): brls::Box(brls::Axis::COLUMN) {
   brls::Label* copyright = new brls::Label();
   copyright->setText(
     "Simple Mod Alchemist is licensed under GPL-v3.0\n" \
+        "Fork by SehlingS\n"\
         "\u00A9 SimpleModManager 2019 - 2023 Nadrino\n"\
         "\u00A9 Simple Mod Alchemist 2025 - 2026 gtiersma"
   );
@@ -89,6 +90,7 @@ brls::View* About::buildTopLeftBox() {
 
   brls::Label* changelog = new brls::Label();
   changelog->setText(
+    " - Fixed subfolders with corrupt filesystem entries being skipped when enabling mods.\n"\
     " - Help info is now in the app.\n"\
     " - Fixed the mod random settings, making it easier to use as well.\n"\
     " - Game folders are now automatically given the game's name with the title ID number.\n"\
@@ -131,7 +133,8 @@ brls::View* About::buildBottomLeftBox() {
 
   brls::Label* credits = new brls::Label();
   credits->setText(
-    "- Maintained by gtiersma.\n"\
+    "- Fork maintained by SehlingS.\n"\
+    "- Maintained by gtiersma (original).\n"\
     "- Built upon SimpleModManager, developed by Nadrino.\n"\
     "- Powered by Borealis, provided by the RetroNX team.\n"\
     "- Special thanks to RetroNX, devkitPro, the ethical homebrew development community in general, and Nintendo.\n"\
