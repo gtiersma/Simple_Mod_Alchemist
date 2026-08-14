@@ -109,7 +109,16 @@ void ModBrowser::handleModSelect(const ModSource& mod, size_t selectedIndex) {
     // If the mod was changed, deactivate the old one and activate the new one:
     controller.deactivateMod();
     // mod.mods doesn't have the default option at the begining, so index must be offset by -1:
-    controller.activateMod(mod.getMods()[selectedIndex - 1]);
+    std::string activatedMod = mod.getMods()[selectedIndex - 1];
+    controller.activateMod(activatedMod);
+
+    // Show the list of files that were moved to the atmosphere folder:
+    std::string movedFiles = controller.getMovedFilesList(activatedMod);
+    if (!movedFiles.empty()) {
+      brls::Dialog* dialog = new brls::Dialog("The following files were moved:\n\n" + movedFiles);
+      dialog->addButton("OK", []() {});
+      dialog->open();
+    }
   }
 }
 

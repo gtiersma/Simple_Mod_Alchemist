@@ -81,6 +81,15 @@ class Controller {
      */
     void activateMod(const std::string& mod);
 
+    /*
+     * Reads the list of moved files for the specified mod (the .txt file) and returns it as a string.
+     * 
+     * Returns an empty string if no list exists (e.g. the mod isn't active).
+     * 
+     * @requirement: group and source must be set
+     */
+    std::string getMovedFilesList(const std::string& mod);
+
     /**
      * Deactivates the currently active mod, restoring the moddable source to its vanilla state
      */

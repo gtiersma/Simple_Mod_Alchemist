@@ -283,6 +283,62 @@ void Controller::moveModFiles(
 }
 
 /**
+ * Reads the list of moved files for the specified mod (the .txt file) and returns it as a string.
+ * 
+ * Returns an empty string if no list exists (e.g. the mod isn't active).
+ * 
+ * @requirement: group and source must be set
+ */
+std::string Controller::getMovedFilesList(const std::string& mod) {
+  std::string movedFiles;
+
+  std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
+
+  // Try to open the active mod's txt file to get the list of files that were moved to atmosphere's folder:
+  FsFile movedFilesList;
+  Result openResult = fsFsOpenFile(
+    &FsManager::sdSystem,
+    movedFilesListPath.get(),
+    FsOpenMode_Read,
+    &movedFilesList
+  );
+
+  // If there's no list file (or it can't be opened), the mod isn't active:
+  if (R_FAILED(openResult)) {
+    return "";
+  }
+
+  s64 fileSize;
+  MetaManager::tryResult(fsFileGetSize(&movedFilesList, &fileSize));
+
+  // Initialize buffer and path builder:
+  s64 offset = 0;
+  char* buffer = new char[FILE_LIST_BUFFER_SIZE];
+
+  // As long as there is still data in the file:
+  while (offset < fileSize) {
+    s64 readSize = fileSize - offset;
+    if (readSize > FILE_LIST_BUFFER_SIZE) {
+      readSize = FILE_LIST_BUFFER_SIZE;
+    }
+
+    MetaManager::tryResult(
+      fsFileRead(&movedFilesList, offset, buffer, readSize, FsReadOption_None, nullptr)
+    );
+
+    movedFiles += std::string_view(buffer, readSize);
+
+    offset += readSize;
+  }
+
+  delete[] buffer;
+
+  fsFileClose(&movedFilesList);
+
+  return movedFiles;
+}
+
+/**
  * Deactivates the currently active mod, restoring the moddable source to its vanilla state
  * 
  * @requirement: group and source must be set
