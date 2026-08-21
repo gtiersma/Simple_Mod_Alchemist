@@ -5,7 +5,7 @@
 #include <set>
 
 
-const std::string APP_VERSION = "1.1.2-sehling";
+const std::string APP_VERSION = "1.1.4-sehling";
 
 const int64_t FILE_LIST_BUFFER_SIZE = 100;
 
