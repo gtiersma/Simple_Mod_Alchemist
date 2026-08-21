@@ -89,6 +89,7 @@ brls::View* About::buildTopLeftBox() {
 
   brls::Label* changelog = new brls::Label();
   changelog->setText(
+    " - Fixed subfolders with corrupt filesystem entries being skipped when enabling mods.\n"\
     " - Help info is now in the app.\n"\
     " - Fixed the mod random settings, making it easier to use as well.\n"\
     " - Game folders are now automatically given the game's name with the title ID number.\n"\

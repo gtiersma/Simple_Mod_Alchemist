@@ -4,6 +4,8 @@
 #include "StateAlchemist/fs_manager.h"
 #include "StateAlchemist/meta_manager.h"
 
+#include <borealis/core/logger.hpp>
+
 #include <set>
 
 
@@ -210,95 +212,130 @@ void Controller::activateMod(const std::string& mod) {
   // The txt file for the active mod:
   FsFile movedFilesFile = FsManager::initFile(this->getMovedFilesListFilePath(mod));
 
-  FsDir dir = FsManager::openFolder(modPath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
-
-  // Iterartor for current entry in the current directory:
-  short i = 0;
-
-  // Used for "storing" where the iteration left off at when traversing deeper into the hierarchy:
-  std::vector<u64> iStorage;
-
-  // The path we are currently at relative to the mod path.
-  // Empty string is mod path itself:
-  std::string currentBasePath = "";
-
   // Position in the txt file where we should write the next file path:
   s64 txtOffset = 0;
 
-  // The index of the current entry we're iterating over in the current directory:
-  short entryIndex = 0;
+  // Recursively move every file of the mod, recording each one in the txt file:
+  this->moveModFiles(modPath, "", movedFilesFile, txtOffset);
 
-  // The current number of files read at a time
-  // It reads 1 at a time, so it will always be either 1 or 0 (0 if all have been read)
-  s64 readCount = 0;
+  fsFileClose(&movedFilesFile);
+}
 
-  FsDirectoryEntry entry;
+/**
+ * Recursively moves the files of a mod from its folder into the atmosphere folder for the game.
+ *
+ * Every folder is enumerated with its own fresh FsDir handle opened from scratch, so a folder that
+ * is reported (or read) incorrectly by the filesystem doesn't cause the remaining entries of its
+ * parent to be skipped (unlike the previous approach that reused a single handle and tracked
+ * iteration indices to jump between folders).
+ */
+void Controller::moveModFiles(
+  const std::string& modPath,
+  const std::string& currentBasePath,
+  FsFile& movedFilesFile,
+  s64& txtOffset
+) {
+  std::vector<FsDirectoryEntry> entries;
+  FsManager::readAllEntries(modPath + currentBasePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
 
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, 1, &entry))) {
+  for (FsDirectoryEntry& entry : entries) {
+    std::string nextPath = currentBasePath + "/" + entry.name;
+    const std::string sourcePath = modPath + nextPath;
+    const std::string targetPath = this->getAtmospherePath() + nextPath;
 
-    // Continue iterating the index until it catches up with the iteration we should be on (if needed):
-    entryIndex++;
-    if (entryIndex > i) {
-      i++;
+    // If the next entry is a file, we will move it and record it as moved as long as there isn't a conflict.
+    //
+    // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
+    // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
+    // since some filesystems can report corrupt or unexpected entry types.
+    bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
+    bool isDirectory = entry.type == FsDirEntryType_Dir;
 
-      if (readCount > 0) {
-        std::string nextPath = currentBasePath + "/" + entry.name;
+    if (!isFile && !isDirectory) {
+      isDirectory = FsManager::doesFolderExist(sourcePath);
 
-        // If the next entry is a file, we will move it and record it as moved as long as there isn't a conflict.
-        //
-        // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
-        // In these cases, the entry loaded is corrupt, so we have to skip it and not load the mod files within it.
-        if (entry.type == FsDirEntryType_File && entry.file_size > 0) {
-
-          // If a file already exists in the location we'll move it to, there's a conflict:
-          bool fileConflict = FsManager::doesFileExist(this->getAtmospherePath() + nextPath);
-          if (!fileConflict) {
-            // Record the file we're moving, and move it:
-            FsManager::write(movedFilesFile, nextPath + "\n", txtOffset);
-            FsManager::moveFile(modPath + nextPath, this->getAtmospherePath() + nextPath);
-          }
-        // If the next entry is a folder, we will traverse within it:
-        } else if (entry.type == FsDirEntryType_Dir) {
-          FsManager::createFolderIfNeeded(this->getAtmospherePath() + nextPath);
-
-          // Add the current count to the storage:
-          iStorage.push_back(i);
-
-          currentBasePath = nextPath;
-          FsManager::changeFolder(dir, modPath + nextPath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
-
-          // Reset the index & iterator because we're starting in a new folder:
-          entryIndex = 0;
-          i = 0;
-        }
-      } else {
-        // If there's nothing left in our count storage, we've navigated everything, so we're done:
-        if (iStorage.size() == 0) { break; }
-
-        // Otherwise, let's get back the count data of where we left off in the parent:
-        i = iStorage.back();
-        iStorage.pop_back();
-
-        std::string oldBasePath = currentBasePath;
-
-        // Remove the string portion after the last '/' to get the parent's path:
-        std::size_t lastSlashIndex = currentBasePath.rfind('/');
-        currentBasePath = currentBasePath.substr(0, lastSlashIndex);
-        FsManager::changeFolder(dir, modPath + currentBasePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles);
-
-        // Delete the folder only if it's now empty. The folder should be empty,
-        // but if not for whatever reason, this should just silently break and skip it:
-        fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(modPath + oldBasePath).get());
-
-        // Reset the entry index because it will start at the beginning again:
-        entryIndex = 0;
+      if (!isDirectory) {
+        isFile = FsManager::doesFileExist(sourcePath);
       }
     }
 
+    if (isFile) {
+      // If a file already exists in the location we'll move it to, there's a conflict:
+      bool fileConflict = FsManager::doesFileExist(targetPath);
+      if (!fileConflict) {
+        // Record the file we're moving, and move it:
+        FsManager::write(movedFilesFile, nextPath + "\n", txtOffset);
+        FsManager::moveFile(sourcePath, targetPath);
+      }
+    // If the next entry is a folder, we will traverse within it:
+    } else if (isDirectory) {
+      FsManager::createFolderIfNeeded(targetPath);
+
+      this->moveModFiles(modPath, nextPath, movedFilesFile, txtOffset);
+
+      // Delete the folder only if it's now empty. The folder should be empty,
+      // but if not for whatever reason, this should just silently break and skip it:
+      fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(sourcePath).get());
+    } else {
+      brls::Logger::warning("Mod Alchemist: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
+    }
+  }
+}
+
+/**
+ * Reads the list of moved files for the specified mod (the .txt file) and returns it as a string.
+ * 
+ * Returns an empty string if no list exists (e.g. the mod isn't active).
+ * 
+ * @requirement: group and source must be set
+ */
+std::string Controller::getMovedFilesList(const std::string& mod) {
+  std::string movedFiles;
+
+  std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
+
+  // Try to open the active mod's txt file to get the list of files that were moved to atmosphere's folder:
+  FsFile movedFilesList;
+  Result openResult = fsFsOpenFile(
+    &FsManager::sdSystem,
+    movedFilesListPath.get(),
+    FsOpenMode_Read,
+    &movedFilesList
+  );
+
+  // If there's no list file (or it can't be opened), the mod isn't active:
+  if (R_FAILED(openResult)) {
+    return "";
   }
 
-  fsFileClose(&movedFilesFile);
-  fsDirClose(&dir);
+  s64 fileSize;
+  MetaManager::tryResult(fsFileGetSize(&movedFilesList, &fileSize));
+
+  // Initialize buffer and path builder:
+  s64 offset = 0;
+  char* buffer = new char[FILE_LIST_BUFFER_SIZE];
+
+  // As long as there is still data in the file:
+  while (offset < fileSize) {
+    s64 readSize = fileSize - offset;
+    if (readSize > FILE_LIST_BUFFER_SIZE) {
+      readSize = FILE_LIST_BUFFER_SIZE;
+    }
+
+    MetaManager::tryResult(
+      fsFileRead(&movedFilesList, offset, buffer, readSize, FsReadOption_None, nullptr)
+    );
+
+    movedFiles += std::string_view(buffer, readSize);
+
+    offset += readSize;
+  }
+
+  delete[] buffer;
+
+  fsFileClose(&movedFilesList);
+
+  return movedFiles;
 }
 
 /**
