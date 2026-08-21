@@ -67,7 +67,6 @@ About::About(): brls::Box(brls::Axis::COLUMN) {
   brls::Label* copyright = new brls::Label();
   copyright->setText(
     "Simple Mod Alchemist is licensed under GPL-v3.0\n" \
-        "Fork by SehlingS\n"\
         "\u00A9 SimpleModManager 2019 - 2023 Nadrino\n"\
         "\u00A9 Simple Mod Alchemist 2025 - 2026 gtiersma"
   );
@@ -133,8 +132,7 @@ brls::View* About::buildBottomLeftBox() {
 
   brls::Label* credits = new brls::Label();
   credits->setText(
-    "- Fork maintained by SehlingS.\n"\
-    "- Maintained by gtiersma (original).\n"\
+    "- Maintained by gtiersma.\n"\
     "- Built upon SimpleModManager, developed by Nadrino.\n"\
     "- Powered by Borealis, provided by the RetroNX team.\n"\
     "- Special thanks to RetroNX, devkitPro, the ethical homebrew development community in general, and Nintendo.\n"\
