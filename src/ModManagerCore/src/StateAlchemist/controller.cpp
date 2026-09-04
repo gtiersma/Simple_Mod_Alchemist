@@ -562,40 +562,24 @@ std::string Controller::getGroupPath() {
   return this->getGamePath() + "/" + this->group;
 }
 
-/*
- * Gets the file path for the specified source within the group
- * 
- * @requirement: group and source must be set
- */
 std::string Controller::getSourcePath() {
   std::string groupPath = this->getGroupPath();
   return groupPath + "/" + FsManager::getFolderName(groupPath, this->source);
 }
 
-/*
- * Get the file path for the specified mod within the moddable source
- * 
- * @requirement: group and source must be set
- */
 std::string Controller::getModPath(const std::string& mod) {
   std::string sourcePath = this->getSourcePath();
   return sourcePath + "/" + FsManager::getFolderName(sourcePath, mod);
 }
 
-/**
- * Gets the game's path that's stored within Atmosphere's directory
- */
 std::string Controller::getAtmospherePath() {
   return ATMOSPHERE_PATH + MetaManager::getHexTitleId(this->titleId);
 }
 
-/**
- * Gets the file path for the list of moved files for the specified mod
- * 
- * The file should only exist if the mod is currently active
- * 
- * @requirement: group and source must be set
- */
 std::string Controller::getMovedFilesListFilePath(const std::string& mod) {
   return this->getSourcePath() + "/" + mod + TXT_EXT;
+}
+
+bool Controller::isPatchPath(const std::string& basePath) {
+  return basePath.compare(0, PATCH_FOLDER.size, PATCH_FOLDER) == 0;
 }

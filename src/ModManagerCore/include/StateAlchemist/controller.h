@@ -151,11 +151,15 @@ class Controller {
 
     /**
      * Gets the file path for the specified source within the group
+     * 
+     * @requirement: group and source must be set
      */
     std::string getSourcePath();
 
     /**
      * Get the file path for the specified mod within the moddable source
+     * 
+     * @requirement: group and source must be set
      */
     std::string getModPath(const std::string& mod);
 
@@ -168,8 +172,15 @@ class Controller {
      * Gets the file path for the list of moved files for the specified mod
      * 
      * The file should only exist if the mod is currently active
+     * 
+     * @requirement: group and source must be set
      */
     std::string getMovedFilesListFilePath(const std::string& mod);
+
+    /**
+     * Whether the base path (aka the path starting from the alchemy folder) specified is for a patch rather than a standard mod
+     */
+    bool isPatchPath(const std::string& basePath);
 };
 
 extern Controller controller;
