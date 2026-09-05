@@ -105,11 +105,67 @@ void ModBrowser::handleModSelect(const ModSource& mod, size_t selectedIndex) {
   if (selectedIndex == 0) {
     // If the default option was chosen, deactivate whatever mod is active:
     controller.deactivateMod();
+    // Keep the cached UI state in sync with the filesystem.
+    gameBrowser.getModManager().refreshActiveIndices();
   } else if (mod.getActiveIndex() != selectedIndex - 1) {
     // If the mod was changed, deactivate the old one and activate the new one:
     controller.deactivateMod();
     // mod.mods doesn't have the default option at the begining, so index must be offset by -1:
-    controller.activateMod(mod.getMods()[selectedIndex - 1]);
+    std::string activatedMod = mod.getMods()[selectedIndex - 1];
+    controller.activateMod(activatedMod);
+    // Keep the cached UI state in sync with the filesystem.
+    gameBrowser.getModManager().refreshActiveIndices();
+
+    // Show the list of files that were moved to the atmosphere folder:
+    std::string movedFiles = controller.getMovedFilesList(activatedMod);
+    if (!movedFiles.empty()) {
+      // Paths contain few spaces, so explicitly break very long path segments.
+      std::string displayFiles;
+      std::size_t lineStart = 0;
+      while (lineStart < movedFiles.size()) {
+        std::size_t lineEnd = movedFiles.find('\n', lineStart);
+        if (lineEnd == std::string::npos) {
+          lineEnd = movedFiles.size();
+        }
+
+        std::string line = movedFiles.substr(lineStart, lineEnd - lineStart);
+        while (line.size() > 58) {
+          std::size_t breakAt = line.rfind('/', 58);
+          if (breakAt == std::string::npos || breakAt < 20) {
+            breakAt = 58;
+          } else {
+            ++breakAt;
+          }
+
+          displayFiles += line.substr(0, breakAt) + "\n";
+          line.erase(0, breakAt);
+        }
+        displayFiles += line + "\n";
+
+        lineStart = lineEnd + (lineEnd < movedFiles.size() ? 1 : 0);
+      }
+
+      brls::Label* label = new brls::Label();
+      label->setText("The following files were moved:\n\n" + displayFiles);
+      label->setSingleLine(false);
+      label->setIsWrapping(true);
+      label->setFontSize(16.0f);
+
+      brls::ScrollingFrame* scroll = new brls::ScrollingFrame();
+      scroll->setWidth(660.0f);
+      scroll->setHeight(400.0f);
+      scroll->setFocusable(true);
+      scroll->setScrollingIndicatorVisible(true);
+      scroll->setContentView(label);
+
+      brls::Box* content = new brls::Box(brls::Axis::COLUMN);
+      content->setWidth(680.0f);
+      content->addView(scroll);
+
+      brls::Dialog* dialog = new brls::Dialog(content);
+      dialog->addButton("OK", []() {});
+      dialog->open();
+    }
   }
 }
 

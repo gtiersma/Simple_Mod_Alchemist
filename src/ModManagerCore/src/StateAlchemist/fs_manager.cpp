@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <set>
 
 FsFileSystem FsManager::sdSystem;
 
@@ -198,6 +199,58 @@ std::vector<std::string> FsManager::listNames(const std::string& path, bool sort
   }
 
   return names;
+}
+
+/**
+ * Reads every directory entry of the specified path into the given vector.
+ *
+ * The filesystem can sometimes report a premature "end of directory" before all
+ * entries have been returned (see hasFilesDeep). To work around that, the directory
+ * is reopened with a fresh handle and re-read until no new entries are found or the
+ * reported entry count is reached.
+ */
+void FsManager::readAllEntries(const std::string& path, const u32& mode, std::vector<FsDirectoryEntry>& out) {
+  out.clear();
+
+  std::set<std::string> seenNames;
+  s64 expectedCount = -1;
+
+  FsDir countDir;
+  Result countResult = fsFsOpenDirectory(&sdSystem, toPathBuffer(path).get(), mode, &countDir);
+  if (R_SUCCEEDED(countResult)) {
+    s64 total = 0;
+    if (R_SUCCEEDED(fsDirGetEntryCount(&countDir, &total))) {
+      expectedCount = total;
+    }
+    fsDirClose(&countDir);
+  }
+
+  // Read in a loop, reopening the directory each time, until we have seen all
+  // reported entries (or until a full pass adds nothing new).
+  bool madeProgress = true;
+  while (madeProgress) {
+    madeProgress = false;
+
+    FsDir dir = FsManager::openFolder(path, mode);
+
+    std::vector<FsDirectoryEntry> entries(MAX_FS_ENTRY_LOAD);
+    s64 readCount = 0;
+    while (R_SUCCEEDED(fsDirRead(&dir, &readCount, MAX_FS_ENTRY_LOAD, entries.data())) && readCount) {
+      for (s64 i = 0; i < readCount; i++) {
+        FsDirectoryEntry& entry = entries[i];
+        if (seenNames.insert(entry.name).second) {
+          out.push_back(entry);
+          madeProgress = true;
+        }
+      }
+    }
+
+    fsDirClose(&dir);
+
+    if (expectedCount > 0 && out.size() >= static_cast<size_t>(expectedCount)) {
+      break;
+    }
+  }
 }
 
 /**
