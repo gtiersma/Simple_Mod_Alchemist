@@ -292,7 +292,7 @@ void Controller::moveModFiles(
 std::string Controller::getMovedFilesList(const std::string& mod) {
   std::string movedFiles;
 
-  std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
+  const std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
 
   // Try to open the active mod's txt file to get the list of files that were moved to atmosphere's folder:
   FsFile movedFilesList;
@@ -510,7 +510,6 @@ Controller::~Controller() {
  * Essentially the same as deactivating the mod, except this can't be used with the default mod option.
  */
 void Controller::returnFiles(const std::string& mod) {
-
   std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
   std::string modPath = this->getModPath(mod);
 
@@ -611,7 +610,7 @@ std::string Controller::getModPath(const std::string& mod) {
 }
 
 std::string Controller::getAtmosphereRoot(const std::string& basePath) {
-  if (basePath.compare(0, PATCH_FOLDER.size, PATCH_FOLDER) == 0) {
+  if (basePath.compare(0, PATCH_FOLDER.size(), PATCH_FOLDER) == 0) {
     return "/" + ATMOSPHERE_FOLDER + "/";
   }
   return ATMOSPHERE_PATH + MetaManager::getHexTitleId(this->titleId) + "/";
@@ -619,8 +618,4 @@ std::string Controller::getAtmosphereRoot(const std::string& basePath) {
 
 std::string Controller::getMovedFilesListFilePath(const std::string& mod) {
   return this->getSourcePath() + "/" + mod + TXT_EXT;
-}
-
-bool Controller::isPatchPath(const std::string& basePath) {
-  return basePath.compare(0, PATCH_FOLDER.size, PATCH_FOLDER) == 0;
 }
