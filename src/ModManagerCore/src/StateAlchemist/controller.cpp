@@ -16,7 +16,7 @@ void Controller::setTitleId(const u64& titleId) {
   this->titleId = titleId;
 
   // Create the Atmosphere title ID folder for the current game
-  FsManager::createFolderIfNeeded(this->getAtmospherePath());
+  FsManager::createFolderIfNeeded(this->getAtmosphereRoot());
 }
 
 void Controller::setGamePath(const std::string& name) {
@@ -241,7 +241,7 @@ void Controller::moveModFiles(
   for (FsDirectoryEntry& entry : entries) {
     std::string nextPath = currentBasePath + "/" + entry.name;
     const std::string sourcePath = modPath + nextPath;
-    const std::string targetPath = this->getAtmospherePath() + nextPath;
+    const std::string targetPath = this->getAtmosphereRoot(nextPath) + nextPath;
 
     // If the next entry is a file, we will move it and record it as moved as long as there isn't a conflict.
     //
@@ -513,8 +513,6 @@ void Controller::returnFiles(const std::string& mod) {
 
   std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
   std::string modPath = this->getModPath(mod);
-  std::string atmoRootPath = this->getAtmospherePath();
-  int atmoRootPathSize = atmoRootPath.size();
 
   // Try to open the active mod's txt file to get the list of files that were moved to atmosphere's folder:
   FsFile movedFilesList;
@@ -546,7 +544,10 @@ void Controller::returnFiles(const std::string& mod) {
     while (newLinePos != std::string::npos) {
       // Trim the new line and any characters that were gathered after it to get the cleaned atmosphere file path:
       std::string basePath = pathBuilder.substr(0, newLinePos);
+
+      std::string atmoRootPath = this->getAtmosphereRoot(basePath);
       std::string atmoPath = atmoRootPath + basePath;
+      int atmoRootPathSize = atmoRootPath.size();
 
       // Move any characters gathered after the new line to the pathBuilder string for the next path:
       pathBuilder = pathBuilder.substr(newLinePos + 1);
@@ -609,8 +610,11 @@ std::string Controller::getModPath(const std::string& mod) {
   return sourcePath + "/" + FsManager::getFolderName(sourcePath, mod);
 }
 
-std::string Controller::getAtmospherePath() {
-  return ATMOSPHERE_PATH + MetaManager::getHexTitleId(this->titleId);
+std::string Controller::getAtmosphereRoot(const std::string& basePath) {
+  if (basePath.compare(0, PATCH_FOLDER.size, PATCH_FOLDER) == 0) {
+    return "/" + ATMOSPHERE_FOLDER + "/";
+  }
+  return ATMOSPHERE_PATH + MetaManager::getHexTitleId(this->titleId) + "/";
 }
 
 std::string Controller::getMovedFilesListFilePath(const std::string& mod) {

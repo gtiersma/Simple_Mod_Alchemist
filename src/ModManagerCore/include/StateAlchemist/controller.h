@@ -193,9 +193,12 @@ class Controller {
     std::string getModPath(const std::string& mod);
 
     /**
-     * Gets the game's path that's stored within Atmosphere's directory
+     * Gets path from the SD card root to the current game's folder for the specified mod.
+     * The exception being patches since those get moved to a different directory under atmosphere.
+     * If the mod isn't specified, the method just assumes the mod must not be a path
+     * (since that is most-often the case).
      */
-    std::string getAtmospherePath();
+    std::string getAtmosphereRoot(const std::string& mod = "");
 
     /**
      * Gets the file path for the list of moved files for the specified mod
@@ -205,11 +208,6 @@ class Controller {
      * @requirement: group and source must be set
      */
     std::string getMovedFilesListFilePath(const std::string& mod);
-
-    /**
-     * Whether the base path (aka the path starting from the alchemy folder) specified is for a patch rather than a standard mod
-     */
-    bool isPatchPath(const std::string& basePath);
 };
 
 extern Controller controller;
