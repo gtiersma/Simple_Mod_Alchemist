@@ -376,7 +376,7 @@ void FsManager::moveContents(
     } else if (isDirectory) {
       createFolderIfNeeded(targetPath);
 
-      moveContents(fromPath, toPath, conflictStrategy, fileMoveFn, basePath);
+      moveContents(fromPath, toPath, conflictStrategy, fileMoveFn, nextPath);
 
       // Delete the folder only if it's now empty. The folder should be empty,
       // but if not for whatever reason, this should just silently break and skip it:
