@@ -2,6 +2,8 @@
 #include "StateAlchemist/meta_manager.h"
 #include "StateAlchemist/constants.h"
 
+#include <borealis/core/logger.hpp>
+
 #include <algorithm>
 #include <cstring>
 #include <set>
@@ -325,12 +327,72 @@ void FsManager::moveFile(const std::string& fromPath, const std::string& toPath)
   );
 }
 
+void FsManager::moveContents(
+  const std::string& fromPath,
+  const std::string& toPath,
+  ConflictStrategy conflictStrategy,
+  std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn,
+  const std::string& basePath
+) {
+  std::vector<FsDirectoryEntry> entries;
+  readAllEntries(fromPath + basePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
+
+  for (FsDirectoryEntry& entry : entries) {
+    std::string nextPath = basePath + "/" + entry.name;
+    const std::string sourcePath = fromPath + nextPath;
+    const std::string targetPath = toPath + nextPath;
+
+    // If the next entry is a file, we will move it and record it as moved as long as there isn't a conflict.
+    //
+    // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
+    // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
+    // since some filesystems can report corrupt or unexpected entry types.
+    bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
+    bool isDirectory = entry.type == FsDirEntryType_Dir;
+
+    if (!isFile && !isDirectory) {
+      isDirectory = doesFolderExist(sourcePath);
+
+      if (!isDirectory) {
+        isFile = doesFileExist(sourcePath);
+      }
+    }
+
+    if (isFile) {
+      // If a file already exists in the location we'll move it to, there's a conflict:
+      bool fileConflict = doesFileExist(targetPath);
+      fileMoveFn(nextPath, fileConflict);
+      if (fileConflict) {
+        if (conflictStrategy == ConflictStrategy::OVERWRITE_TARGET) {
+          fsFsDeleteFile(&sdSystem, toPathBuffer(targetPath).get());
+          moveFile(sourcePath, targetPath);
+        } else if (conflictStrategy == ConflictStrategy::PRESERVE_TARGET) {
+          fsFsDeleteFile(&sdSystem, toPathBuffer(sourcePath).get());
+        }
+      } else {
+        moveFile(sourcePath, targetPath);
+      }
+    // If the next entry is a folder, we will traverse within it:
+    } else if (isDirectory) {
+      createFolderIfNeeded(targetPath);
+
+      moveContents(fromPath, toPath, conflictStrategy, fileMoveFn, basePath);
+
+      // Delete the folder only if it's now empty. The folder should be empty,
+      // but if not for whatever reason, this should just silently break and skip it:
+      fsFsDeleteDirectory(&sdSystem, toPathBuffer(sourcePath).get());
+    } else {
+      brls::Logger::warning("Mod Alchemist: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
+    }
+  }
+}
+
 void FsManager::forEachFolderInFilePath(const std::string& path, std::function<bool (const std::string& path)> fn) {
   std::string pathRemaining = path.substr(1); // Index 0 is a "/", so start at index 1
   int slashIndex = pathRemaining.find_first_of("/");
   std::string currentPath = "";
 
-  while(slashIndex != std::string::npos) {
+  while (slashIndex != std::string::npos) {
     currentPath = currentPath + "/" + pathRemaining.substr(0, slashIndex);
 
     bool shouldContinue = fn(currentPath);
@@ -347,7 +409,7 @@ void FsManager::forEachFolderInFilePathDeepestFirst(const std::string& path, std
   std::string currentPath = path;
   int slashIndex = path.find_last_of("/");
 
-  while(slashIndex != std::string::npos) {
+  while (slashIndex != std::string::npos) {
     currentPath = currentPath.substr(0, slashIndex);
 
     bool shouldContinue = fn(currentPath);

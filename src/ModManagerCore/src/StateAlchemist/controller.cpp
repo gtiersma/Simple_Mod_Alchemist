@@ -4,8 +4,6 @@
 #include "StateAlchemist/fs_manager.h"
 #include "StateAlchemist/meta_manager.h"
 
-#include <borealis/core/logger.hpp>
-
 #include <set>
 
 
@@ -216,71 +214,21 @@ void Controller::activateMod(const std::string& mod) {
   s64 txtOffset = 0;
 
   // Recursively move every file of the mod, recording each one in the txt file:
-  this->moveModFiles(modPath, "", movedFilesFile, txtOffset);
+  FsManager::moveContents(
+    modPath,
+    this->getAtmospherePath(),
+    ConflictStrategy::KEEP_BOTH,
+    [&movedFilesFile, &txtOffset](const std::string& relativePath, bool conflicts) {
+      if (!conflicts) {
+        // Record the file being moved:
+        FsManager::write(movedFilesFile, relativePath + "\n", txtOffset);
+      }
+    }
+  );
 
   fsFileClose(&movedFilesFile);
 }
 
-/**
- * Recursively moves the files of a mod from its folder into the atmosphere folder for the game.
- *
- * Every folder is enumerated with its own fresh FsDir handle opened from scratch, so a folder that
- * is reported (or read) incorrectly by the filesystem doesn't cause the remaining entries of its
- * parent to be skipped (unlike the previous approach that reused a single handle and tracked
- * iteration indices to jump between folders).
- */
-void Controller::moveModFiles(
-  const std::string& modPath,
-  const std::string& currentBasePath,
-  FsFile& movedFilesFile,
-  s64& txtOffset
-) {
-  std::vector<FsDirectoryEntry> entries;
-  FsManager::readAllEntries(modPath + currentBasePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
-
-  for (FsDirectoryEntry& entry : entries) {
-    std::string nextPath = currentBasePath + "/" + entry.name;
-    const std::string sourcePath = modPath + nextPath;
-    const std::string targetPath = this->getAtmospherePath() + nextPath;
-
-    // If the next entry is a file, we will move it and record it as moved as long as there isn't a conflict.
-    //
-    // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
-    // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
-    // since some filesystems can report corrupt or unexpected entry types.
-    bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
-    bool isDirectory = entry.type == FsDirEntryType_Dir;
-
-    if (!isFile && !isDirectory) {
-      isDirectory = FsManager::doesFolderExist(sourcePath);
-
-      if (!isDirectory) {
-        isFile = FsManager::doesFileExist(sourcePath);
-      }
-    }
-
-    if (isFile) {
-      // If a file already exists in the location we'll move it to, there's a conflict:
-      bool fileConflict = FsManager::doesFileExist(targetPath);
-      if (!fileConflict) {
-        // Record the file we're moving, and move it:
-        FsManager::write(movedFilesFile, nextPath + "\n", txtOffset);
-        FsManager::moveFile(sourcePath, targetPath);
-      }
-    // If the next entry is a folder, we will traverse within it:
-    } else if (isDirectory) {
-      FsManager::createFolderIfNeeded(targetPath);
-
-      this->moveModFiles(modPath, nextPath, movedFilesFile, txtOffset);
-
-      // Delete the folder only if it's now empty. The folder should be empty,
-      // but if not for whatever reason, this should just silently break and skip it:
-      fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(sourcePath).get());
-    } else {
-      brls::Logger::warning("Mod Alchemist: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
-    }
-  }
-}
 
 /**
  * Reads the list of moved files for the specified mod (the .txt file) and returns it as a string.
@@ -495,20 +443,12 @@ Controller::Controller() {
   MetaManager::tryResult(fsOpenSdCardFileSystem(&FsManager::sdSystem));
 }
 
-/**
- * Unmount SD card when destroyed 
- */
 Controller::~Controller() {
   fsFsClose(&FsManager::sdSystem);
   pminfoExit();
   pmdmntExit();
 }
 
-/**
- * Returns all files belonging to a mod from the atmosphere active mods folder to their original location
- * 
- * Essentially the same as deactivating the mod, except this can't be used with the default mod option.
- */
 void Controller::returnFiles(const std::string& mod) {
 
   std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));

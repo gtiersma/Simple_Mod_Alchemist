@@ -9,6 +9,13 @@
 #include <functional>
 
 
+enum class ConflictStrategy {
+  OVERWRITE_TARGET, // Delete target file, moving source file in its place
+  PRESERVE_TARGET, // Leave target file; delete source file
+  KEEP_BOTH // Leave both target & source file
+};
+
+
 /**
  * Heper functions related to the filesystem
  */
@@ -84,6 +91,26 @@ namespace FsManager {
    * If any folders in the "toPath" don't exist, it creates them.
    */
   void moveFile(const std::string& fromPath, const std::string& toPath);
+
+  /**
+   * Moves everything from within a folder into a different folder.
+   *
+   * @param fromPath   The folder path to move contents out of.
+   * @param toPath     The folder path to move contents into.
+   * @param overwrite  Action to take if file conflict occurs. See enum.
+   *                   Default: OVERWRITE_TARGET
+   * @param fileMoveFn Optionally provide a callback to run every time a file is moved.
+   *                   @subparam relativePath The base file path being moved (from the relative point of "toPath").
+   *                   @subparam conflicts    True if the files conflicts with an already-existing file under "toPath".
+   * @param basePath   USED ONLY IN RECURSIVE CALLS. The base file path being moved (from the relative point of "toPath").
+   */
+  void moveContents(
+    const std::string& fromPath,
+    const std::string& toPath,
+    ConflictStrategy conflictStrategy = ConflictStrategy::OVERWRITE_TARGET,
+    std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn = {},
+    const std::string& basePath = ""
+  );
 
   /**
    * Performs the provided function on every folder in the path of a file.
