@@ -118,7 +118,8 @@ void ModBrowser::handleModSelect(const ModSource& mod, size_t selectedIndex) {
 
     // Show the list of files that were moved to the atmosphere folder:
     std::string movedFiles = controller.getMovedFilesList(activatedMod);
-    if (!movedFiles.empty()) {
+    bool showPopup = gameBrowser.getConfigHandler().getConfig().showFileListPopup;
+    if (!movedFiles.empty() && showPopup) {
       // Paths contain few spaces, so explicitly break very long path segments.
       std::string displayFiles;
       std::size_t lineStart = 0;
@@ -149,13 +150,14 @@ void ModBrowser::handleModSelect(const ModSource& mod, size_t selectedIndex) {
       label->setText("The following files were moved:\n\n" + displayFiles);
       label->setSingleLine(false);
       label->setIsWrapping(true);
-      label->setFontSize(16.0f);
+      label->setFontSize(14.0f);
 
       brls::ScrollingFrame* scroll = new brls::ScrollingFrame();
       scroll->setWidth(660.0f);
       scroll->setHeight(400.0f);
       scroll->setFocusable(true);
       scroll->setScrollingIndicatorVisible(true);
+      scroll->setScrollingBehavior(brls::ScrollingBehavior::CENTERED);
       scroll->setContentView(label);
 
       brls::Box* content = new brls::Box(brls::Axis::COLUMN);

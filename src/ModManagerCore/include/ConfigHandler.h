@@ -18,6 +18,7 @@
 
 struct ConfigHolder{
   std::string lastSmmVersion{};
+  bool showFileListPopup{true};
 
   std::string configFilePath{"/config/SimpleModAlchemist/parameters.ini"};
 
