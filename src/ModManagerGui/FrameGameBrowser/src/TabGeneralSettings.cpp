@@ -15,7 +15,8 @@
 
 using namespace brls::literals;
 
-TabGeneralSettings::TabGeneralSettings() {
+TabGeneralSettings::TabGeneralSettings()
+    : brls::Box(brls::Axis::COLUMN) {
   this->rebuildLayout();
 }
 
