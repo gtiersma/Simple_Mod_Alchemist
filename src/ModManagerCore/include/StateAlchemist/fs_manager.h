@@ -48,6 +48,20 @@ namespace FsManager {
   std::vector<std::string> listNames(const std::string& path, bool sort);
 
   /**
+   * Reads every directory entry of the specified path into the given vector.
+   *
+   * The filesystem can sometimes report a premature "end of directory" before all
+   * entries have been returned (see hasFilesDeep). To work around that, the directory
+   * is reopened with a fresh handle and re-read until no new entries are found or the
+   * reported entry count is reached.
+   *
+   * @param path The folder to read
+   * @param mode FsDirOpenMode flags for how the folder should be opened
+   * @param out The vector to fill with the directory entries. It is cleared first.
+   */
+  void readAllEntries(const std::string& path, const u32& mode, std::vector<FsDirectoryEntry>& out);
+
+  /**
    * Gets the folder name for an entity with the specified name
    */
   std::string getFolderName(const std::string& path, const std::string& name);

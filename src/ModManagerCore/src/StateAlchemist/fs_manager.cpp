@@ -2,8 +2,11 @@
 #include "StateAlchemist/meta_manager.h"
 #include "StateAlchemist/constants.h"
 
+#include <borealis/core/logger.hpp>
+
 #include <algorithm>
 #include <cstring>
+#include <set>
 
 FsFileSystem FsManager::sdSystem;
 
@@ -24,17 +27,19 @@ FsDir FsManager::openFolder(const std::string& path, const u32& mode) {
 void FsManager::changeFolder(FsDir& dir, const std::string& path, const u32& mode) {
   fsDirClose(&dir);
 
-  MetaManager::tryResult(
-    fsFsOpenDirectory(&sdSystem, toPathBuffer(path).get(), mode, &dir)
-  );
+  Result result = fsFsOpenDirectory(&sdSystem, toPathBuffer(path).get(), mode, &dir);
+  if (R_FAILED(result)) {
+    brls::Logger::warning("FsManager: changeFolder failed for '{}' (result {:#x})", path, result);
+  }
 }
 
 void FsManager::createFolderIfNeeded(const std::string& path) {
   if (doesFolderExist(path)) { return; }
 
-  MetaManager::tryResult(
-    fsFsCreateDirectory(&sdSystem, toPathBuffer(path).get())
-  );
+  Result result = fsFsCreateDirectory(&sdSystem, toPathBuffer(path).get());
+  if (R_FAILED(result)) {
+    brls::Logger::warning("FsManager: createFolderIfNeeded failed for '{}' (result {:#x})", path, result);
+  }
 }
 
 bool FsManager::doesFolderExist(const std::string& path) {
@@ -52,8 +57,8 @@ bool FsManager::doesFolderExist(const std::string& path) {
   } else if (result == 0x202) {
     return false; // File does not exist
   } else {
-    MetaManager::tryResult(result); // Handle other exceptions
-    return false; // This line will never be reached, but added for completeness
+    brls::Logger::warning("FsManager: doesFolderExist failed for '{}' (result {:#x})", path, result);
+    return false;
   }
 }
 
@@ -72,8 +77,8 @@ bool FsManager::doesFileExist(const std::string& path) {
   } else if (result == 0x202) {
     return false; // File does not exist
   } else {
-    MetaManager::tryResult(result); // Handle other exceptions
-    return false; // This line will never be reached, but added for completeness
+    brls::Logger::warning("FsManager: doesFileExist failed for '{}' (result {:#x})", path, result);
+    return false;
   }
 }
 
@@ -201,6 +206,58 @@ std::vector<std::string> FsManager::listNames(const std::string& path, bool sort
 }
 
 /**
+ * Reads every directory entry of the specified path into the given vector.
+ *
+ * The filesystem can sometimes report a premature "end of directory" before all
+ * entries have been returned (see hasFilesDeep). To work around that, the directory
+ * is reopened with a fresh handle and re-read until no new entries are found or the
+ * reported entry count is reached.
+ */
+void FsManager::readAllEntries(const std::string& path, const u32& mode, std::vector<FsDirectoryEntry>& out) {
+  out.clear();
+
+  std::set<std::string> seenNames;
+  s64 expectedCount = -1;
+
+  FsDir countDir;
+  Result countResult = fsFsOpenDirectory(&sdSystem, toPathBuffer(path).get(), mode, &countDir);
+  if (R_SUCCEEDED(countResult)) {
+    s64 total = 0;
+    if (R_SUCCEEDED(fsDirGetEntryCount(&countDir, &total))) {
+      expectedCount = total;
+    }
+    fsDirClose(&countDir);
+  }
+
+  // Read in a loop, reopening the directory each time, until we have seen all
+  // reported entries (or until a full pass adds nothing new).
+  bool madeProgress = true;
+  while (madeProgress) {
+    madeProgress = false;
+
+    FsDir dir = FsManager::openFolder(path, mode);
+
+    std::vector<FsDirectoryEntry> entries(MAX_FS_ENTRY_LOAD);
+    s64 readCount = 0;
+    while (R_SUCCEEDED(fsDirRead(&dir, &readCount, MAX_FS_ENTRY_LOAD, entries.data())) && readCount) {
+      for (s64 i = 0; i < readCount; i++) {
+        FsDirectoryEntry& entry = entries[i];
+        if (seenNames.insert(entry.name).second) {
+          out.push_back(entry);
+          madeProgress = true;
+        }
+      }
+    }
+
+    fsDirClose(&dir);
+
+    if (expectedCount > 0 && out.size() >= static_cast<size_t>(expectedCount)) {
+      break;
+    }
+  }
+}
+
+/**
  * Gets the name of the folder that currently exists with the name of the specified entity
  */
 std::string FsManager::getFolderName(const std::string& path, const std::string& name) {
@@ -267,9 +324,10 @@ void FsManager::moveFile(const std::string& fromPath, const std::string& toPath)
     return true;
   });
 
-  MetaManager::tryResult(
-    fsFsRenameFile(&sdSystem, toPathBuffer(fromPath).get(), toPathBuffer(toPath).get())
-  );
+  Result result = fsFsRenameFile(&sdSystem, toPathBuffer(fromPath).get(), toPathBuffer(toPath).get());
+  if (R_FAILED(result)) {
+    brls::Logger::warning("FsManager: moveFile failed '{}' -> '{}' (result {:#x})", fromPath, toPath, result);
+  }
 }
 
 void FsManager::forEachFolderInFilePath(const std::string& path, std::function<bool (const std::string& path)> fn) {

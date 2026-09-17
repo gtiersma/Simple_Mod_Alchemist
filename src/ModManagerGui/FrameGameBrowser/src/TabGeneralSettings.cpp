@@ -11,9 +11,12 @@
 #include <note_cell.hpp>
 #include <GameBrowser.h>
 
+#include <borealis/views/cells/cell_bool.hpp>
+
 using namespace brls::literals;
 
-TabGeneralSettings::TabGeneralSettings() {
+TabGeneralSettings::TabGeneralSettings()
+    : brls::Box(brls::Axis::COLUMN) {
   this->rebuildLayout();
 }
 
@@ -48,6 +51,17 @@ void TabGeneralSettings::rebuildLayout() {
     return true;
   });
   this->addView(migrationItem);
+
+  brls::BooleanCell* fileListToggle = new brls::BooleanCell();
+  fileListToggle->init(
+    "Show file list after enabling mods",
+    gameBrowser.getConfigHandler().getConfig().showFileListPopup,
+    [](bool on) {
+      gameBrowser.getConfigHandler().getConfig().showFileListPopup = on;
+      gameBrowser.getConfigHandler().dumpConfigToFile();
+    }
+  );
+  this->addView(fileListToggle);
 }
 
 /**

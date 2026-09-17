@@ -46,6 +46,9 @@ void ConfigHandler::loadConfig(const std::string &configFilePath_) {
     if(elements[0] == "last-program-version"){
       config.lastSmmVersion = elements[1];
     }
+    else if(elements[0] == "show-file-list-popup"){
+      config.showFileListPopup = (elements[1] == "true");
+    }
 
   } // lines
 
@@ -65,6 +68,9 @@ void ConfigHandler::dumpConfigToFile() const {
   ssConfig << std::endl;
   ssConfig << "# DO NOT TOUCH THIS : used to recognise the last version of the program config" << std::endl;
   ssConfig << "last-program-version = " << APP_VERSION << std::endl;
+  ssConfig << std::endl;
+  ssConfig << "# Show the file list popup after enabling a mod" << std::endl;
+  ssConfig << "show-file-list-popup = " << (_config_.showFileListPopup ? "true" : "false") << std::endl;
   ssConfig << std::endl;
 
   GenericToolbox::dumpStringInFile(_config_.configFilePath, ssConfig.str());
