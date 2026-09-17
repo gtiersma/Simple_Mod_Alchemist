@@ -214,6 +214,38 @@ std::string MetaManager::makeFolderNameSafe(const std::string& dirtyName, const 
   return limitedName;
 }
 
+std::string MetaManager::breakPaths(const std::string& paths) {
+  const int BREAK_LIMIT = 58;
+
+  std::string displayPaths;
+  std::size_t lineStart = 0;
+
+  while (lineStart < paths.size()) {
+    std::size_t lineEnd = paths.find('\n', lineStart);
+    if (lineEnd == std::string::npos) {
+      lineEnd = paths.size();
+    }
+
+    std::string line = movedFiles.substr(lineStart, lineEnd - lineStart);
+    while (line.size() > BREAK_LIMIT) {
+      std::size_t breakAt = line.rfind('/', BREAK_LIMIT);
+      if (breakAt == std::string::npos || breakAt < 20) {
+        breakAt = BREAK_LIMIT;
+      } else {
+        ++breakAt;
+      }
+
+      displayPaths += line.substr(0, breakAt) + "\n";
+      line.erase(0, breakAt);
+    }
+    displayPaths += line + "\n";
+
+    lineStart = lineEnd + (lineEnd < paths.size() ? 1 : 0);
+  }
+
+  return displayPaths;
+}
+
 std::vector<std::string> MetaManager::limitSelectLabels(std::vector<std::string>& rawNames) {
   std::vector<std::string> limitedNames;
 
