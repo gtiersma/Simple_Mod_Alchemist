@@ -207,9 +207,6 @@ void Controller::activateMod(const std::string& mod) {
   // Path to the "mod" folder in alchemy's directory:
   std::string modPath = this->getModPath(mod);
 
-  // Path to move the content to (under the Atmosphere folder):
-  std::string atmospherePath = this->getAtmosphereRoot();
-
   // The txt file for the active mod:
   FsFile movedFilesFile = FsManager::initFile(this->getMovedFilesListFilePath(mod));
 
@@ -226,21 +223,16 @@ void Controller::activateMod(const std::string& mod) {
 
   // Extra functionality to move patch folders and files to their alternate directory:
   std::function<void (const std::string& relativePath)> folderMoveFn =
-    [modPath, atmospherePath, fileMoveFn](const std::string& relativePath) {
+    [modPath, fileMoveFn](const std::string& relativePath) {
       if (relativePath == "/" + PATCH_PATH) {
-        FsManager::moveContents(
-          modPath,
-          "/" + ATMOSPHERE_FOLDER + "/",
-          ConflictStrategy::KEEP_BOTH,
-          fileMoveFn,
-          {},
-          relativePath
-        );
+        const patchAtmoPath = "/" + ATMOSPHERE_FOLDER + relativePath
+        FsManager::createFolderIfNeeded(patchAtmoPath);
+        FsManager::moveContents(modPath, patchAtmoPath, ConflictStrategy::KEEP_BOTH, fileMoveFn);
       }
     };
 
   // Begin recursively moving every file of the mod:
-  FsManager::moveContents(modPath, atmospherePath, ConflictStrategy::KEEP_BOTH, fileMoveFn, folderMoveFn);
+  FsManager::moveContents(modPath, this->getAtmosphereRoot(), ConflictStrategy::KEEP_BOTH, fileMoveFn, folderMoveFn);
   fsFileClose(&movedFilesFile);
 }
 
