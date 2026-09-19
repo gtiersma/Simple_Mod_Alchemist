@@ -89,11 +89,6 @@
             text="- Any time any mod files are manually added to any game under `/atmosphere/contents/`, the backup will need to be updated with those new files."
             marginBottom="30px"
         />
-        <brls:Label
-            width="100%"
-            text="- If you ever wish to recreate an entire new backup, both of the old backup folders must be deleted first before copying the new folders from the SD card. No merging folders."
-            marginBottom="50px"
-        />
     </brls:Box>
 
     <brls:Header
@@ -111,12 +106,6 @@
             width="100%"
             text="1. Delete both of the 'mod_alchemy' and '/atmosphere/contents/' folders off of your SD card."
             marginBottom="30px"
-        />
-        <brls:Label
-            width="100%"
-            text="- Don't skip this. Merging won't work right."
-            marginBottom="30px"
-            marginLeft="20px"
         />
         <brls:Label
             width="100%"
@@ -190,11 +179,6 @@
             text="- Any time mods are added to Simple Mod Alchemist, the backup will need to be updated with those new files."
             marginBottom="30px"
         />
-        <brls:Label
-            width="100%"
-            text="- If you ever wish to recreate an entire new backup, the old backup folder must be deleted first before copying the new folders from the SD card. No merging folders."
-            marginBottom="50px"
-        />
     </brls:Box>
 
     <brls:Header
@@ -223,12 +207,6 @@
             width="100%"
             text="2. Delete the 'mod_alchemy' folder on the SD card."
             marginBottom="30px"
-        />
-        <brls:Label
-            width="100%"
-            text="- Don't skip this. Merging won't work right."
-            marginBottom="30px"
-            marginLeft="20px"
         />
         <brls:Label
             width="100%"

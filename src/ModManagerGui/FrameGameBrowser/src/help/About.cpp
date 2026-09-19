@@ -89,10 +89,9 @@ brls::View* About::buildTopLeftBox() {
 
   brls::Label* changelog = new brls::Label();
   changelog->setText(
-    " - Fixed subfolders with corrupt filesystem entries being skipped when enabling mods.\n"\
-    " - Help info is now in the app.\n"\
-    " - Fixed the mod random settings, making it easier to use as well.\n"\
-    " - Game folders are now automatically given the game's name with the title ID number.\n"\
+    " - Fixed infrequent skipping of files & folders when enabling mods. (@SehlingS)\n"\
+    " - Support for IPS patches.\n"\
+    " - New setting to show a moved file report after enabling a mod. (@SehlingS)\n"\
     " - General stability improvements!\n"
   );
   changelog->setHorizontalAlign(brls::HorizontalAlign::LEFT);
@@ -133,6 +132,7 @@ brls::View* About::buildBottomLeftBox() {
   brls::Label* credits = new brls::Label();
   credits->setText(
     "- Maintained by gtiersma.\n"\
+    "- Additional contributions by SehlingS.\n"\
     "- Built upon SimpleModManager, developed by Nadrino.\n"\
     "- Powered by Borealis, provided by the RetroNX team.\n"\
     "- Special thanks to RetroNX, devkitPro, the ethical homebrew development community in general, and Nintendo.\n"\
@@ -158,7 +158,7 @@ brls::View* About::buildBottomRightBox() {
   rightBox->addView(portrait);
 
   brls::Label* portraitLabel = new brls::Label();
-  portraitLabel->setText("SimpleModManager Original Author: Nadrino");
+  portraitLabel->setText("SimpleModManager Founder: Nadrino");
   portraitLabel->setFontSize(12.0f);
   portraitLabel->setHorizontalAlign(brls::HorizontalAlign::CENTER);
   portraitLabel->setMarginTop(10.0f);

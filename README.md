@@ -18,7 +18,7 @@ Simple Mod Alchemist is the definitive Nintendo Switch mod management solution. 
 * Scalable - works with lists of hundreds of mods
 * Change mods at random
   * Set how likely each mod gets picked at random
-* More to come!
+* Support for `.ips` patches
 
 
 ## Screenshots
@@ -99,11 +99,9 @@ This method is safer and will also backup the current enabled/disabled statuses 
 * **Maintaining the backup:**
   * Any time mods are added for Simple Mod Alchemist, the backup will need to be updated with those new files.
   * Any time any mod files are *manually* added to ***any*** game under `/atmosphere/contents/`, the backup will need to be updated with those new files.
-  * If you ever wish to recreate an entire new backup, both of the old backup folders must be deleted *first* before copying the new folders from the SD card. No merging folders.
 
 * **Restoring the backup:**
   1. Delete both of the `mod_alchemy` and `/atmosphere/contents/` folders off of your SD card.
-    * Don't skip this. Merging won't work right.
   2. Paste the folder backups onto the SD card in their place.
 
 ### Single Folder
@@ -116,13 +114,11 @@ This method is safer and will also backup the current enabled/disabled statuses 
 
 * **Maintaining the backup:**
   * Any time mods are added for Simple Mod Alchemist, the backup will need to be updated with those new files.
-  * If you ever wish to recreate an entire new backup, the old backup folder must be deleted *first* before copying the new folders from the SD card. No merging folders.
 
 * **Restoring the backup:**
   1. In the app, run the **Disable All Mods** option on each game.
     * This puts all mod files back within the `mod_alchemy` folder, ensuring no old files will linger behind when replaced by the backup.
   2. Delete the `mod_alchemy` folder on the SD card.
-    * Don't skip this. Merging won't work right.
   3. Paste the backup folder in its place.
 
 
@@ -131,6 +127,8 @@ This method is safer and will also backup the current enabled/disabled statuses 
 ### Adding Mods
 
 Mods can be added to the app at any time by following the same instructions listed above.
+
+If using an `.ips` patch, instead of putting it in `atmosphere/exefs_patches/<patch_name>/<patch_number>.ips`, put it in `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/exefs_patches/<patch_name>/<patch_number>.ips`. If the app sees the `exefs_patches` folder directly in the mod's folder, it handles it specially, moving it to the patch folder, unlike everything else that gets moved to the mod folder.
 
 ### Deleting Mods
 
@@ -173,25 +171,27 @@ Everything will work as long as the title ID in the parenthesis isn't changed.
 
 ### After enabling a mod, I don't notice it in the game.
 
-Disable the mod in the app. Then in a file explorer, go to that mod's folder in the `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/` folder to inspect its folders and files.
+Disable the mod in the app. In the app's settings, turn on the moved file dialog. Then try enabling the mod again. You'll see a report listing the files that were moved.
 
-Make sure the folders and files are all named correctly. The folder directly in the `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/` folder should usually be named `romfs`. `romfs` should contain more folders matching the game's file system.
+Make sure the folders and files are all named correctly. The first folder in the path listed should be the folder you put directly in the `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/` folder. It should usually be named `romfs`. `romfs` should contain more folders matching the game's file system.
+
+If everything looks fine there, try a file explorer. Go to that mod's folder in `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/`. If it really is enabled, it should be empty with all folders and files moved to `/atmosphere/contents/<title_id>/`.
 
 ---
 
 ### A mod is only being partially enabled. Not all files belonging to that mod were enabled.
 
-Use a file explorer to go within `/atmosphere/contents/<title_id>/` and find the places the files should be located at (matching the locations of the files that weren't moved in `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/`).
+Disable the mod in the app. In the app's settings, turn on the moved file dialog setting. Then try enabling the mod again. You'll see a report listing the files moved.
 
-If there is already a file within `/atmosphere/contents/<title_id>/` with the same name and location as a file that's not being moved from within `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/`, then that is the reason it's not enabling. There's already a file for another mod in its place. There's a conflict. If you really want the mod to be fully enabled, you will need to find out where that file came from. It may have come from another mod that was enabled through the app.
+If you see some of the mod's files and folders not listed, it's likely they aren't being moved because of a file conflict. There may already be a file within `/atmosphere/contents/<title_id>/` with the same name and location as a file that's not being moved from within `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/`.
+
+If you really want the mod to be fully enabled, you will need to find out where the conflicting file came from. It may have come from another mod that was enabled through the app.
 
 Try using **Disable All Mods** in the app. Then try searching your SD card for that file's name. You should be able to see all the mods that use it. If some of those mods may have been enabled at the same time, that would've been the problem. You will need to try to sort out the conflicting files between them.
 
 If the file is still located within `/atmosphere/contents/<title_id>/` even after disabling all mods through the app, then that file does not belong to any of the mods in Simple Mod Alchemist. It was put there manually, so you will need to figure out why it's there and if you need it.
 
-Once the conflicting files are sorted out so that the files can now be moved to their spots within `/atmosphere/contents/<title_id>/`, the mod should now be able to be enabled fully.
-
-If there was no conflict to begin with, it could be from an infrequent bug that causes specific files to not be moved. This particular problem seems to be outside the Simple Mod Alchemist code, so there may be nothing that can be done about it at the moment, but it's infrequent, so it shouldn't happen often. But even if this bug occurs, the rest of the files should still be moving properly when enabling or disabling the mod, so there should be no need to worry about lost files.
+Once the conflicting files are sorted out, the mod should enable fully.
 
 ---
 
@@ -224,14 +224,6 @@ See if it continues to happen.
 If it was working fine at one point, but suddenly this issue began happening, try restoring from a backup if you have one. To do so, use the **Disable All Mods** option for the game that's having issues. Then delete the game's folder from within the `mod_alchemy` folder, copying the backup into its place.
 
 If it still continues to be a problem, please file a GitHub issue, describing how you came across the error, how the folders that contain the related mod are organized (if it was related to a specific mod), and any other details you think may be helpful.
-
----
-
-### After restoring a backup, the app is crashing or not working right.
-
-When restoring a backup, make sure to **delete** the old folder(s) on the SD card before pasting the backup folder(s). No pasting and merging.
-
-See the **Backups** section to make sure it's being restored properly.
 
 ---
 

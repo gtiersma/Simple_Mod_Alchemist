@@ -13,6 +13,12 @@
     <brls:Label
         width="100%"
         text="See 'Setup'."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If using an `.ips` patch, instead of putting it in `atmosphere/exefs_patches/[-PATCH-NAME-]/[-PATCH-NUMBER-].ips`, put it in `mod_alchemy/[-GAME-NAME-] ([-TITLE-ID-])/[-GROUP-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]/exefs_patches/[-PATCH-NAME-]/[-PATCH-NUMBER-].ips`. If the app sees the `exefs_patches` folder directly in the mod's folder, it handles it specially, moving it to the patch folder, unlike everything else that gets moved to the mod folder."
     />
 
     <brls:Box
