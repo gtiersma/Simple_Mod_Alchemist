@@ -80,6 +80,16 @@ namespace MetaManager {
   std::string makeFolderNameSafe(const std::string& dirtyName, const int softLimit);
 
   /**
+   * Paths contain few spaces, so they can have wrapping issues in the UI.
+   * This method explicitly break very long path segments by replacing whitespace that may exist in long paths with new lines.
+   *
+   * @param paths Long string of multiple paths.
+   *
+   * @creator SehlingS
+   */
+  std::string breakPaths(const std::string& paths);
+
+  /**
    * Limit string size of the options used by a SelectItem.
    * Needed for the UI. It hangs if strings get to be too excessively long.
    */

@@ -27,17 +27,19 @@ FsDir FsManager::openFolder(const std::string& path, const u32& mode) {
 void FsManager::changeFolder(FsDir& dir, const std::string& path, const u32& mode) {
   fsDirClose(&dir);
 
-  MetaManager::tryResult(
-    fsFsOpenDirectory(&sdSystem, toPathBuffer(path).get(), mode, &dir)
-  );
+  Result result = fsFsOpenDirectory(&sdSystem, toPathBuffer(path).get(), mode, &dir);
+  if (R_FAILED(result)) {
+    brls::Logger::warning("FsManager: changeFolder failed for '{}' (result {:#x})", path, result);
+  }
 }
 
 void FsManager::createFolderIfNeeded(const std::string& path) {
   if (doesFolderExist(path)) { return; }
 
-  MetaManager::tryResult(
-    fsFsCreateDirectory(&sdSystem, toPathBuffer(path).get())
-  );
+  Result result = fsFsCreateDirectory(&sdSystem, toPathBuffer(path).get());
+  if (R_FAILED(result)) {
+    brls::Logger::warning("FsManager: createFolderIfNeeded failed for '{}' (result {:#x})", path, result);
+  }
 }
 
 bool FsManager::doesFolderExist(const std::string& path) {
@@ -55,8 +57,8 @@ bool FsManager::doesFolderExist(const std::string& path) {
   } else if (result == 0x202) {
     return false; // File does not exist
   } else {
-    MetaManager::tryResult(result); // Handle other exceptions
-    return false; // This line will never be reached, but added for completeness
+    brls::Logger::warning("FsManager: doesFolderExist failed for '{}' (result {:#x})", path, result);
+    return false;
   }
 }
 
@@ -75,8 +77,8 @@ bool FsManager::doesFileExist(const std::string& path) {
   } else if (result == 0x202) {
     return false; // File does not exist
   } else {
-    MetaManager::tryResult(result); // Handle other exceptions
-    return false; // This line will never be reached, but added for completeness
+    brls::Logger::warning("FsManager: doesFileExist failed for '{}' (result {:#x})", path, result);
+    return false;
   }
 }
 
@@ -322,9 +324,10 @@ void FsManager::moveFile(const std::string& fromPath, const std::string& toPath)
     return true;
   });
 
-  MetaManager::tryResult(
-    fsFsRenameFile(&sdSystem, toPathBuffer(fromPath).get(), toPathBuffer(toPath).get())
-  );
+  Result result = fsFsRenameFile(&sdSystem, toPathBuffer(fromPath).get(), toPathBuffer(toPath).get());
+  if (R_FAILED(result)) {
+    brls::Logger::warning("FsManager: moveFile failed '{}' -> '{}' (result {:#x})", fromPath, toPath, result);
+  }
 }
 
 void FsManager::moveContents(

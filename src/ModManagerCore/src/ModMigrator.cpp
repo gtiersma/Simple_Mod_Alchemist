@@ -115,6 +115,9 @@ void ModMigrator::migrateMod(
   // Case: Something weird about this mod. Just don't migrate it. Skip it. Better safe than sorry.
   if (!FsManager::doesFolderExist(oldModTitleIdPath)) return;
 
+  // Case: The mod folder is empty. Nothing to migrate.
+  if (!FsManager::hasFilesDeep(oldModTitleIdPath)) return;
+
   // Create the new source/mod folders for the mod to migrate:
   FsManager::createFolderIfNeeded(newModPath);
   newModPath = newModPath + "/" + MIGRATION_MOD_NAME;

@@ -65,6 +65,13 @@ private:
    * @param index The index of the mod source in the cell list
    */
   void configureModSelector(brls::SelectorCell* selector, ModSource& mod, const int& index);
+
+  /**
+   * Shows a list of files that were moved (in a dialog)
+   *
+   * @param files File list in the form of a single string.
+   */
+  void showFileMoveReport(const std::string& files);
 };
 
 

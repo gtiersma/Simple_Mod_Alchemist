@@ -18,7 +18,11 @@ const std::string RATING_DELIMITER = "~~";
 const std::string TXT_EXT = ".txt";
 const std::string ALCHEMIST_FOLDER = "mod_alchemy";
 const std::string ALCHEMIST_PATH = "/" + ALCHEMIST_FOLDER;
-const std::string ATMOSPHERE_PATH = "/atmosphere/contents/";
+const std::string ATMOSPHERE_FOLDER = "atmosphere";
+const std::string ATMOSPHERE_PATH = "/" + ATMOSPHERE_FOLDER + "/contents/";
+
+// Relative to /atmosphere
+const std::string PATCH_PATH = "/exefs_patches";
 
 // UI seems likely to hang if a control's label is much longer than this number
 const int MAX_LABEL_SIZE = 25;
