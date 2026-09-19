@@ -335,6 +335,7 @@ void FsManager::moveContents(
   const std::string& toPath,
   ConflictStrategy conflictStrategy,
   std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn,
+  std::function<void (const std::string& relativePath)> folderMoveFn,
   const std::string& basePath
 ) {
   std::vector<FsDirectoryEntry> entries;
@@ -377,9 +378,10 @@ void FsManager::moveContents(
       }
     // If the next entry is a folder, we will traverse within it:
     } else if (isDirectory) {
+      folderMoveFn(nextPath);
       createFolderIfNeeded(targetPath);
 
-      moveContents(fromPath, toPath, conflictStrategy, fileMoveFn, nextPath);
+      moveContents(fromPath, toPath, conflictStrategy, fileMoveFn, folderMoveFn, nextPath);
 
       // Delete the folder only if it's now empty. The folder should be empty,
       // but if not for whatever reason, this should just silently break and skip it:
