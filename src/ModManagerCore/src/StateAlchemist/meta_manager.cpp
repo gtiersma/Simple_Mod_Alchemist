@@ -226,7 +226,7 @@ std::string MetaManager::breakPaths(const std::string& paths) {
       lineEnd = paths.size();
     }
 
-    std::string line = movedFiles.substr(lineStart, lineEnd - lineStart);
+    std::string line = paths.substr(lineStart, lineEnd - lineStart);
     while (line.size() > BREAK_LIMIT) {
       std::size_t breakAt = line.rfind('/', BREAK_LIMIT);
       if (breakAt == std::string::npos || breakAt < 20) {

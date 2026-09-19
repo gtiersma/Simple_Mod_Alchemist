@@ -9,6 +9,7 @@
 #include <StateAlchemist/controller.h>
 #include <StateAlchemist/meta_manager.h>
 #include <note_cell.hpp>
+#include <d_down_scroller.hpp>
 
 
 using namespace brls::literals;
@@ -177,16 +178,16 @@ void ModBrowser::showFileMoveReport(const std::string& files) {
   label->setIsWrapping(true);
   label->setFontSize(14.0f);
 
-  brls::ScrollingFrame* scroll = new brls::ScrollingFrame();
+  brls::DDownScroller* scroll = new brls::DDownScroller();
   scroll->setWidth(660.0f);
   scroll->setHeight(400.0f);
   scroll->setFocusable(true);
   scroll->setScrollingIndicatorVisible(true);
-  scroll->setScrollingBehavior(brls::ScrollingBehavior::CENTERED);
   scroll->setContentView(label);
 
   brls::Box* content = new brls::Box(brls::Axis::COLUMN);
   content->setWidth(680.0f);
+  content->setPadding(30, 0, 0, 30);
   content->addView(scroll);
 
   brls::Dialog* dialog = new brls::Dialog(content);
