@@ -16,7 +16,7 @@ void Controller::setTitleId(const u64& titleId) {
   this->titleId = titleId;
 
   // Create the Atmosphere title ID folder for the current game
-  FsManager::createFolderIfNeeded(this->getAtmospherePath());
+  FsManager::createFolderIfNeeded(this->getAtmosphereRoot());
 }
 
 void Controller::setGamePath(const std::string& name) {
@@ -241,7 +241,7 @@ void Controller::moveModFiles(
   for (FsDirectoryEntry& entry : entries) {
     std::string nextPath = currentBasePath + "/" + entry.name;
     const std::string sourcePath = modPath + nextPath;
-    const std::string targetPath = this->getAtmospherePath() + nextPath;
+    const std::string targetPath = this->getAtmosphereRoot(nextPath) + nextPath;
 
     // If the next entry is a file, we will move it and record it as moved as long as there isn't a conflict.
     //
@@ -292,7 +292,7 @@ void Controller::moveModFiles(
 std::string Controller::getMovedFilesList(const std::string& mod) {
   std::string movedFiles;
 
-  std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
+  const std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
 
   // Try to open the active mod's txt file to get the list of files that were moved to atmosphere's folder:
   FsFile movedFilesList;
@@ -510,11 +510,8 @@ Controller::~Controller() {
  * Essentially the same as deactivating the mod, except this can't be used with the default mod option.
  */
 void Controller::returnFiles(const std::string& mod) {
-
   std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
   std::string modPath = this->getModPath(mod);
-  std::string atmoRootPath = this->getAtmospherePath();
-  int atmoRootPathSize = atmoRootPath.size();
 
   // Try to open the active mod's txt file to get the list of files that were moved to atmosphere's folder:
   FsFile movedFilesList;
@@ -546,7 +543,10 @@ void Controller::returnFiles(const std::string& mod) {
     while (newLinePos != std::string::npos) {
       // Trim the new line and any characters that were gathered after it to get the cleaned atmosphere file path:
       std::string basePath = pathBuilder.substr(0, newLinePos);
+
+      std::string atmoRootPath = this->getAtmosphereRoot(basePath);
       std::string atmoPath = atmoRootPath + basePath;
+      int atmoRootPathSize = atmoRootPath.size();
 
       // Move any characters gathered after the new line to the pathBuilder string for the next path:
       pathBuilder = pathBuilder.substr(newLinePos + 1);
@@ -599,40 +599,23 @@ std::string Controller::getGroupPath() {
   return this->getGamePath() + "/" + this->group;
 }
 
-/*
- * Gets the file path for the specified source within the group
- * 
- * @requirement: group and source must be set
- */
 std::string Controller::getSourcePath() {
   std::string groupPath = this->getGroupPath();
   return groupPath + "/" + FsManager::getFolderName(groupPath, this->source);
 }
 
-/*
- * Get the file path for the specified mod within the moddable source
- * 
- * @requirement: group and source must be set
- */
 std::string Controller::getModPath(const std::string& mod) {
   std::string sourcePath = this->getSourcePath();
   return sourcePath + "/" + FsManager::getFolderName(sourcePath, mod);
 }
 
-/**
- * Gets the game's path that's stored within Atmosphere's directory
- */
-std::string Controller::getAtmospherePath() {
-  return ATMOSPHERE_PATH + MetaManager::getHexTitleId(this->titleId);
+std::string Controller::getAtmosphereRoot(const std::string& basePath) {
+  if (basePath.compare(0, PATCH_PATH.size(), PATCH_PATH) == 0) {
+    return "/" + ATMOSPHERE_FOLDER + "/"; // If starts with PATCH_PATH
+  }
+  return ATMOSPHERE_PATH + MetaManager::getHexTitleId(this->titleId) + "/";
 }
 
-/**
- * Gets the file path for the list of moved files for the specified mod
- * 
- * The file should only exist if the mod is currently active
- * 
- * @requirement: group and source must be set
- */
 std::string Controller::getMovedFilesListFilePath(const std::string& mod) {
   return this->getSourcePath() + "/" + mod + TXT_EXT;
 }
