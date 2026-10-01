@@ -33,7 +33,7 @@ void ModMigrator::begin(std::atomic<float>& progress) {
   // Case: Vanilla SMM folder isn't there, so do nothing:
   if (!FsManager::doesFolderExist(LEGACY_BASE_PATH)) return;
 
-  std::vector<std::string> gameFolders = FsManager::listNames(LEGACY_BASE_PATH, false);
+  std::vector<std::string> gameFolders = FsManager::loadNames(LEGACY_BASE_PATH, false);
 
   // Case: No legacy folders for games:
   if (gameFolders.empty()) return;
@@ -60,7 +60,7 @@ void ModMigrator::begin(std::atomic<float>& progress) {
 bool ModMigrator::migrateGame(const std::string& gameFolder, std::atomic<float>& progress, const float& percentageOfTotal) {
   std::string legacyGamePath = LEGACY_BASE_PATH + "/" + gameFolder;
 
-  std::vector<std::string> modFolders = FsManager::listNames(legacyGamePath, false);
+  std::vector<std::string> modFolders = FsManager::loadNames(legacyGamePath, false);
 
   // Case: No mods for this game, so do nothing
   if (modFolders.empty()) return false;
@@ -73,7 +73,7 @@ bool ModMigrator::migrateGame(const std::string& gameFolder, std::atomic<float>&
   if (!FsManager::doesFolderExist(contentsFolder)) return false;
 
   // Should be a single folder with the game's title ID
-  std::vector<std::string> titleId = FsManager::listNames(contentsFolder, false);
+  std::vector<std::string> titleId = FsManager::loadNames(contentsFolder, false);
 
   // Case: It wasn't a single folder with the game's title ID. Something weird about these mods.
   // Just don't migrate them. Skip them. Better safe than sorry.

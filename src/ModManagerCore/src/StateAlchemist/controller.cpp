@@ -225,7 +225,7 @@ void Controller::activateMod(const std::string& mod) {
   std::function<void (const std::string& relativePath)> folderMoveFn =
     [modPath, fileMoveFn](const std::string& relativePath) {
       if (relativePath == "/" + PATCH_PATH) {
-        const patchAtmoPath = "/" + ATMOSPHERE_FOLDER + relativePath
+        const std::string patchAtmoPath = "/" + ATMOSPHERE_FOLDER + relativePath
         FsManager::createFolderIfNeeded(patchAtmoPath);
         FsManager::moveContents(modPath, patchAtmoPath, ConflictStrategy::KEEP_BOTH, fileMoveFn);
       }
