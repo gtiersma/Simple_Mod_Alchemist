@@ -38,7 +38,7 @@ bool Controller::doesGameHaveFolder() {
  *             Can take considerable performance when in nested loops, so sometimes it's good to skip if not needed
  */
 std::vector<std::string> Controller::loadGroups(bool sort) {
-  return FsManager::listNames(this->getGamePath(), sort);
+  return FsManager::loadNames(this->getGamePath(), sort);
 }
 
 /**
@@ -50,7 +50,7 @@ std::vector<std::string> Controller::loadGroups(bool sort) {
  * @requirement: group must be set
  */
 std::vector<std::string> Controller::loadSources(bool sort) {
-  return FsManager::listNames(this->getGroupPath(), sort);
+  return FsManager::loadNames(this->getGroupPath(), sort);
 }
 
 /**
@@ -62,7 +62,7 @@ std::vector<std::string> Controller::loadSources(bool sort) {
  * @requirement: group and source must be set
  */
 std::vector<std::string> Controller::loadMods(bool sort) {
-  return FsManager::listNames(this->getSourcePath(), sort);
+  return FsManager::loadNames(this->getSourcePath(), sort);
 }
 
 

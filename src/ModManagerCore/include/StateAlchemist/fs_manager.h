@@ -47,12 +47,17 @@ namespace FsManager {
 
   /**
    * Gets a vector of all entity names that are directly within the specified path
-   * (parsing the name from the folder name)
+   * (parsing the name from the folder name).
+   *
+   * While doing that, it also checks for the existence of folders that belong to the same entity, but have different names.
+   * This is rare, but could happen when the user copies folder structures around.
+   * Having multiple folders for the same entity could break things.
+   * If duplicates are found, the folders get combined into one to prevent the issue.
    * 
-   * @param sort Whether to sort the list of names alphabetically or not
-   *             Can take considerable performance when in nested loops, so sometimes it's good to skip if not needed
+   * @param sort Whether to sort the list of names alphabetically or not.
+   *             Can take considerable performance when in nested loops, so sometimes it's good to skip if not needed.
    */
-  std::vector<std::string> listNames(const std::string& path, bool sort);
+  std::vector<std::string> loadNames(const std::string& path, bool sort);
 
   /**
    * Reads every directory entry of the specified path into the given vector.
@@ -110,8 +115,8 @@ namespace FsManager {
     const std::string& fromPath,
     const std::string& toPath,
     ConflictStrategy conflictStrategy = ConflictStrategy::OVERWRITE_TARGET,
-    std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn = {},
-    std::function<void (const std::string& relativePath)> folderMoveFn = {},
+    std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn = [](const std::string&, bool conflicts) {},
+    std::function<void (const std::string& relativePath)> folderMoveFn = [](const std::string&) {},
     const std::string& basePath = ""
   );
 

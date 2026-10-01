@@ -172,31 +172,42 @@ bool FsManager::hasFilesDeep(const std::string& path) {
   return hasFiles;
 }
 
-/**
- * Gets a vector of all entity names that are directly within the specified path
- * (parsing the name from the folder name)
- * 
- * @param sort Whether to sort the list of names alphabetically or not
- *             Can take considerable performance when in nested loops, so sometimes it's good to skip if not needed
- */
-std::vector<std::string> FsManager::listNames(const std::string& path, bool sort) {
-  std::vector<std::string> names;
+std::vector<std::string> FsManager::loadNames(const std::string& path, bool sort) {
+  std::vector<FsDirectoryEntry> entries;
+  readAllEntries(path, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
 
-  FsDir dir = FsManager::openFolder(path, FsDirOpenMode_ReadDirs);
+  // Map of the parsed name of the entity TO the original folder name it came from:
+  std::unordered_map<std::string, std::string> parsedToFolder = {};
 
-  std::vector<FsDirectoryEntry> entries(MAX_FS_ENTRY_LOAD);
-  s64 readCount = 0;
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, MAX_FS_ENTRY_LOAD, entries.data())) && readCount) {
-    for (int i = 0; i < readCount; i++) {
-      FsDirectoryEntry entry = entries[i];
-      // Exclude hidden folders that start with "."
-      if (entry.type == FsDirEntryType_Dir && entry.name[0] != '.') {
-        names.push_back(MetaManager::parseName(entry.name));
+  for (FsDirectoryEntry& entry : entries) {
+    // Exclude hidden folders that start with "."
+    if (entry.type == FsDirEntryType_Dir && entry.name[0] != '.') {
+      const std::string parsedName = MetaManager::parseName(entry.name);
+      
+      // Check for folders that are getting parsed to the same name.
+      auto duplicate = parsedToFolder.find(parsedName);
+      if (duplicate == parsedToFolder.end()) {
+        parsedToFolder[parsedName] = entry.name;
+      } else if { // If a duplicate is found, combine them:
+
+        // Favor keeping the longer folder name since that one must have the metadata in the name:
+        const std::string betterName = duplicate->second.size() > entry.name.size() ? duplicate->second : entry.name;
+        const std::string worseName = duplicate->second.size() > entry.name.size() ? entry.name : duplicate->second;
+          
+        moveContents(ALCHEMY_PATH + "/" + worseName, ALCHEMY_PATH + "/" + betterName, ConflictStrategy::OVERWRITE_TARGET);
+        fsFsDeleteDirectory(&sdSystem, toPathBuffer(ALCHEMY_PATH + "/" + worseName).get());
+
+        parsedToFolder[parsedName] = betterName;
       }
     }
   }
 
-  fsDirClose(&dir);
+  // Copy de-duplicated parsed names from the map into a vector:
+  std::vector<std::string> names;
+  names.reserve(parsedToFolder.size());
+  for (const auto& [parsed, folderName] : parsedToFolder) {
+    names.push_back(parsed);
+  }
 
   if (sort) {
     std::sort(names.begin(), names.end());
@@ -205,14 +216,6 @@ std::vector<std::string> FsManager::listNames(const std::string& path, bool sort
   return names;
 }
 
-/**
- * Reads every directory entry of the specified path into the given vector.
- *
- * The filesystem can sometimes report a premature "end of directory" before all
- * entries have been returned (see hasFilesDeep). To work around that, the directory
- * is reopened with a fresh handle and re-read until no new entries are found or the
- * reported entry count is reached.
- */
 void FsManager::readAllEntries(const std::string& path, const u32& mode, std::vector<FsDirectoryEntry>& out) {
   out.clear();
 
@@ -342,7 +345,7 @@ void FsManager::moveContents(
   readAllEntries(fromPath + basePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
 
   for (FsDirectoryEntry& entry : entries) {
-    std::string nextPath = basePath + "/" + entry.name;
+    std::string nextPath = std::string(basePath + "/") + entry.name;
     const std::string sourcePath = fromPath + nextPath;
     const std::string targetPath = toPath + nextPath;
 
