@@ -188,14 +188,14 @@ std::vector<std::string> FsManager::loadNames(const std::string& path, bool sort
       auto duplicate = parsedToFolder.find(parsedName);
       if (duplicate == parsedToFolder.end()) {
         parsedToFolder[parsedName] = entry.name;
-      } else if { // If a duplicate is found, combine them:
+      } else { // If a duplicate is found, combine them:
 
         // Favor keeping the longer folder name since that one must have the metadata in the name:
-        const std::string betterName = duplicate->second.size() > entry.name.size() ? duplicate->second : entry.name;
-        const std::string worseName = duplicate->second.size() > entry.name.size() ? entry.name : duplicate->second;
+        const std::string betterName = duplicate->second.size() > std::strlen(entry.name) ? duplicate->second : entry.name;
+        const std::string worseName = duplicate->second.size() > std::strlen(entry.name) ? entry.name : duplicate->second;
           
-        moveContents(ALCHEMY_PATH + "/" + worseName, ALCHEMY_PATH + "/" + betterName, ConflictStrategy::OVERWRITE_TARGET);
-        fsFsDeleteDirectory(&sdSystem, toPathBuffer(ALCHEMY_PATH + "/" + worseName).get());
+        moveContents(ALCHEMIST_PATH + "/" + worseName, ALCHEMIST_PATH + "/" + betterName, ConflictStrategy::OVERWRITE_TARGET);
+        fsFsDeleteDirectory(&sdSystem, toPathBuffer(ALCHEMIST_PATH + "/" + worseName).get());
 
         parsedToFolder[parsedName] = betterName;
       }

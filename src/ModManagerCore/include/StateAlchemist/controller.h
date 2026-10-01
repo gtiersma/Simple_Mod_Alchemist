@@ -69,15 +69,26 @@ class Controller {
      */
     void saveDefaultRating(const u8& rating);
 
-    /*
-     * Gets the mod currently activated for the moddable source in the group
+    /**
+     * Gets the mod currently activated for the source
      *
      * Returns an empty string if no mod is active and vanilla files are being used
+     * 
+     * @requirement: group and must be set
      */
     std::string getActiveMod(const std::string& source);
 
-    /*
+    /**
      * Activates the specified mod, moving all its files into the atmosphere folder for the game
+     * 
+     * Make sure to deactivate any existing active mod for this source if there is one
+     * 
+     * Mod won't be activated if EVERY file belonging to it has a conflict with a file already in the atmosphere folder
+     * 
+     * @requirement:
+     *  - group and source must be set
+     *  - "mod" parameter must not currently be active
+     *  - the title ID folder for the current game must already exist in Atmosphere's "content" folder
      */
     void activateMod(const std::string& mod);
 

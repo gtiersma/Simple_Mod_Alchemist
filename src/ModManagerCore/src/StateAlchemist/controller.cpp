@@ -149,13 +149,6 @@ void Controller::saveDefaultRating(const u8& rating) {
   );
 }
 
-/**
- * Gets the mod currently activated for the source
- *
- * Returns an empty string if no mod is active and vanilla files are being used
- * 
- * @requirement: group and must be set
- */
 std::string Controller::getActiveMod(const std::string& source) {
 
   // Open to the correct source directory
@@ -190,18 +183,6 @@ std::string Controller::getActiveMod(const std::string& source) {
   return activeMod;
 }
 
-/**
- * Activates the specified mod, moving all its files into the atmosphere folder for the game
- * 
- * Make sure to deactivate any existing active mod for this source if there is one
- * 
- * Mod won't be activated if EVERY file belonging to it has a conflict with a file already in the atmosphere folder
- * 
- * @requirement:
- *  - group and source must be set
- *  - "mod" parameter must not currently be active
- *  - the title ID folder for the current game must already exist in Atmosphere's "content" folder
- */
 void Controller::activateMod(const std::string& mod) {
 
   // Path to the "mod" folder in alchemy's directory:
@@ -225,7 +206,7 @@ void Controller::activateMod(const std::string& mod) {
   std::function<void (const std::string& relativePath)> folderMoveFn =
     [modPath, fileMoveFn](const std::string& relativePath) {
       if (relativePath == "/" + PATCH_PATH) {
-        const std::string patchAtmoPath = "/" + ATMOSPHERE_FOLDER + relativePath
+        const std::string patchAtmoPath = "/" + ATMOSPHERE_FOLDER + relativePath;
         FsManager::createFolderIfNeeded(patchAtmoPath);
         FsManager::moveContents(modPath, patchAtmoPath, ConflictStrategy::KEEP_BOTH, fileMoveFn);
       }
