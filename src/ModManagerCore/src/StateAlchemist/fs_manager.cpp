@@ -194,8 +194,8 @@ std::vector<std::string> FsManager::loadNames(const std::string& path, bool sort
         const std::string betterName = duplicate->second.size() > std::strlen(entry.name) ? duplicate->second : entry.name;
         const std::string worseName = duplicate->second.size() > std::strlen(entry.name) ? entry.name : duplicate->second;
           
-        moveContents(ALCHEMIST_PATH + "/" + worseName, ALCHEMIST_PATH + "/" + betterName, ConflictStrategy::OVERWRITE_TARGET);
-        fsFsDeleteDirectory(&sdSystem, toPathBuffer(ALCHEMIST_PATH + "/" + worseName).get());
+        moveContents(path + "/" + worseName, path + "/" + betterName, ConflictStrategy::OVERWRITE_TARGET);
+        fsFsDeleteDirectory(&sdSystem, toPathBuffer(path + "/" + worseName).get());
 
         parsedToFolder[parsedName] = betterName;
       }
