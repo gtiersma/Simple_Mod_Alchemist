@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <cstring>
 #include <set>
+#include <filesystem>
+
 
 FsFileSystem FsManager::sdSystem;
 
@@ -176,8 +178,29 @@ std::vector<std::string> FsManager::loadNames(const std::string& path, bool sort
   std::vector<FsDirectoryEntry> entries;
   readAllEntries(path, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
 
+  std::vector<std::string> names;
+  for (FsDirectoryEntry& entry : entries) {
+    // Exclude hidden folders that start with "."
+    if (entry.type == FsDirEntryType_Dir && entry.name[0] != '.') {
+      names.push_back(MetaManager::parseName(entry.name));
+    }
+  }
+
+  if (sort) {
+    std::sort(names.begin(), names.end());
+  }
+
+  return names;
+}
+
+void FsManager::deduplicateFolderNames(const std::string& path, std::atomic<float>& progress, const float& percentageOfWhole) {
+  std::vector<FsDirectoryEntry> entries;
+  readAllEntries(path, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
+
   // Map of the parsed name of the entity TO the original folder name it came from:
   std::unordered_map<std::string, std::string> parsedToFolder = {};
+
+  const float progressPerEntry = percentageOfWhole / entries.size();
 
   for (FsDirectoryEntry& entry : entries) {
     // Exclude hidden folders that start with "."
@@ -200,20 +223,9 @@ std::vector<std::string> FsManager::loadNames(const std::string& path, bool sort
         parsedToFolder[parsedName] = betterName;
       }
     }
-  }
 
-  // Copy de-duplicated parsed names from the map into a vector:
-  std::vector<std::string> names;
-  names.reserve(parsedToFolder.size());
-  for (const auto& [parsed, folderName] : parsedToFolder) {
-    names.push_back(parsed);
+    progress.store(progress.load() + progressPerEntry);
   }
-
-  if (sort) {
-    std::sort(names.begin(), names.end());
-  }
-
-  return names;
 }
 
 void FsManager::readAllEntries(const std::string& path, const u32& mode, std::vector<FsDirectoryEntry>& out) {
@@ -388,7 +400,8 @@ void FsManager::moveContents(
 
       // Delete the folder only if it's now empty. The folder should be empty,
       // but if not for whatever reason, this should just silently break and skip it:
-      fsFsDeleteDirectory(&sdSystem, toPathBuffer(sourcePath).get());
+      std::filesystem::remove(sourcePath);
+      //fsFsDeleteDirectory(&sdSystem, toPathBuffer(sourcePath).get());
     } else {
       brls::Logger::warning("Mod Alchemist: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
     }

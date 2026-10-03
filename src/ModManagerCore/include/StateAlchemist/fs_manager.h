@@ -60,6 +60,23 @@ namespace FsManager {
   std::vector<std::string> loadNames(const std::string& path, bool sort);
 
   /**
+   * Combines any folders that are found with duplicate entity names under the same path.
+   *
+   * @param path The directory to look for duplicates directly within.
+   *
+   * @param progress Scale of 0.0-1.0 of the current deduplication progress.
+   *                 Updated while the method runs.
+   * 
+   * @param percentageOfWhole If there is other work happening in other methods
+                              (or this method is being called multiple times),
+   *                          include the percentage of the total work that this method call makes up.
+   *                          The method will only increase the progress by that percentage.
+   *                          By default, it's expected that this is the only code to be progress-tracked,
+   *                          so the progress param is at 0% and it will move forward to 100%.
+   */
+  void deduplicateFolderNames(const std::string& path, std::atomic<float>& progress, const float& percentageOfWhole = 1.0f);
+
+  /**
    * Reads every directory entry of the specified path into the given vector.
    *
    * The filesystem can sometimes report a premature "end of directory" before all
@@ -68,7 +85,9 @@ namespace FsManager {
    * reported entry count is reached.
    *
    * @param path The folder to read
+   *
    * @param mode FsDirOpenMode flags for how the folder should be opened
+   *
    * @param out The vector to fill with the directory entries. It is cleared first.
    */
   void readAllEntries(const std::string& path, const u32& mode, std::vector<FsDirectoryEntry>& out);
