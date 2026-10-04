@@ -7,6 +7,7 @@
 #include <string>
 #include <memory>
 #include <functional>
+#include <atomic>
 
 
 enum class ConflictStrategy {

@@ -5,8 +5,10 @@
 #include "GroupBrowser.h"
 #include "ModBrowser.h"
 #include "util.hpp"
+#include "loading_dialog.hpp"
 
 #include <StateAlchemist/controller.h>
+#include <StateAlchemist/fs_manager.h>
 
 
 using namespace brls::literals;
@@ -25,8 +27,6 @@ GroupBrowser::GroupBrowser() {
       // Only trigger when the sidebar item gains focus
       if (!view->isFocused())
         return;
-
-      gameBrowser.getModManager().setGroup(group);
       
       // Remove the old group list before showing the new one
       // (if there is currently one shown).
@@ -36,8 +36,12 @@ GroupBrowser::GroupBrowser() {
         this->removeView(this->getChildren()[1]);
       }
 
-      this->_current_mod_browser_ = new ModBrowser(view);
-      this->addView(this->_current_mod_browser_);
+      controller.group = group;
+      this->loadSources([this, view](const std::vector<std::string>& sources) => {
+        gameBrowser.getModManager().setSources(sources);
+        this->_current_mod_browser_ = new ModBrowser(view);
+        this->addView(this->_current_mod_browser_);
+      });
     });
   }
 
@@ -52,6 +56,45 @@ GroupBrowser::GroupBrowser() {
     )->open();
     return true;
   });
+}
+
+void GroupBrowser::loadSources(std::function<void (const std::vector<std::string>& sources)> fn) {
+  std::vector<std::string> sources = controller.loadSources(true);
+
+  // Check for duplicate entries.
+  // Since entries are conveniently sorted, duplicates would be adjacent, so we only need to compare adjacent elements.
+  bool hasDuplicates = false;
+  const int sourceCount = sources.size();
+  for (int i = sourceCount - 1; i > 0; i--) {
+    if (sources[i - 1] == sources[i]) {
+      sources.erase(i);
+      hasDuplicates = true;
+    }
+  }
+
+  if (hasDuplicates) {
+    LoadingDialog* loadingDialog = LoadingDialog::build();
+    loadingDialog->setAction("Found mod folders that belong to the same mod. Combining them");
+    loadingDialog->open();
+    
+    new std::thread([sources, fn, loadingDialog]() => {
+      
+      // Fraction that each "run" of deduplication makes up of the whole (sources + 1 group):
+      const float runFraction = 1 / (sources.size() + 1);
+
+      // Combine duplicate sources under the group folder:
+      FsManager::deduplicateFolderNames(controller.getGroupPath(), loadingDialog->getAtomicProgress(), runFraction);
+
+      // Combine duplicate mods under each source:
+      for (std::string& source : sources) {
+        controller.source = source;
+        FsManager::deduplicateFolderNames(controller.getSourcePath(), loadingDialog->getAtomicProgress(), runFraction);
+      }
+
+      loadingDialog->close();
+      fn(sources);
+    });
+  }
 }
 
 GroupBrowser* GroupBrowser::create() {

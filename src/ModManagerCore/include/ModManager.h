@@ -76,11 +76,11 @@ public:
   ConfigHolder& getConfig();
 
   /**
-   * Call this to set the group instead of setting it on the controller directly.
+   * Set the current sources for whichever group is currently loaded.
    * 
-   * This will allow this mod manager to reset its state and load some initial mods for the group list.
+   * This will allow this mod manager to reset its state and load some initial mods for the source list.
    */
-  void setGroup(const std::string& group);
+  void setSources(const std::vector<std::string>& sources);
 
   /**
    * Gets the source name at the specified index.

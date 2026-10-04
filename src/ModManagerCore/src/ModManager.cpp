@@ -29,10 +29,8 @@ ConfigHolder& ModManager::getConfig(){
  * Call this instead of doing "controller.group = group" directly.
  * This will reset/reload data that's necessary for when the group changes.
  */
-void ModManager::setGroup(const std::string& group) {
-  if (controller.group == group) { return; }
-  controller.group = group;
-  this->_mod_source_names_ = controller.loadSources(true);
+void ModManager::setSources(const std::vector<std::string>& sources) {
+  this->_mod_source_names_ = sources;
   this->_last_loaded_index_ = -1;
   this->_mod_source_cache_.clear();
   this->loadSources(ModManager::_INIT_CHUNK_SIZE_);

@@ -47,6 +47,17 @@ private:
 
   std::vector<Game> _gameList_;
 
+  /**
+   * Gets the sources for the current group (the group set in controller).
+   *
+   * Sources are loaded async, so a callback is used instead of a return value.
+   *
+   * While loading, checks for mod folders that belong to the same thing,
+   * merging them into one folder.
+   * Duplicates like these are rare, often related to problems of the user copying around folders,
+   * but they can break things, so this function will fix them.
+   */
+  void loadSources(std::function<void (const std::vector<std::string>& sources)> fn);
 };
 
 extern GameBrowser gameBrowser;
