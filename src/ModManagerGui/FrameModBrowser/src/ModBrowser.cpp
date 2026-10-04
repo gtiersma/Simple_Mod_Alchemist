@@ -7,9 +7,11 @@
 #include "RandomSettings.h"
 
 #include <StateAlchemist/controller.h>
+#include <StateAlchemist/fs_manager.h>
 #include <StateAlchemist/meta_manager.h>
 #include <note_cell.hpp>
 #include <d_down_scroller.hpp>
+#include <loading_dialog.hpp>
 
 
 using namespace brls::literals;
@@ -184,7 +186,7 @@ void ModBrowser::loadSourcesNearIndex(const int& index) {
 
       // Since mods are conveniently sorted, duplicates would be adjacent, so we only need to compare adjacent elements:
       if (source.getMods()[i - 1] == source.getMods()[i]) {
-        source.getMods().erase(i);
+        source.removeMod(i);
         hasDuplicates = true;
       }
     }
@@ -195,13 +197,13 @@ void ModBrowser::loadSourcesNearIndex(const int& index) {
     loadingDialog->setAction("Found mod folders that belong to the same mod. Combining them");
     loadingDialog->open();
     
-    new std::thread([loadedSources, loadingDialog]() => {
+    new std::thread([loadedSources, loadingDialog]() {
       
       // Fraction that each "run" of deduplication makes up of the whole:
       const float runFraction = 1 / loadedSources.size();
 
       // Combine duplicate mods under each source:
-      for (const std::string& source : loadedSources) {
+      for (const ModSource& source : loadedSources) {
         controller.source = source.getSource();
         FsManager::deduplicateFolderNames(controller.getSourcePath(), loadingDialog->getAtomicProgress(), runFraction);
       }

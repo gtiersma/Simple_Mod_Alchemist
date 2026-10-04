@@ -153,6 +153,13 @@ class Controller {
      */
     std::string getGroupPath();
 
+    /**
+     * Gets the file path for the specified source within the group
+     * 
+     * @requirement: group and source must be set
+     */
+    std::string getSourcePath();
+
     Controller();
 
     /**
@@ -190,13 +197,6 @@ class Controller {
      * TODO: Use FsManager::moveContent
      */
     void returnFiles(const std::string& mod);
-
-    /**
-     * Gets the file path for the specified source within the group
-     * 
-     * @requirement: group and source must be set
-     */
-    std::string getSourcePath();
 
     /**
      * Get the file path for the specified mod within the moddable source

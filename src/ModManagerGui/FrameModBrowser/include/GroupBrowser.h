@@ -10,6 +10,10 @@
 
 #include "ModBrowser.h"
 
+#include <functional>
+#include <string>
+#include <vector>
+
 
 class GroupBrowser : public brls::Box {
   public:
@@ -19,6 +23,14 @@ class GroupBrowser : public brls::Box {
 
   private:
     BRLS_BIND(brls::Sidebar, groupList, "group-list");
+
+    /**
+     * Loads the list of mod source names for the current group set in the controller.
+     *
+     * After loading them, it also checks for sources in the group that have duplicate folders,
+     * merging them into a single folder.
+     */
+    void loadSources(std::function<void (const std::vector<std::string>& sources)> fn);
 
     ModBrowser* _current_mod_browser_{nullptr};
 };

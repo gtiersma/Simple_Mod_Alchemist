@@ -37,7 +37,7 @@ GroupBrowser::GroupBrowser() {
       }
 
       controller.group = group;
-      this->loadSources([this, view](const std::vector<std::string>& sources) => {
+      this->loadSources([this, view](const std::vector<std::string>& sources) {
         gameBrowser.getModManager().setSources(sources);
         this->_current_mod_browser_ = new ModBrowser(view);
         this->addView(this->_current_mod_browser_);
@@ -67,7 +67,7 @@ void GroupBrowser::loadSources(std::function<void (const std::vector<std::string
   const int sourceCount = sources.size();
   for (int i = sourceCount - 1; i > 0; i--) {
     if (sources[i - 1] == sources[i]) {
-      sources.erase(i);
+      sources.erase(sources.begin() + i);
       hasDuplicates = true;
     }
   }
@@ -77,7 +77,7 @@ void GroupBrowser::loadSources(std::function<void (const std::vector<std::string
     loadingDialog->setAction("Found mod folders that belong to the same mod. Combining them");
     loadingDialog->open();
     
-    new std::thread([sources, fn, loadingDialog]() => {
+    new std::thread([sources, fn, loadingDialog]() {
       FsManager::deduplicateFolderNames(controller.getGroupPath(), loadingDialog->getAtomicProgress());
       loadingDialog->close();
       fn(sources);

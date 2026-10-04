@@ -15,6 +15,8 @@
 
 /**
  * Object containing data related to a "source" (something moddable in a game)
+ *
+ * TODO: Separate into its own header/.cpp file combo
  */
 class ModSource {
   public:
@@ -40,10 +42,22 @@ class ModSource {
     const std::string& getSource() const { return this->source; }
     const std::vector<std::string>& getMods() const { return this->mods; }
     const std::vector<std::string>& getOptions() const { return this->options; }
-    const int& getModCount() { return this->mods.size(); }
+    const int getModCount() { return this->mods.size(); }
 
     size_t getActiveIndex() const { return this->activeIndex; }
     void setActiveIndex(size_t index) { this->activeIndex = index; }
+
+    /**
+     * Removes a mod at the specified index from the source's data.
+     * 
+     * @param index Must correspond to the element to remove in the "mods" vector.
+     *              The same mod is also removed from the "options" vector,
+     *              converting this index to the correct index for that one.
+     */
+    void removeMod(size_t index) {
+      this->mods.erase(this->mods.begin() + index);
+      this->options.erase(this->options.begin() + index + 1);
+    }
 
   private:
 

@@ -65,7 +65,7 @@ std::vector<ModSource> ModManager::loadSourcesIfNeeded(const int& index) {
   } else if (!this->isSourceLoaded(index + ModManager::_SEQUENT_CHUNK_SIZE_)) {
     return this->loadSources(ModManager::_SEQUENT_CHUNK_SIZE_);
   }
-  return {}
+  return {};
 }
 
 /**
