@@ -57,19 +57,15 @@ bool ModManager::isSourceLoaded(const int& index) {
   return index <= this->_last_loaded_index_;
 }
 
-/**
- * Will load data for more mod sources if the source "index" parameter is close enough to an index we haven't loaded data for yet.
- *
- * This ensures we always load data ahead of time while something like scrolling is happening.
- */
-void ModManager::loadSourcesIfNeeded(const int& index) {
+std::vector<ModSource> ModManager::loadSourcesIfNeeded(const int& index) {
   if (index > this->_last_loaded_index_ + ModManager::_SEQUENT_CHUNK_SIZE_) {
     // This call should ideally never be hit, but it's here just to be safe.
     // Loads an exceptionally large number of source objects if the "index" argument is significantly further down the list.
-    this->loadSources(index - this->_last_loaded_index_ + ModManager::_SEQUENT_CHUNK_SIZE_);
+    return this->loadSources(index - this->_last_loaded_index_ + ModManager::_SEQUENT_CHUNK_SIZE_);
   } else if (!this->isSourceLoaded(index + ModManager::_SEQUENT_CHUNK_SIZE_)) {
-    this->loadSources(ModManager::_SEQUENT_CHUNK_SIZE_);
+    return this->loadSources(ModManager::_SEQUENT_CHUNK_SIZE_);
   }
+  return {}
 }
 
 /**
@@ -104,20 +100,8 @@ void ModManager::refreshActiveIndices() {
   }
 }
 
-/**
- * Loads more data for the mod sources.
- *
- * There could be a lot of sources and each one requires individual filesystem operations
- * to load their data, so we do it in batches.
- *
- * @param count The number of mod sources to load data for.
- *              Loading starts at the next index of the last one that was loaded.
- *              It then loads the number specified from that point.
- *
- * If all sources in the current group have already had all their data loaded,
- * this method does nothing.
- */
-void ModManager::loadSources(const int& count) {
+std::vector<ModSource> ModManager::loadSources(const int& count) {
+  std::vector<ModSource> loadedSources;
 
   // Total number of sources; including those that have yet to load their data.
   int sourceCount = this->_mod_source_names_.size();
@@ -134,13 +118,18 @@ void ModManager::loadSources(const int& count) {
   for (int i = this->_last_loaded_index_ + 1; i <= lastIndexToLoad; i++) {
     controller.source = this->_mod_source_names_[i];
     std::vector<std::string> mods = controller.loadMods(true);
-    int activeIndex = this->getActiveIndex(controller.source, mods);
-    this->_mod_source_cache_.insert({
+
+    ModSource source = ModSource(
       controller.source,
-      ModSource(controller.source, std::move(mods), activeIndex)
-    });
+      std::move(mods),
+      this->getActiveIndex(controller.source, mods)
+    );
+    loadedSources.push_back(source);
+    this->_mod_source_cache_.insert({ controller.source, source });
   }
 
   // Track the last one we loaded:
   this->_last_loaded_index_ = lastIndexToLoad;
+
+  return loadedSources;
 }

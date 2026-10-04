@@ -78,19 +78,7 @@ void GroupBrowser::loadSources(std::function<void (const std::vector<std::string
     loadingDialog->open();
     
     new std::thread([sources, fn, loadingDialog]() => {
-      
-      // Fraction that each "run" of deduplication makes up of the whole (sources + 1 group):
-      const float runFraction = 1 / (sources.size() + 1);
-
-      // Combine duplicate sources under the group folder:
-      FsManager::deduplicateFolderNames(controller.getGroupPath(), loadingDialog->getAtomicProgress(), runFraction);
-
-      // Combine duplicate mods under each source:
-      for (std::string& source : sources) {
-        controller.source = source;
-        FsManager::deduplicateFolderNames(controller.getSourcePath(), loadingDialog->getAtomicProgress(), runFraction);
-      }
-
+      FsManager::deduplicateFolderNames(controller.getGroupPath(), loadingDialog->getAtomicProgress());
       loadingDialog->close();
       fn(sources);
     });

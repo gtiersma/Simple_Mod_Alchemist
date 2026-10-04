@@ -67,6 +67,14 @@ private:
   void configureModSelector(brls::SelectorCell* selector, ModSource& mod, const int& index);
 
   /**
+   * Loads mod source data for sources listed within a proximity from the source selector index specified.
+   *
+   * While loading, also checks for mods in the loaded sources that have duplicates,
+   * merging the mod folders into a single folder.
+   */
+  void loadSourcesNearIndex(const int& index);
+
+  /**
    * Shows a list of files that were moved (in a dialog)
    *
    * @param files File list in the form of a single string.

@@ -139,8 +139,8 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
 
   // If focus is drawing near to the point where we don't have data loaded
   // for the mod sources that will come into view soon, we need to load the next chunk:
-  selector->getFocusEvent()->subscribe([index](brls::View* view) {
-    gameBrowser.getModManager().loadSourcesIfNeeded(index);
+  selector->getFocusEvent()->subscribe([this, index](brls::View* view) {
+    this->loadSourcesNearIndex(index);
   });
 
   selector->registerAction("Back", brls::BUTTON_B, [this](brls::View* view) {
@@ -169,6 +169,46 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
     RandomSettings::showInDialog();
     return true;
   });
+}
+
+void ModBrowser::loadSourcesNearIndex(const int& index) {
+  std::vector<ModSource> loadedSources = gameBrowser.getModManager().loadSourcesIfNeeded(index);
+
+  // Check for duplicate mods.
+  bool hasDuplicates = false;
+  for (ModSource& source : loadedSources) {
+    const int modCount = source.getModCount();
+
+    // Do reverse order to ensure any possible removed elements won't throw off the indices:
+    for (int i = modCount - 1; i > 0; i--) {
+
+      // Since mods are conveniently sorted, duplicates would be adjacent, so we only need to compare adjacent elements:
+      if (source.getMods()[i - 1] == source.getMods()[i]) {
+        source.getMods().erase(i);
+        hasDuplicates = true;
+      }
+    }
+  }
+
+  if (hasDuplicates) {
+    LoadingDialog* loadingDialog = LoadingDialog::build();
+    loadingDialog->setAction("Found mod folders that belong to the same mod. Combining them");
+    loadingDialog->open();
+    
+    new std::thread([loadedSources, loadingDialog]() => {
+      
+      // Fraction that each "run" of deduplication makes up of the whole:
+      const float runFraction = 1 / loadedSources.size();
+
+      // Combine duplicate mods under each source:
+      for (const std::string& source : loadedSources) {
+        controller.source = source.getSource();
+        FsManager::deduplicateFolderNames(controller.getSourcePath(), loadingDialog->getAtomicProgress(), runFraction);
+      }
+
+      loadingDialog->close();
+    });
+  }
 }
 
 void ModBrowser::showFileMoveReport(const std::string& files) {

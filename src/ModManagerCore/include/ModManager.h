@@ -40,6 +40,7 @@ class ModSource {
     const std::string& getSource() const { return this->source; }
     const std::vector<std::string>& getMods() const { return this->mods; }
     const std::vector<std::string>& getOptions() const { return this->options; }
+    const int& getModCount() { return this->mods.size(); }
 
     size_t getActiveIndex() const { return this->activeIndex; }
     void setActiveIndex(size_t index) { this->activeIndex = index; }
@@ -119,10 +120,14 @@ public:
   bool isSourceLoaded(const int& index);
 
   /**
-   * Checks to see if the source objects within a certain proximity of the specified index are all loaded.
-   * If not, it loads the next chunk.
+   * Will load data for more mod sources if the source "index" parameter is close enough to an index we haven't loaded data for yet.
+   *
+   * This ensures we always load data ahead of time while something like scrolling is happening.
+   *
+   * @returns A sorted vector only of the ModSources that were just loaded from this function call.
+   *          Empty if no loading occurred.
    */
-  void loadSourcesIfNeeded(const int& index);
+  std::vector<ModSource> loadSourcesIfNeeded(const int& index);
 
 private:
   GameBrowser* _owner_{nullptr};
@@ -148,10 +153,21 @@ private:
   std::map<std::string, ModSource> _mod_source_cache_;
 
   /**
-   * Loads however many more source objects specified by the count param.
-   * Does nothing if all source objects have already been loaded.
+   * Loads more data for the mod sources.
+   *
+   * There could be a lot of sources and each one requires individual filesystem operations
+   * to load their data, so we do it in batches.
+   *
+   * @param count The number of mod sources to load data for.
+   *              Loading starts at the next index of the last one that was loaded.
+   *              It then loads the number specified from that point.
+   *
+   * @returns A sorted vector only of the ModSources that were just loaded from this function call.
+   *
+   * If all sources in the current group have already had all their data loaded,
+   * this method does nothing.
    */
-  void loadSources(const int& count);
+  std::vector<ModSource> loadSources(const int& count);
 
   /**
    * The number of mod sources to load data for initially (the first time data is loaded for mods in a group)
