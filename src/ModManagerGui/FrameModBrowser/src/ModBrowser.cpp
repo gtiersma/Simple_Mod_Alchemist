@@ -208,6 +208,7 @@ void ModBrowser::loadSourcesNearIndex(const int& index) {
         FsManager::deduplicateFolderNames(controller.getSourcePath(), loadingDialog->getAtomicProgress(), runFraction);
       }
 
+      gameBrowser.getModManager().refreshActiveIndices();
       loadingDialog->close();
     });
   }

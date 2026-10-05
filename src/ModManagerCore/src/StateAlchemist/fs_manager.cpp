@@ -398,9 +398,26 @@ void FsManager::moveContents(
 
       moveContents(fromPath, toPath, conflictStrategy, fileMoveFn, folderMoveFn, nextPath);
 
+      s64 total = 0;
+      FsDir countDir;
+      Result countResult = fsFsOpenDirectory(
+        &sdSystem,
+        toPathBuffer(sourcePath).get(),
+        FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles,
+        &countDir
+      );
+      if (R_SUCCEEDED(countResult)) {
+        if (R_SUCCEEDED(fsDirGetEntryCount(&countDir, &total))) {
+          if (total == 0) {
+            std::filesystem::remove(sourcePath);
+          }
+        }
+        fsDirClose(&countDir);
+      }
+
       // Delete the folder only if it's now empty. The folder should be empty,
       // but if not for whatever reason, this should just silently break and skip it:
-      std::filesystem::remove(sourcePath);
+      //std::filesystem::remove(sourcePath); <- was causing crashing if not empty (I think?)
       //fsFsDeleteDirectory(&sdSystem, toPathBuffer(sourcePath).get());
     } else {
       brls::Logger::warning("Mod Alchemist: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));

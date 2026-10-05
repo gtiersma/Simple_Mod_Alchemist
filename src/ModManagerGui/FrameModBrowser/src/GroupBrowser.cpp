@@ -82,6 +82,8 @@ void GroupBrowser::loadSources(std::function<void (const std::vector<std::string
       loadingDialog->close();
       fn(sources);
     });
+  } else {
+    fn(sources);
   }
 }
 
