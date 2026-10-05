@@ -29,8 +29,10 @@ class GroupBrowser : public brls::Box {
      *
      * After loading them, it also checks for sources in the group that have duplicate folders,
      * merging them into a single folder.
+     * 
+     * @param completeFn The function to call after the sources have been loaded.
      */
-    void loadSources(std::function<void (const std::vector<std::string>& sources)> fn);
+    void loadSources(std::function<void ()> completeFn);
 
     ModBrowser* _current_mod_browser_{nullptr};
 };

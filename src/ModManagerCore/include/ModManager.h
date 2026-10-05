@@ -94,8 +94,11 @@ public:
    * Set the current sources for whichever group is currently loaded.
    * 
    * This will allow this mod manager to reset its state and load some initial mods for the source list.
+   * 
+   * @returns The initially loaded mod source objects for the specified sources.
+   *          Keep in mind NOT ALL sources are initially loaded for performance reasons.
    */
-  void setSources(const std::vector<std::string>& sources);
+  std::vector<ModSource> setSources(const std::vector<std::string>& sources);
 
   /**
    * Gets the source name at the specified index.
