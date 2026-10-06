@@ -538,9 +538,9 @@ std::string Controller::getModPath(const std::string& mod) {
 
 std::string Controller::getAtmosphereRoot(const std::string& basePath) {
   if (basePath.compare(0, PATCH_PATH.size(), PATCH_PATH) == 0) {
-    return "/" + ATMOSPHERE_FOLDER + "/"; // If starts with PATCH_PATH
+    return "/" + ATMOSPHERE_FOLDER; // If starts with PATCH_PATH
   }
-  return ATMOSPHERE_PATH + MetaManager::getHexTitleId(this->titleId) + "/";
+  return ATMOSPHERE_PATH + MetaManager::getHexTitleId(this->titleId);
 }
 
 std::string Controller::getMovedFilesListFilePath(const std::string& mod) {

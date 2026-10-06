@@ -72,7 +72,7 @@ std::vector<ModSource> ModManager::loadSourcesIfNeeded(const int& index) {
  * @param mods Ordered vector of mod names that belong to the source.
  */
 int ModManager::getActiveIndex(const std::string& source, const std::vector<std::string>& mods) {
-  unsigned activeIndex = -1;
+  int activeIndex = -1;
   std::string activeMod = controller.getActiveMod(source);
 
   if (activeMod.empty()) { return activeIndex; }
@@ -114,12 +114,9 @@ std::vector<ModSource> ModManager::loadSources(const int& count) {
   for (int i = this->_last_loaded_index_ + 1; i <= lastIndexToLoad; i++) {
     controller.source = this->_mod_source_names_[i];
     std::vector<std::string> mods = controller.loadMods(true);
+    const int activeIndex = this->getActiveIndex(controller.source, mods);
 
-    ModSource source = ModSource(
-      controller.source,
-      std::move(mods),
-      this->getActiveIndex(controller.source, mods)
-    );
+    ModSource source = ModSource(controller.source, std::move(mods), activeIndex);
     loadedSources.push_back(source);
     this->_mod_source_cache_.insert({ controller.source, source });
   }

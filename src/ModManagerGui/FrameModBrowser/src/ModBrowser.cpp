@@ -98,7 +98,7 @@ void ModBrowser::refreshSelections() {
   modList->reloadData();
 }
 
-void ModBrowser::handleModSelect(const ModSource& mod, size_t selectedIndex) {
+void ModBrowser::handleModSelect(ModSource& mod, size_t selectedIndex) {
 
   // Note: selection is -1 if backed out of selecting
   if (selectedIndex == -1) return;
@@ -108,16 +108,14 @@ void ModBrowser::handleModSelect(const ModSource& mod, size_t selectedIndex) {
   if (selectedIndex == 0) {
     // If the default option was chosen, deactivate whatever mod is active:
     controller.deactivateMod();
-    // Keep the cached UI state in sync with the filesystem.
-    gameBrowser.getModManager().refreshActiveIndices();
+    mod.setActiveIndex(-1);
   } else if (mod.getActiveIndex() != selectedIndex - 1) {
     // If the mod was changed, deactivate the old one and activate the new one:
     controller.deactivateMod();
     // mod.mods doesn't have the default option at the begining, so index must be offset by -1:
     std::string activatedMod = mod.getMods()[selectedIndex - 1];
     controller.activateMod(activatedMod);
-    // Keep the cached UI state in sync with the filesystem.
-    gameBrowser.getModManager().refreshActiveIndices();
+    mod.setActiveIndex(selectedIndex - 1);
 
     // Show the list of files that were moved to the atmosphere folder:
     std::string movedFiles = controller.getMovedFilesList(activatedMod);
