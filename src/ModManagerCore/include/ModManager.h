@@ -108,17 +108,21 @@ public:
    */
   std::vector<ModSource> reloadSources();
 
+  ModSource& getSource(const std::string& name);
+
+  /**
+   * Gets the source object for the source name at the specified index.
+   * Assumes that we already know the source object at that index has been loaded.
+   * 
+   * @assumes There's a loaded object for the specified index.
+   */
+  ModSource& getSourceByIndex(const int& index);
+
   /**
    * Gets the source name at the specified index.
    * Source does not need to be loaded. 
    */
   std::string getSourceName(const int& index);
-
-  /**
-   * Gets the source object for the source name at the specified index.
-   * Assumes that we already know the source object at that index has been loaded.
-   */
-  ModSource& getSource(const int& index);
 
   /**
    * Gets the total number of sources in the group; whether loaded or not

@@ -25,7 +25,7 @@ ConfigHolder& ModManager::getConfig(){
   return _owner_->getConfigHandler().getConfig();
 }
 
-td::vector<ModSource> ModManager::setSources(const std::vector<std::string>& sources) {
+std::vector<ModSource> ModManager::setSources(const std::vector<std::string>& sources) {
   this->_mod_source_names_ = sources;
   this->_last_loaded_index_ = -1;
   return this->reloadSources();
@@ -36,13 +36,12 @@ std::vector<ModSource> ModManager::reloadSources() {
   return this->loadSources(ModManager::_INIT_CHUNK_SIZE_);
 }
 
-/**
- * Gets the data related to a moddable thing in the game (aka source)
- * 
- * @warning Expects we already know there's a loaded object for the specified index.
- */
-ModSource& ModManager::getSource(const int& index) {
-  return this->_mod_source_cache_[this->_mod_source_names_[index]];
+ModSource& ModManager::getSource(const std::string& name) {
+  return this->_mod_source_cache_[name];
+}
+
+ModSource& ModManager::getSourceByIndex(const int& index) {
+  return this->getSource(this->_mod_source_names_[index]);
 }
 
 std::string ModManager::getSourceName(const int& index) {

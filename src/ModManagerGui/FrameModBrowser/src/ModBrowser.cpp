@@ -58,7 +58,7 @@ brls::RecyclerCell* ModDataSource::cellForRow(brls::RecyclerFrame* recycler, brl
     
     // CASE: Selector for mods
     brls::SelectorCell* item = (brls::SelectorCell*)recycler->dequeueReusableCell("Selector");
-    ModSource& source = modManager.getSource(indexPath.row);
+    ModSource& source = modManager.getSourceByIndex(indexPath.row);
     this->_selector_config_fn_(item, source, indexPath.row);
     return item;
 
@@ -74,9 +74,10 @@ brls::RecyclerCell* ModDataSource::cellForRow(brls::RecyclerFrame* recycler, brl
 }
 
 ModBrowser::ModBrowser(brls::View* parentCell): _parent_cell_(parentCell) {
+  std::vector<ModSource> sources = gameBrowser.getModManager().setSources(controller.loadSources(true));
   this->inflateFromXMLRes("xml/FrameModBrowser/mod_browser.xml");
   this->deduplicateMods(
-    gameBrowser.getModManager().setSources(controller.loadSources(true)),
+    sources,
     [this]() {
 
       // This is just a random number I tossed here that sounded right,
@@ -189,7 +190,9 @@ void ModBrowser::deduplicateMods(std::vector<ModSource> sources, std::function<v
 
       // Since mods are conveniently sorted, duplicates would be adjacent, so we only need to compare adjacent elements:
       if (source.getMods()[i - 1] == source.getMods()[i]) {
-        source.removeMod(i);
+
+        // Don't modify the ModSource we're iterating on; it's a copy; get the original:
+        gameBrowser.getModManager().getSource(source.getSource()).removeMod(i);
         hasDuplicates = true;
       }
     }
