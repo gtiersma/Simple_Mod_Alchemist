@@ -25,9 +25,13 @@ ConfigHolder& ModManager::getConfig(){
   return _owner_->getConfigHandler().getConfig();
 }
 
-std::vector<ModSource> ModManager::setSources(const std::vector<std::string>& sources) {
+td::vector<ModSource> ModManager::setSources(const std::vector<std::string>& sources) {
   this->_mod_source_names_ = sources;
   this->_last_loaded_index_ = -1;
+  return this->reloadSources();
+}
+
+std::vector<ModSource> ModManager::reloadSources() {
   this->_mod_source_cache_.clear();
   return this->loadSources(ModManager::_INIT_CHUNK_SIZE_);
 }

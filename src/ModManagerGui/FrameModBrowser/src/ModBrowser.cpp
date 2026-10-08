@@ -75,21 +75,26 @@ brls::RecyclerCell* ModDataSource::cellForRow(brls::RecyclerFrame* recycler, brl
 
 ModBrowser::ModBrowser(brls::View* parentCell): _parent_cell_(parentCell) {
   this->inflateFromXMLRes("xml/FrameModBrowser/mod_browser.xml");
+  this->deduplicateMods(
+    gameBrowser.getModManager().setSources(controller.loadSources(true)),
+    [this]() {
 
-  // This is just a random number I tossed here that sounded right,
-  // and it seems to be working.
-  // TODO: Is this really the right number though?
-  modList->estimatedRowHeight = 70;
+      // This is just a random number I tossed here that sounded right,
+      // and it seems to be working.
+      // TODO: Is this really the right number though?
+      modList->estimatedRowHeight = 70;
 
-  modList->registerCell("Selector", []() { return new brls::SelectorCell(); });
-  modList->registerCell("Note", []() { return new brls::NoteCell(); });
+      modList->registerCell("Selector", []() { return new brls::SelectorCell(); });
+      modList->registerCell("Note", []() { return new brls::NoteCell(); });
 
-  modList->setDataSource(
-    new ModDataSource(
-      [this](brls::SelectorCell* selector, ModSource& mod, const int& index) {
-        this->configureModSelector(selector, mod, index);
-      }
-    )
+      modList->setDataSource(
+        new ModDataSource(
+          [this](brls::SelectorCell* selector, ModSource& mod, const int& index) {
+            this->configureModSelector(selector, mod, index);
+          }
+        )
+      );
+    }
   );
 }
 
@@ -140,7 +145,8 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
   // If focus is drawing near to the point where we don't have data loaded
   // for the mod sources that will come into view soon, we need to load the next chunk:
   selector->getFocusEvent()->subscribe([this, index](brls::View* view) {
-    this->loadSourcesNearIndex(index);
+    std::vector<ModSource> sources = gameBrowser.getModManager().loadSourcesIfNeeded(index);
+    this->deduplicateMods(sources);
   });
 
   selector->registerAction("Back", brls::BUTTON_B, [this](brls::View* view) {
@@ -171,12 +177,11 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
   });
 }
 
-void ModBrowser::loadSourcesNearIndex(const int& index) {
-  std::vector<ModSource> loadedSources = gameBrowser.getModManager().loadSourcesIfNeeded(index);
+void ModBrowser::deduplicateMods(std::vector<ModSource> sources, std::function<void ()> completeFn) {
 
   // Check for duplicate mods.
   bool hasDuplicates = false;
-  for (ModSource& source : loadedSources) {
+  for (ModSource& source : sources) {
     const int modCount = source.getModCount();
 
     // Do reverse order to ensure any possible removed elements won't throw off the indices:
@@ -195,20 +200,23 @@ void ModBrowser::loadSourcesNearIndex(const int& index) {
     loadingDialog->setAction("Found mod folders that belong to the same mod. Combining them");
     loadingDialog->open();
     
-    new std::thread([loadedSources, loadingDialog]() {
+    new std::thread([sources, completeFn, loadingDialog]() {
       
       // Fraction that each "run" of deduplication makes up of the whole:
-      const float runFraction = 1 / loadedSources.size();
+      const float runFraction = 1 / sources.size();
 
       // Combine duplicate mods under each source:
-      for (const ModSource& source : loadedSources) {
+      for (const ModSource& source : sources) {
         controller.source = source.getSource();
         FsManager::deduplicateFolderNames(controller.getSourcePath(), loadingDialog->getAtomicProgress(), runFraction);
       }
 
       gameBrowser.getModManager().refreshActiveIndices();
       loadingDialog->close();
+      completeFn();
     });
+  } else {
+    completeFn();
   }
 }
 

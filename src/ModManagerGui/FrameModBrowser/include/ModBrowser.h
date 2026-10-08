@@ -11,6 +11,7 @@
 
 #include <borealis.hpp>
 
+#include <functional>
 #include <vector>
 #include <string>
 
@@ -67,12 +68,12 @@ private:
   void configureModSelector(brls::SelectorCell* selector, ModSource& mod, const int& index);
 
   /**
-   * Loads mod source data for sources listed within a proximity from the source selector index specified.
-   *
-   * While loading, also checks for mods in the loaded sources that have duplicates,
+   * Checks for mods in the sources currently loaded for mods that have duplicates,
    * merging the mod folders into a single folder.
+   * 
+   * @param completeFn Optional function to call after the sources have been loaded.
    */
-  void loadSourcesNearIndex(const int& index);
+  void deduplicateMods(std::vector<ModSource> sources, std::function<void ()> completeFn = []() {});
 
   /**
    * Shows a list of files that were moved (in a dialog)

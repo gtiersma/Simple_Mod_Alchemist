@@ -37,7 +37,7 @@ GroupBrowser::GroupBrowser() {
       }
 
       controller.group = group;
-      this->loadSources([this, view]() {
+      this->deduplicateSources([this, view]() {
         this->_current_mod_browser_ = new ModBrowser(view);
         this->addView(this->_current_mod_browser_);
       });
@@ -57,30 +57,17 @@ GroupBrowser::GroupBrowser() {
   });
 }
 
-void GroupBrowser::loadSources(std::function<void ()> completeFn) {
+void GroupBrowser::deduplicateSources(std::function<void ()> completeFn) {
   std::vector<std::string> sourceNames = controller.loadSources(true);
 
   // Check for duplicate entries.
-  // Since entries are conveniently sorted, duplicates would be adjacent, so we only need to compare adjacent elements.
   bool hasDuplicates = false;
   const int sourceCount = sourceNames.size();
   for (int i = sourceCount - 1; i > 0; i--) {
+    // Since entries are conveniently sorted, duplicates would be adjacent, so we only need to compare adjacent elements.
     if (sourceNames[i - 1] == sourceNames[i]) {
       sourceNames.erase(sourceNames.begin() + i);
       hasDuplicates = true;
-    }
-  }
-
-  std::vector<ModSource> sources = gameBrowser.getModManager().setSources(sourceNames);
-  for (ModSource& source : sources) {
-    const int modCount = source.getModCount();
-
-    // Do reverse order to ensure any possible removed elements won't throw off the indices:
-    for (int i = modCount - 1; i > 0; i--) {
-      if (source.getMods()[i - 1] == source.getMods()[i]) {
-        source.removeMod(i);
-        hasDuplicates = true;
-      }
     }
   }
 
@@ -88,29 +75,12 @@ void GroupBrowser::loadSources(std::function<void ()> completeFn) {
     LoadingDialog* loadingDialog = LoadingDialog::build();
     loadingDialog->setAction("Found mod folders that belong to the same mod. Combining them");
     loadingDialog->open();
-    
-    new std::thread([sources, completeFn, loadingDialog]() {
 
-      // Fraction that each "run" of deduplication makes up of the whole (+1 for the group):
-      const float runFraction = 1 / sources.size() + 1;
-
+    new std::thread([completeFn, loadingDialog]() {
       FsManager::deduplicateFolderNames(
         controller.getGroupPath(),
-        loadingDialog->getAtomicProgress(),
-        runFraction
+        loadingDialog->getAtomicProgress()
       );
-
-      for (const ModSource& source : sources) {
-        controller.source = source.getSource();
-        FsManager::deduplicateFolderNames(
-          controller.getSourcePath(),
-          loadingDialog->getAtomicProgress(),
-          runFraction
-        );
-      }
-
-      gameBrowser.getModManager().refreshActiveIndices();
-
       loadingDialog->close();
       completeFn();
     });

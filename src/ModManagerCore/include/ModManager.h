@@ -101,6 +101,14 @@ public:
   std::vector<ModSource> setSources(const std::vector<std::string>& sources);
 
   /**
+   * Clears the source data that is currently loaded, reloading fresh data from the SD card.
+   *
+   * @returns The initially loaded mod source objects for the specified sources.
+   *          Keep in mind NOT ALL sources are initially loaded for performance reasons.
+   */
+  std::vector<ModSource> reloadSources();
+
+  /**
    * Gets the source name at the specified index.
    * Source does not need to be loaded. 
    */
