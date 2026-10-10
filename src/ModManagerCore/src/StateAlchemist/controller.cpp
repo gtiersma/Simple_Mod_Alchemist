@@ -4,8 +4,6 @@
 #include "StateAlchemist/fs_manager.h"
 #include "StateAlchemist/meta_manager.h"
 
-#include <borealis/core/logger.hpp>
-
 #include <set>
 
 
@@ -40,7 +38,7 @@ bool Controller::doesGameHaveFolder() {
  *             Can take considerable performance when in nested loops, so sometimes it's good to skip if not needed
  */
 std::vector<std::string> Controller::loadGroups(bool sort) {
-  return FsManager::listNames(this->getGamePath(), sort);
+  return FsManager::loadNames(this->getGamePath(), sort);
 }
 
 /**
@@ -52,7 +50,7 @@ std::vector<std::string> Controller::loadGroups(bool sort) {
  * @requirement: group must be set
  */
 std::vector<std::string> Controller::loadSources(bool sort) {
-  return FsManager::listNames(this->getGroupPath(), sort);
+  return FsManager::loadNames(this->getGroupPath(), sort);
 }
 
 /**
@@ -64,7 +62,7 @@ std::vector<std::string> Controller::loadSources(bool sort) {
  * @requirement: group and source must be set
  */
 std::vector<std::string> Controller::loadMods(bool sort) {
-  return FsManager::listNames(this->getSourcePath(), sort);
+  return FsManager::loadNames(this->getSourcePath(), sort);
 }
 
 
@@ -151,13 +149,6 @@ void Controller::saveDefaultRating(const u8& rating) {
   );
 }
 
-/**
- * Gets the mod currently activated for the source
- *
- * Returns an empty string if no mod is active and vanilla files are being used
- * 
- * @requirement: group and must be set
- */
 std::string Controller::getActiveMod(const std::string& source) {
 
   // Open to the correct source directory
@@ -192,18 +183,6 @@ std::string Controller::getActiveMod(const std::string& source) {
   return activeMod;
 }
 
-/**
- * Activates the specified mod, moving all its files into the atmosphere folder for the game
- * 
- * Make sure to deactivate any existing active mod for this source if there is one
- * 
- * Mod won't be activated if EVERY file belonging to it has a conflict with a file already in the atmosphere folder
- * 
- * @requirement:
- *  - group and source must be set
- *  - "mod" parameter must not currently be active
- *  - the title ID folder for the current game must already exist in Atmosphere's "content" folder
- */
 void Controller::activateMod(const std::string& mod) {
 
   // Path to the "mod" folder in alchemy's directory:
@@ -215,71 +194,27 @@ void Controller::activateMod(const std::string& mod) {
   // Position in the txt file where we should write the next file path:
   s64 txtOffset = 0;
 
-  // Recursively move every file of the mod, recording each one in the txt file:
-  this->moveModFiles(modPath, "", movedFilesFile, txtOffset);
+  // Extra functionality to record each file as it is moved:
+  std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn =
+    [&movedFilesFile, &txtOffset](const std::string& relativePath, bool conflicts) {
+      if (!conflicts) {
+        FsManager::write(movedFilesFile, relativePath + "\n", txtOffset);
+      }
+    };
 
+  // Extra functionality to move patch folders and files to their alternate directory:
+  std::function<void (const std::string& relativePath)> folderMoveFn =
+    [modPath, fileMoveFn](const std::string& relativePath) {
+      if (relativePath == "/" + PATCH_PATH) {
+        const std::string patchAtmoPath = "/" + ATMOSPHERE_FOLDER + relativePath;
+        FsManager::createFolderIfNeeded(patchAtmoPath);
+        FsManager::moveContents(modPath, patchAtmoPath, ConflictStrategy::KEEP_BOTH, fileMoveFn);
+      }
+    };
+
+  // Begin recursively moving every file of the mod:
+  FsManager::moveContents(modPath, this->getAtmosphereRoot(), ConflictStrategy::KEEP_BOTH, fileMoveFn, folderMoveFn);
   fsFileClose(&movedFilesFile);
-}
-
-/**
- * Recursively moves the files of a mod from its folder into the atmosphere folder for the game.
- *
- * Every folder is enumerated with its own fresh FsDir handle opened from scratch, so a folder that
- * is reported (or read) incorrectly by the filesystem doesn't cause the remaining entries of its
- * parent to be skipped (unlike the previous approach that reused a single handle and tracked
- * iteration indices to jump between folders).
- */
-void Controller::moveModFiles(
-  const std::string& modPath,
-  const std::string& currentBasePath,
-  FsFile& movedFilesFile,
-  s64& txtOffset
-) {
-  std::vector<FsDirectoryEntry> entries;
-  FsManager::readAllEntries(modPath + currentBasePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
-
-  for (FsDirectoryEntry& entry : entries) {
-    std::string nextPath = currentBasePath + "/" + entry.name;
-    const std::string sourcePath = modPath + nextPath;
-    const std::string targetPath = this->getAtmosphereRoot(nextPath) + nextPath;
-
-    // If the next entry is a file, we will move it and record it as moved as long as there isn't a conflict.
-    //
-    // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
-    // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
-    // since some filesystems can report corrupt or unexpected entry types.
-    bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
-    bool isDirectory = entry.type == FsDirEntryType_Dir;
-
-    if (!isFile && !isDirectory) {
-      isDirectory = FsManager::doesFolderExist(sourcePath);
-
-      if (!isDirectory) {
-        isFile = FsManager::doesFileExist(sourcePath);
-      }
-    }
-
-    if (isFile) {
-      // If a file already exists in the location we'll move it to, there's a conflict:
-      bool fileConflict = FsManager::doesFileExist(targetPath);
-      if (!fileConflict) {
-        // Record the file we're moving, and move it:
-        FsManager::write(movedFilesFile, nextPath + "\n", txtOffset);
-        FsManager::moveFile(sourcePath, targetPath);
-      }
-    // If the next entry is a folder, we will traverse within it:
-    } else if (isDirectory) {
-      FsManager::createFolderIfNeeded(targetPath);
-
-      this->moveModFiles(modPath, nextPath, movedFilesFile, txtOffset);
-
-      // Delete the folder only if it's now empty. The folder should be empty,
-      // but if not for whatever reason, this should just silently break and skip it:
-      fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(sourcePath).get());
-    } else {
-      brls::Logger::warning("Mod Alchemist: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
-    }
-  }
 }
 
 /**
@@ -495,20 +430,12 @@ Controller::Controller() {
   MetaManager::tryResult(fsOpenSdCardFileSystem(&FsManager::sdSystem));
 }
 
-/**
- * Unmount SD card when destroyed 
- */
 Controller::~Controller() {
   fsFsClose(&FsManager::sdSystem);
   pminfoExit();
   pmdmntExit();
 }
 
-/**
- * Returns all files belonging to a mod from the atmosphere active mods folder to their original location
- * 
- * Essentially the same as deactivating the mod, except this can't be used with the default mod option.
- */
 void Controller::returnFiles(const std::string& mod) {
   std::unique_ptr<char[]> movedFilesListPath = FsManager::toPathBuffer(this->getMovedFilesListFilePath(mod));
   std::string modPath = this->getModPath(mod);
@@ -611,9 +538,9 @@ std::string Controller::getModPath(const std::string& mod) {
 
 std::string Controller::getAtmosphereRoot(const std::string& basePath) {
   if (basePath.compare(0, PATCH_PATH.size(), PATCH_PATH) == 0) {
-    return "/" + ATMOSPHERE_FOLDER + "/"; // If starts with PATCH_PATH
+    return "/" + ATMOSPHERE_FOLDER; // If starts with PATCH_PATH
   }
-  return ATMOSPHERE_PATH + MetaManager::getHexTitleId(this->titleId) + "/";
+  return ATMOSPHERE_PATH + MetaManager::getHexTitleId(this->titleId);
 }
 
 std::string Controller::getMovedFilesListFilePath(const std::string& mod) {

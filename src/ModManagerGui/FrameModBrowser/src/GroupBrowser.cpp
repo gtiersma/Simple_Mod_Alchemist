@@ -5,8 +5,10 @@
 #include "GroupBrowser.h"
 #include "ModBrowser.h"
 #include "util.hpp"
+#include "loading_dialog.hpp"
 
 #include <StateAlchemist/controller.h>
+#include <StateAlchemist/fs_manager.h>
 
 
 using namespace brls::literals;
@@ -25,8 +27,6 @@ GroupBrowser::GroupBrowser() {
       // Only trigger when the sidebar item gains focus
       if (!view->isFocused())
         return;
-
-      gameBrowser.getModManager().setGroup(group);
       
       // Remove the old group list before showing the new one
       // (if there is currently one shown).
@@ -36,8 +36,16 @@ GroupBrowser::GroupBrowser() {
         this->removeView(this->getChildren()[1]);
       }
 
-      this->_current_mod_browser_ = new ModBrowser(view);
-      this->addView(this->_current_mod_browser_);
+      // Handle merging folders that could exist belonging to the same source/mods:
+      controller.group = group;
+      this->deduplicateSources([this, view]() {
+        std::vector<ModSource> sources = gameBrowser.getModManager().setSources(controller.loadSources(true));
+        this->_current_mod_browser_ = new ModBrowser(view);
+        this->_current_mod_browser_->deduplicateMods(
+          sources,
+          [this]() { this->addView(this->_current_mod_browser_); }
+        );
+      });
     });
   }
 
@@ -52,6 +60,38 @@ GroupBrowser::GroupBrowser() {
     )->open();
     return true;
   });
+}
+
+void GroupBrowser::deduplicateSources(std::function<void ()> completeFn) {
+  std::vector<std::string> sourceNames = controller.loadSources(true);
+
+  // Check for duplicate entries.
+  bool hasDuplicates = false;
+  const int sourceCount = sourceNames.size();
+  for (int i = sourceCount - 1; i > 0; i--) {
+    // Since entries are conveniently sorted, duplicates would be adjacent, so we only need to compare adjacent elements.
+    if (sourceNames[i - 1] == sourceNames[i]) {
+      sourceNames.erase(sourceNames.begin() + i);
+      hasDuplicates = true;
+    }
+  }
+
+  if (hasDuplicates) {
+    LoadingDialog* loadingDialog = LoadingDialog::build();
+    loadingDialog->setAction("Found mod folders that belong to the same mod. Combining them");
+    loadingDialog->open();
+
+    new std::thread([completeFn, loadingDialog]() {
+      FsManager::deduplicateFolderNames(
+        controller.getGroupPath(),
+        loadingDialog->getAtomicProgress()
+      );
+      loadingDialog->close();
+      completeFn();
+    });
+  } else {
+    completeFn();
+  }
 }
 
 GroupBrowser* GroupBrowser::create() {

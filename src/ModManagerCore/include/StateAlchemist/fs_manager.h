@@ -7,6 +7,14 @@
 #include <string>
 #include <memory>
 #include <functional>
+#include <atomic>
+
+
+enum class ConflictStrategy {
+  OVERWRITE_TARGET, // Delete target file, moving source file in its place
+  PRESERVE_TARGET, // Leave target file; delete source file
+  KEEP_BOTH // Leave both target & source file
+};
 
 
 /**
@@ -40,12 +48,34 @@ namespace FsManager {
 
   /**
    * Gets a vector of all entity names that are directly within the specified path
-   * (parsing the name from the folder name)
+   * (parsing the name from the folder name).
+   *
+   * While doing that, it also checks for the existence of folders that belong to the same entity, but have different names.
+   * This is rare, but could happen when the user copies folder structures around.
+   * Having multiple folders for the same entity could break things.
+   * If duplicates are found, the folders get combined into one to prevent the issue.
    * 
-   * @param sort Whether to sort the list of names alphabetically or not
-   *             Can take considerable performance when in nested loops, so sometimes it's good to skip if not needed
+   * @param sort Whether to sort the list of names alphabetically or not.
+   *             Can take considerable performance when in nested loops, so sometimes it's good to skip if not needed.
    */
-  std::vector<std::string> listNames(const std::string& path, bool sort);
+  std::vector<std::string> loadNames(const std::string& path, bool sort);
+
+  /**
+   * Combines any folders that are found with duplicate entity names under the same path.
+   *
+   * @param path The directory to look for duplicates directly within.
+   *
+   * @param progress Scale of 0.0-1.0 of the current deduplication progress.
+   *                 Updated while the method runs.
+   * 
+   * @param percentageOfWhole If there is other work happening in other methods
+                              (or this method is being called multiple times),
+   *                          include the percentage of the total work that this method call makes up.
+   *                          The method will only increase the progress by that percentage.
+   *                          By default, it's expected that this is the only code to be progress-tracked,
+   *                          so the progress param is at 0% and it will move forward to 100%.
+   */
+  void deduplicateFolderNames(const std::string& path, std::atomic<float>& progress, const float& percentageOfWhole = 1.0f);
 
   /**
    * Reads every directory entry of the specified path into the given vector.
@@ -56,7 +86,9 @@ namespace FsManager {
    * reported entry count is reached.
    *
    * @param path The folder to read
+   *
    * @param mode FsDirOpenMode flags for how the folder should be opened
+   *
    * @param out The vector to fill with the directory entries. It is cleared first.
    */
   void readAllEntries(const std::string& path, const u32& mode, std::vector<FsDirectoryEntry>& out);
@@ -84,6 +116,29 @@ namespace FsManager {
    * If any folders in the "toPath" don't exist, it creates them.
    */
   void moveFile(const std::string& fromPath, const std::string& toPath);
+
+  /**
+   * Moves everything from within a folder into a different folder.
+   *
+   * @param fromPath     The folder path to move contents out of.
+   * @param toPath       The folder path to move contents into.
+   * @param overwrite    Action to take if file conflict occurs. See enum.
+   *                     Default: OVERWRITE_TARGET
+   * @param fileMoveFn   Optionally provide a callback to run every time a file is moved.
+   *                       @subparam relativePath The base file path being moved (from the relative point of "toPath").
+   *                       @subparam conflicts    True if the files conflicts with an already-existing file under "toPath".
+   * @param folderMoveFn Optionally provide a callback to run every time a folder is moved.
+   *                       @subparam relativePath The base folder path being moved (from the relative point of "toPath").
+   * @param basePath     USED ONLY IN RECURSIVE CALLS. The base file path being moved (from the relative point of "toPath").
+   */
+  void moveContents(
+    const std::string& fromPath,
+    const std::string& toPath,
+    ConflictStrategy conflictStrategy = ConflictStrategy::OVERWRITE_TARGET,
+    std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn = [](const std::string&, bool conflicts) {},
+    std::function<void (const std::string& relativePath)> folderMoveFn = [](const std::string&) {},
+    const std::string& basePath = ""
+  );
 
   /**
    * Performs the provided function on every folder in the path of a file.

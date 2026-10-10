@@ -7,9 +7,11 @@
 #include "RandomSettings.h"
 
 #include <StateAlchemist/controller.h>
+#include <StateAlchemist/fs_manager.h>
 #include <StateAlchemist/meta_manager.h>
 #include <note_cell.hpp>
 #include <d_down_scroller.hpp>
+#include <loading_dialog.hpp>
 
 
 using namespace brls::literals;
@@ -56,7 +58,7 @@ brls::RecyclerCell* ModDataSource::cellForRow(brls::RecyclerFrame* recycler, brl
     
     // CASE: Selector for mods
     brls::SelectorCell* item = (brls::SelectorCell*)recycler->dequeueReusableCell("Selector");
-    ModSource& source = modManager.getSource(indexPath.row);
+    ModSource& source = modManager.getSourceByIndex(indexPath.row);
     this->_selector_config_fn_(item, source, indexPath.row);
     return item;
 
@@ -72,6 +74,7 @@ brls::RecyclerCell* ModDataSource::cellForRow(brls::RecyclerFrame* recycler, brl
 }
 
 ModBrowser::ModBrowser(brls::View* parentCell): _parent_cell_(parentCell) {
+  std::vector<ModSource> sources = gameBrowser.getModManager().setSources(controller.loadSources(true));
   this->inflateFromXMLRes("xml/FrameModBrowser/mod_browser.xml");
 
   // This is just a random number I tossed here that sounded right,
@@ -96,7 +99,7 @@ void ModBrowser::refreshSelections() {
   modList->reloadData();
 }
 
-void ModBrowser::handleModSelect(const ModSource& mod, size_t selectedIndex) {
+void ModBrowser::handleModSelect(ModSource& mod, size_t selectedIndex) {
 
   // Note: selection is -1 if backed out of selecting
   if (selectedIndex == -1) return;
@@ -106,16 +109,14 @@ void ModBrowser::handleModSelect(const ModSource& mod, size_t selectedIndex) {
   if (selectedIndex == 0) {
     // If the default option was chosen, deactivate whatever mod is active:
     controller.deactivateMod();
-    // Keep the cached UI state in sync with the filesystem.
-    gameBrowser.getModManager().refreshActiveIndices();
+    mod.setActiveIndex(-1);
   } else if (mod.getActiveIndex() != selectedIndex - 1) {
     // If the mod was changed, deactivate the old one and activate the new one:
     controller.deactivateMod();
     // mod.mods doesn't have the default option at the begining, so index must be offset by -1:
     std::string activatedMod = mod.getMods()[selectedIndex - 1];
     controller.activateMod(activatedMod);
-    // Keep the cached UI state in sync with the filesystem.
-    gameBrowser.getModManager().refreshActiveIndices();
+    mod.setActiveIndex(selectedIndex - 1);
 
     // Show the list of files that were moved to the atmosphere folder:
     std::string movedFiles = controller.getMovedFilesList(activatedMod);
@@ -139,8 +140,9 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
 
   // If focus is drawing near to the point where we don't have data loaded
   // for the mod sources that will come into view soon, we need to load the next chunk:
-  selector->getFocusEvent()->subscribe([index](brls::View* view) {
-    gameBrowser.getModManager().loadSourcesIfNeeded(index);
+  selector->getFocusEvent()->subscribe([this, index](brls::View* view) {
+    std::vector<ModSource> sources = gameBrowser.getModManager().loadSourcesIfNeeded(index);
+    this->deduplicateMods(sources);
   });
 
   selector->registerAction("Back", brls::BUTTON_B, [this](brls::View* view) {
@@ -169,6 +171,51 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
     RandomSettings::showInDialog();
     return true;
   });
+}
+
+void ModBrowser::deduplicateMods(std::vector<ModSource> sources, std::function<void ()> completeFn) {
+
+  // Check for duplicate mods.
+  bool hasDuplicates = false;
+  for (ModSource& source : sources) {
+    const int modCount = source.getModCount();
+
+    // Do reverse order to ensure any possible removed elements won't throw off the indices:
+    for (int i = modCount - 1; i > 0; i--) {
+
+      // Since mods are conveniently sorted, duplicates would be adjacent, so we only need to compare adjacent elements:
+      if (source.getMods()[i - 1] == source.getMods()[i]) {
+
+        // Don't modify the ModSource we're iterating on; it's a copy; get the original:
+        gameBrowser.getModManager().getSource(source.getSource()).removeMod(i);
+        hasDuplicates = true;
+      }
+    }
+  }
+
+  if (hasDuplicates) {
+    LoadingDialog* loadingDialog = LoadingDialog::build();
+    loadingDialog->setAction("Found mod folders that belong to the same mod. Combining them");
+    loadingDialog->open();
+    
+    new std::thread([sources, completeFn, loadingDialog]() {
+      
+      // Fraction that each "run" of deduplication makes up of the whole:
+      const float runFraction = 1 / sources.size();
+
+      // Combine duplicate mods under each source:
+      for (const ModSource& source : sources) {
+        controller.source = source.getSource();
+        FsManager::deduplicateFolderNames(controller.getSourcePath(), loadingDialog->getAtomicProgress(), runFraction);
+      }
+
+      gameBrowser.getModManager().refreshActiveIndices();
+      loadingDialog->close();
+      completeFn();
+    });
+  } else {
+    completeFn();
+  }
 }
 
 void ModBrowser::showFileMoveReport(const std::string& files) {

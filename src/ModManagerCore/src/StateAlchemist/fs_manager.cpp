@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <cstring>
 #include <set>
+#include <filesystem>
+
 
 FsFileSystem FsManager::sdSystem;
 
@@ -172,31 +174,17 @@ bool FsManager::hasFilesDeep(const std::string& path) {
   return hasFiles;
 }
 
-/**
- * Gets a vector of all entity names that are directly within the specified path
- * (parsing the name from the folder name)
- * 
- * @param sort Whether to sort the list of names alphabetically or not
- *             Can take considerable performance when in nested loops, so sometimes it's good to skip if not needed
- */
-std::vector<std::string> FsManager::listNames(const std::string& path, bool sort) {
+std::vector<std::string> FsManager::loadNames(const std::string& path, bool sort) {
+  std::vector<FsDirectoryEntry> entries;
+  readAllEntries(path, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
+
   std::vector<std::string> names;
-
-  FsDir dir = FsManager::openFolder(path, FsDirOpenMode_ReadDirs);
-
-  std::vector<FsDirectoryEntry> entries(MAX_FS_ENTRY_LOAD);
-  s64 readCount = 0;
-  while (R_SUCCEEDED(fsDirRead(&dir, &readCount, MAX_FS_ENTRY_LOAD, entries.data())) && readCount) {
-    for (int i = 0; i < readCount; i++) {
-      FsDirectoryEntry entry = entries[i];
-      // Exclude hidden folders that start with "."
-      if (entry.type == FsDirEntryType_Dir && entry.name[0] != '.') {
-        names.push_back(MetaManager::parseName(entry.name));
-      }
+  for (FsDirectoryEntry& entry : entries) {
+    // Exclude hidden folders that start with "."
+    if (entry.type == FsDirEntryType_Dir && entry.name[0] != '.') {
+      names.push_back(MetaManager::parseName(entry.name));
     }
   }
-
-  fsDirClose(&dir);
 
   if (sort) {
     std::sort(names.begin(), names.end());
@@ -205,14 +193,41 @@ std::vector<std::string> FsManager::listNames(const std::string& path, bool sort
   return names;
 }
 
-/**
- * Reads every directory entry of the specified path into the given vector.
- *
- * The filesystem can sometimes report a premature "end of directory" before all
- * entries have been returned (see hasFilesDeep). To work around that, the directory
- * is reopened with a fresh handle and re-read until no new entries are found or the
- * reported entry count is reached.
- */
+void FsManager::deduplicateFolderNames(const std::string& path, std::atomic<float>& progress, const float& percentageOfWhole) {
+  std::vector<FsDirectoryEntry> entries;
+  readAllEntries(path, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
+
+  // Map of the parsed name of the entity TO the original folder name it came from:
+  std::unordered_map<std::string, std::string> parsedToFolder = {};
+
+  const float progressPerEntry = percentageOfWhole / entries.size();
+
+  for (FsDirectoryEntry& entry : entries) {
+    // Exclude hidden folders that start with "."
+    if (entry.type == FsDirEntryType_Dir && entry.name[0] != '.') {
+      const std::string parsedName = MetaManager::parseName(entry.name);
+      
+      // Check for folders that are getting parsed to the same name.
+      auto duplicate = parsedToFolder.find(parsedName);
+      if (duplicate == parsedToFolder.end()) {
+        parsedToFolder[parsedName] = entry.name;
+      } else { // If a duplicate is found, combine them:
+
+        // Favor keeping the longer folder name since that one must have the metadata in the name:
+        const std::string betterName = duplicate->second.size() > std::strlen(entry.name) ? duplicate->second : entry.name;
+        const std::string worseName = duplicate->second.size() > std::strlen(entry.name) ? entry.name : duplicate->second;
+          
+        moveContents(path + "/" + worseName, path + "/" + betterName, ConflictStrategy::OVERWRITE_TARGET);
+        fsFsDeleteDirectory(&sdSystem, toPathBuffer(path + "/" + worseName).get());
+
+        parsedToFolder[parsedName] = betterName;
+      }
+    }
+
+    progress.store(progress.load() + progressPerEntry);
+  }
+}
+
 void FsManager::readAllEntries(const std::string& path, const u32& mode, std::vector<FsDirectoryEntry>& out) {
   out.clear();
 
@@ -330,12 +345,74 @@ void FsManager::moveFile(const std::string& fromPath, const std::string& toPath)
   }
 }
 
+void FsManager::moveContents(
+  const std::string& fromPath,
+  const std::string& toPath,
+  ConflictStrategy conflictStrategy,
+  std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn,
+  std::function<void (const std::string& relativePath)> folderMoveFn,
+  const std::string& basePath
+) {
+  std::vector<FsDirectoryEntry> entries;
+  readAllEntries(fromPath + basePath, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
+
+  for (FsDirectoryEntry& entry : entries) {
+    std::string nextPath = std::string(basePath + "/") + entry.name;
+    const std::string sourcePath = fromPath + nextPath;
+    const std::string targetPath = toPath + nextPath;
+
+    // If the next entry is a file, we will move it and record it as moved as long as there isn't a conflict.
+    //
+    // File size has to be compared for rare cases where folder is incorrectly categorized as a file.
+    // If the entry type is still unclear after that, fall back to checking the actual path on the SD card,
+    // since some filesystems can report corrupt or unexpected entry types.
+    bool isFile = entry.type == FsDirEntryType_File && entry.file_size > 0;
+    bool isDirectory = entry.type == FsDirEntryType_Dir;
+
+    if (!isFile && !isDirectory) {
+      isDirectory = doesFolderExist(sourcePath);
+
+      if (!isDirectory) {
+        isFile = doesFileExist(sourcePath);
+      }
+    }
+
+    if (isFile) {
+      // If a file already exists in the location we'll move it to, there's a conflict:
+      bool fileConflict = doesFileExist(targetPath);
+      fileMoveFn(nextPath, fileConflict);
+      if (fileConflict) {
+        if (conflictStrategy == ConflictStrategy::OVERWRITE_TARGET) {
+          fsFsDeleteFile(&sdSystem, toPathBuffer(targetPath).get());
+          moveFile(sourcePath, targetPath);
+        } else if (conflictStrategy == ConflictStrategy::PRESERVE_TARGET) {
+          fsFsDeleteFile(&sdSystem, toPathBuffer(sourcePath).get());
+        }
+      } else {
+        moveFile(sourcePath, targetPath);
+      }
+    // If the next entry is a folder, we will traverse within it:
+    } else if (isDirectory) {
+      folderMoveFn(nextPath);
+      createFolderIfNeeded(targetPath);
+
+      moveContents(fromPath, toPath, conflictStrategy, fileMoveFn, folderMoveFn, nextPath);
+
+      // Delete the folder only if it's now empty. The folder should be empty,
+      // but if not for whatever reason, this should just silently break and skip it:
+      fsFsDeleteDirectory(&sdSystem, toPathBuffer(sourcePath).get());
+    } else {
+      brls::Logger::warning("Mod Alchemist: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
+    }
+  }
+}
+
 void FsManager::forEachFolderInFilePath(const std::string& path, std::function<bool (const std::string& path)> fn) {
   std::string pathRemaining = path.substr(1); // Index 0 is a "/", so start at index 1
   int slashIndex = pathRemaining.find_first_of("/");
   std::string currentPath = "";
 
-  while(slashIndex != std::string::npos) {
+  while (slashIndex != std::string::npos) {
     currentPath = currentPath + "/" + pathRemaining.substr(0, slashIndex);
 
     bool shouldContinue = fn(currentPath);
@@ -352,7 +429,7 @@ void FsManager::forEachFolderInFilePathDeepestFirst(const std::string& path, std
   std::string currentPath = path;
   int slashIndex = path.find_last_of("/");
 
-  while(slashIndex != std::string::npos) {
+  while (slashIndex != std::string::npos) {
     currentPath = currentPath.substr(0, slashIndex);
 
     bool shouldContinue = fn(currentPath);

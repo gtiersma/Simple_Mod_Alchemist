@@ -11,6 +11,7 @@
 
 #include <borealis.hpp>
 
+#include <functional>
 #include <vector>
 #include <string>
 
@@ -41,6 +42,14 @@ public:
 
   void refreshSelections();
 
+  /**
+   * Checks for mods in the sources currently loaded for mods that have duplicates,
+   * merging the mod folders into a single folder.
+   * 
+   * @param completeFn Optional function to call after the sources have been loaded.
+   */
+  void deduplicateMods(std::vector<ModSource> sources, std::function<void ()> completeFn = []() {});
+
 private:
   BRLS_BIND(brls::RecyclerFrame, modList, "mod-list");
 
@@ -55,7 +64,7 @@ private:
    * @param mod The mod source that was changed
    * @param selectedIndex The index of the mod the user changed to
    */
-  void handleModSelect(const ModSource& mod, size_t selectedIndex);
+  void handleModSelect(ModSource& mod, size_t selectedIndex);
 
   /**
    * Configures a single selector cell in the mod list

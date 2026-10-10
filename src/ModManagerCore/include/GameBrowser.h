@@ -46,7 +46,6 @@ private:
   ModsPresetHandler _modPresetHandler_;
 
   std::vector<Game> _gameList_;
-
 };
 
 extern GameBrowser gameBrowser;

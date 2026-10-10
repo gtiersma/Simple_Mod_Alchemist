@@ -15,6 +15,8 @@
 
 /**
  * Object containing data related to a "source" (something moddable in a game)
+ *
+ * TODO: Separate into its own header/.cpp file combo
  */
 class ModSource {
   public:
@@ -40,9 +42,22 @@ class ModSource {
     const std::string& getSource() const { return this->source; }
     const std::vector<std::string>& getMods() const { return this->mods; }
     const std::vector<std::string>& getOptions() const { return this->options; }
+    const int getModCount() { return this->mods.size(); }
 
     size_t getActiveIndex() const { return this->activeIndex; }
     void setActiveIndex(size_t index) { this->activeIndex = index; }
+
+    /**
+     * Removes a mod at the specified index from the source's data.
+     * 
+     * @param index Must correspond to the element to remove in the "mods" vector.
+     *              The same mod is also removed from the "options" vector,
+     *              converting this index to the correct index for that one.
+     */
+    void removeMod(size_t index) {
+      this->mods.erase(this->mods.begin() + index);
+      this->options.erase(this->options.begin() + index + 1);
+    }
 
   private:
 
@@ -76,23 +91,38 @@ public:
   ConfigHolder& getConfig();
 
   /**
-   * Call this to set the group instead of setting it on the controller directly.
+   * Set the current sources for whichever group is currently loaded.
    * 
-   * This will allow this mod manager to reset its state and load some initial mods for the group list.
+   * This will allow this mod manager to reset its state and load some initial mods for the source list.
+   * 
+   * @returns The initially loaded mod source objects for the specified sources.
+   *          Keep in mind NOT ALL sources are initially loaded for performance reasons.
    */
-  void setGroup(const std::string& group);
+  std::vector<ModSource> setSources(const std::vector<std::string>& sources);
+
+  /**
+   * Clears the source data that is currently loaded, reloading fresh data from the SD card.
+   *
+   * @returns The initially loaded mod source objects for the specified sources.
+   *          Keep in mind NOT ALL sources are initially loaded for performance reasons.
+   */
+  std::vector<ModSource> reloadSources();
+
+  ModSource& getSource(const std::string& name);
+
+  /**
+   * Gets the source object for the source name at the specified index.
+   * Assumes that we already know the source object at that index has been loaded.
+   * 
+   * @assumes There's a loaded object for the specified index.
+   */
+  ModSource& getSourceByIndex(const int& index);
 
   /**
    * Gets the source name at the specified index.
    * Source does not need to be loaded. 
    */
   std::string getSourceName(const int& index);
-
-  /**
-   * Gets the source object for the source name at the specified index.
-   * Assumes that we already know the source object at that index has been loaded.
-   */
-  ModSource& getSource(const int& index);
 
   /**
    * Gets the total number of sources in the group; whether loaded or not
@@ -119,10 +149,14 @@ public:
   bool isSourceLoaded(const int& index);
 
   /**
-   * Checks to see if the source objects within a certain proximity of the specified index are all loaded.
-   * If not, it loads the next chunk.
+   * Will load data for more mod sources if the source "index" parameter is close enough to an index we haven't loaded data for yet.
+   *
+   * This ensures we always load data ahead of time while something like scrolling is happening.
+   *
+   * @returns A sorted vector only of the ModSources that were just loaded from this function call.
+   *          Empty if no loading occurred.
    */
-  void loadSourcesIfNeeded(const int& index);
+  std::vector<ModSource> loadSourcesIfNeeded(const int& index);
 
 private:
   GameBrowser* _owner_{nullptr};
@@ -148,10 +182,21 @@ private:
   std::map<std::string, ModSource> _mod_source_cache_;
 
   /**
-   * Loads however many more source objects specified by the count param.
-   * Does nothing if all source objects have already been loaded.
+   * Loads more data for the mod sources.
+   *
+   * There could be a lot of sources and each one requires individual filesystem operations
+   * to load their data, so we do it in batches.
+   *
+   * @param count The number of mod sources to load data for.
+   *              Loading starts at the next index of the last one that was loaded.
+   *              It then loads the number specified from that point.
+   *
+   * @returns A sorted vector only of the ModSources that were just loaded from this function call.
+   *
+   * If all sources in the current group have already had all their data loaded,
+   * this method does nothing.
    */
-  void loadSources(const int& count);
+  std::vector<ModSource> loadSources(const int& count);
 
   /**
    * The number of mod sources to load data for initially (the first time data is loaded for mods in a group)

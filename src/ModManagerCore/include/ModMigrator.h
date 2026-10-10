@@ -56,12 +56,14 @@ class ModMigrator {
       const std::string& titleId,
       const std::string& legacyGamePath
     );
-
+    
     /**
      * Migrates the mod folders & files from the old SMM mod folder to the new one.
      * 
      * The code was mostly just copied over and modifiedfrom Controller::activateMod since we know that method is already reliable.
      * The method was built for maximum memory efficiency though, so this could be much more CPU optimized.
+     *
+     * TODO: Use FsManager::moveContent
      * 
      * @param oldPath The path to the original SMM folder that would contain the mod's romfs folder
      * @param newPath The path to the new folder where the folder structure under "oldPath" should be moved to
