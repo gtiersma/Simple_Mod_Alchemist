@@ -42,6 +42,14 @@ public:
 
   void refreshSelections();
 
+  /**
+   * Checks for mods in the sources currently loaded for mods that have duplicates,
+   * merging the mod folders into a single folder.
+   * 
+   * @param completeFn Optional function to call after the sources have been loaded.
+   */
+  void deduplicateMods(std::vector<ModSource> sources, std::function<void ()> completeFn = []() {});
+
 private:
   BRLS_BIND(brls::RecyclerFrame, modList, "mod-list");
 
@@ -66,14 +74,6 @@ private:
    * @param index The index of the mod source in the cell list
    */
   void configureModSelector(brls::SelectorCell* selector, ModSource& mod, const int& index);
-
-  /**
-   * Checks for mods in the sources currently loaded for mods that have duplicates,
-   * merging the mod folders into a single folder.
-   * 
-   * @param completeFn Optional function to call after the sources have been loaded.
-   */
-  void deduplicateMods(std::vector<ModSource> sources, std::function<void ()> completeFn = []() {});
 
   /**
    * Shows a list of files that were moved (in a dialog)

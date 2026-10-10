@@ -76,26 +76,21 @@ brls::RecyclerCell* ModDataSource::cellForRow(brls::RecyclerFrame* recycler, brl
 ModBrowser::ModBrowser(brls::View* parentCell): _parent_cell_(parentCell) {
   std::vector<ModSource> sources = gameBrowser.getModManager().setSources(controller.loadSources(true));
   this->inflateFromXMLRes("xml/FrameModBrowser/mod_browser.xml");
-  this->deduplicateMods(
-    sources,
-    [this]() {
 
-      // This is just a random number I tossed here that sounded right,
-      // and it seems to be working.
-      // TODO: Is this really the right number though?
-      modList->estimatedRowHeight = 70;
+  // This is just a random number I tossed here that sounded right,
+  // and it seems to be working.
+  // TODO: Is this really the right number though?
+  modList->estimatedRowHeight = 70;
 
-      modList->registerCell("Selector", []() { return new brls::SelectorCell(); });
-      modList->registerCell("Note", []() { return new brls::NoteCell(); });
+  modList->registerCell("Selector", []() { return new brls::SelectorCell(); });
+  modList->registerCell("Note", []() { return new brls::NoteCell(); });
 
-      modList->setDataSource(
-        new ModDataSource(
-          [this](brls::SelectorCell* selector, ModSource& mod, const int& index) {
-            this->configureModSelector(selector, mod, index);
-          }
-        )
-      );
-    }
+  modList->setDataSource(
+    new ModDataSource(
+      [this](brls::SelectorCell* selector, ModSource& mod, const int& index) {
+        this->configureModSelector(selector, mod, index);
+      }
+    )
   );
 }
 

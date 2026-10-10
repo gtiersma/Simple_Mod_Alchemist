@@ -36,10 +36,15 @@ GroupBrowser::GroupBrowser() {
         this->removeView(this->getChildren()[1]);
       }
 
+      // Handle merging folders that could exist belonging to the same source/mods:
       controller.group = group;
       this->deduplicateSources([this, view]() {
+        std::vector<ModSource> sources = gameBrowser.getModManager().setSources(controller.loadSources(true));
         this->_current_mod_browser_ = new ModBrowser(view);
-        this->addView(this->_current_mod_browser_);
+        this->_current_mod_browser_->deduplicateMods(
+          sources,
+          [this]() { this->addView(this->_current_mod_browser_); }
+        );
       });
     });
   }
