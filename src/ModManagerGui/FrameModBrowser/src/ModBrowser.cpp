@@ -74,7 +74,6 @@ brls::RecyclerCell* ModDataSource::cellForRow(brls::RecyclerFrame* recycler, brl
 }
 
 ModBrowser::ModBrowser(brls::View* parentCell): _parent_cell_(parentCell) {
-  std::vector<ModSource> sources = gameBrowser.getModManager().setSources(controller.loadSources(true));
   this->inflateFromXMLRes("xml/FrameModBrowser/mod_browser.xml");
 
   // This is just a random number I tossed here that sounded right,
