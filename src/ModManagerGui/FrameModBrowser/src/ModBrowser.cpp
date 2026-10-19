@@ -200,7 +200,7 @@ void ModBrowser::deduplicateMods(std::vector<ModSource> sources, std::function<v
     new std::thread([sources, completeFn, loadingDialog]() {
       
       // Fraction that each "run" of deduplication makes up of the whole:
-      const float runFraction = 1 / sources.size();
+      const float runFraction = 1.0f / sources.size();
 
       // Combine duplicate mods under each source:
       for (const ModSource& source : sources) {

@@ -48,7 +48,7 @@ public:
    * 
    * @param completeFn Optional function to call after the sources have been loaded.
    */
-  void deduplicateMods(std::vector<ModSource> sources, std::function<void ()> completeFn = []() {});
+  static void deduplicateMods(std::vector<ModSource> sources, std::function<void ()> completeFn = []() {});
 
 private:
   BRLS_BIND(brls::RecyclerFrame, modList, "mod-list");
