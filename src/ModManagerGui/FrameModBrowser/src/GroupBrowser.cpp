@@ -45,6 +45,10 @@ GroupBrowser::GroupBrowser() {
           [this, view]() {
             this->_current_mod_browser_ = new ModBrowser(view);
             this->addView(this->_current_mod_browser_);
+
+            // For some reason, this is needed to prevent various possible infrequent UI glitches
+            // with the mod list when deduplication occurs:
+            this->_current_mod_browser_->refreshSelections();
           }
         );
       });
@@ -73,8 +77,8 @@ void GroupBrowser::deduplicateSources(std::function<void ()> completeFn) {
   for (int i = sourceCount - 1; i > 0; i--) {
     // Since entries are conveniently sorted, duplicates would be adjacent, so we only need to compare adjacent elements.
     if (sourceNames[i - 1] == sourceNames[i]) {
-      sourceNames.erase(sourceNames.begin() + i);
       hasDuplicates = true;
+      break;
     }
   }
 
@@ -88,8 +92,7 @@ void GroupBrowser::deduplicateSources(std::function<void ()> completeFn) {
         controller.getGroupPath(),
         loadingDialog->getAtomicProgress()
       );
-      loadingDialog->close();
-      completeFn();
+      loadingDialog->close(completeFn);
     });
   } else {
     completeFn();

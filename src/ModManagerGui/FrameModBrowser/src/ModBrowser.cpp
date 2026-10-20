@@ -209,8 +209,7 @@ void ModBrowser::deduplicateMods(std::vector<ModSource> sources, std::function<v
       }
 
       gameBrowser.getModManager().refreshActiveIndices();
-      loadingDialog->close();
-      completeFn();
+      loadingDialog->close(completeFn);
     });
   } else {
     completeFn();
