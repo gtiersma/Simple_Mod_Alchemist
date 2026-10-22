@@ -175,7 +175,7 @@ void ModBrowser::configureModSelector(brls::SelectorCell* selector, ModSource& m
 void ModBrowser::deduplicateMods(std::vector<ModSource> sources, std::function<void ()> completeFn) {
 
   // Check for duplicate mods.
-  bool hasDuplicates = false;
+  std::vector<ModSource> sourcesOfDuplicateMods;
   for (ModSource& source : sources) {
     const int modCount = source.getModCount();
 
@@ -187,23 +187,23 @@ void ModBrowser::deduplicateMods(std::vector<ModSource> sources, std::function<v
 
         // Don't modify the ModSource we're iterating on; it's a copy; get the original:
         gameBrowser.getModManager().getSource(source.getSource()).removeMod(i);
-        hasDuplicates = true;
+        sourcesOfDuplicateMods.push_back(source);
       }
     }
   }
 
-  if (hasDuplicates) {
+  if (!sourcesOfDuplicateMods.empty()) {
     LoadingDialog* loadingDialog = LoadingDialog::build();
     loadingDialog->setAction("Found mod folders that belong to the same mod. Combining them");
     loadingDialog->open();
     
-    new std::thread([sources, completeFn, loadingDialog]() {
+    new std::thread([sourcesOfDuplicateMods, completeFn, loadingDialog]() {
       
       // Fraction that each "run" of deduplication makes up of the whole:
-      const float runFraction = 1.0f / sources.size();
+      const float runFraction = 1.0f / sourcesOfDuplicateMods.size();
 
       // Combine duplicate mods under each source:
-      for (const ModSource& source : sources) {
+      for (const ModSource& source : sourcesOfDuplicateMods) {
         controller.source = source.getSource();
         FsManager::deduplicateFolderNames(controller.getSourcePath(), loadingDialog->getAtomicProgress(), runFraction);
       }
