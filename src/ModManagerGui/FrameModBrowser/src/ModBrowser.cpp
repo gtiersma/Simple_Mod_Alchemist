@@ -205,7 +205,8 @@ void ModBrowser::deduplicateMods(std::vector<ModSource> sources, std::function<v
       // Combine duplicate mods under each source:
       for (const ModSource& source : sourcesOfDuplicateMods) {
         controller.source = source.getSource();
-        FsManager::deduplicateFolderNames(controller.getSourcePath(), loadingDialog->getAtomicProgress(), runFraction);
+        FsManager::deduplicateFolderNames(controller.getSourcePath());
+        loadingDialog->getAtomicProgress().store(loadingDialog->getAtomicProgress().load() + runFraction);
       }
 
       gameBrowser.getModManager().refreshActiveIndices();

@@ -67,15 +67,9 @@ namespace FsManager {
    *
    * @param progress Scale of 0.0-1.0 of the current deduplication progress.
    *                 Updated while the method runs.
-   * 
-   * @param percentageOfWhole If there is other work happening in other methods
-                              (or this method is being called multiple times),
-   *                          include the percentage of the total work that this method call makes up.
-   *                          The method will only increase the progress by that percentage.
-   *                          By default, it's expected that this is the only code to be progress-tracked,
-   *                          so the progress param is at 0% and it will move forward to 100%.
+   *                 Optional.
    */
-  void deduplicateFolderNames(const std::string& path, std::atomic<float>& progress, const float& percentageOfWhole = 1.0f);
+  void deduplicateFolderNames(const std::string& path, std::atomic<float>* progress = nullptr);
 
   /**
    * Reads every directory entry of the specified path into the given vector.

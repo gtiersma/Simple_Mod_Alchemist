@@ -90,7 +90,7 @@ void GroupBrowser::deduplicateSources(std::function<void ()> completeFn) {
     new std::thread([completeFn, loadingDialog]() {
       FsManager::deduplicateFolderNames(
         controller.getGroupPath(),
-        loadingDialog->getAtomicProgress()
+        &loadingDialog->getAtomicProgress()
       );
       loadingDialog->close(completeFn);
     });

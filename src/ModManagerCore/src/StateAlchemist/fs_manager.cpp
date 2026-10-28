@@ -193,17 +193,20 @@ std::vector<std::string> FsManager::loadNames(const std::string& path, bool sort
   return names;
 }
 
-void FsManager::deduplicateFolderNames(const std::string& path, std::atomic<float>& progress, const float& percentageOfWhole) {
+void FsManager::deduplicateFolderNames(const std::string& path, std::atomic<float>* progress) {
   std::vector<FsDirectoryEntry> entries;
   readAllEntries(path, FsDirOpenMode_ReadDirs | FsDirOpenMode_ReadFiles, entries);
+
+  if (entries.empty()) { return; }
 
   // Map of the parsed name of the entity TO the original folder name it came from:
   std::unordered_map<std::string, std::string> parsedToFolder = {};
 
-  const float progressPerEntry = percentageOfWhole / entries.size();
+  const float progressPerEntry = 1.0f / entries.size();
 
   for (FsDirectoryEntry& entry : entries) {
     // Exclude hidden folders that start with "."
+    const std::string n = entry.name;
     if (entry.type == FsDirEntryType_Dir && entry.name[0] != '.') {
       const std::string parsedName = MetaManager::parseName(entry.name);
       
@@ -224,7 +227,9 @@ void FsManager::deduplicateFolderNames(const std::string& path, std::atomic<floa
       }
     }
 
-    progress.store(progress.load() + progressPerEntry);
+    if (progress != nullptr) {
+      progress->store(progress->load() + progressPerEntry);
+    }
   }
 }
 
