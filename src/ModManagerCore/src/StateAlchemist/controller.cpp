@@ -427,6 +427,11 @@ Controller::Controller() {
   pmdmntInitialize();
   pminfoInitialize();
 
+  // Get the title ID of the currently running game:
+  u64 processId;
+  pmdmntGetApplicationProcessId(&processId);
+  pminfoGetProgramId(&this->titleId, processId);
+
   MetaManager::tryResult(fsOpenSdCardFileSystem(&FsManager::sdSystem));
 }
 

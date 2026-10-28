@@ -6,6 +6,7 @@
 #include "SimpleModManager.h"
 
 #include <FrameRoot.h>
+#include "FrameModBrowser.h"
 #include <TabGames.h>
 #include <TabGeneralSettings.h>
 #include <help/TabHelp.h>
@@ -65,6 +66,15 @@ int main(int argc, char* argv[])
     brls::TabFrame* tabs = (brls::TabFrame*)appFrame->getContentView();
     brls::Sidebar* sidebar = (brls::Sidebar*)tabs->getChildren().at(0);
     sidebar->setWidthPercentage(20.0f);
+
+    // If a game path/id is already selected in the controller, initially open to that game.
+    //
+    // TODO: Groups are loaded only to check if they exist here. Not efficient:
+    if (controller.getGamePath() != "" && !controller.loadGroups(false).empty()) {
+        FrameModBrowser* modsBrowser = new FrameModBrowser();
+        brls::Application::pushActivity(modsBrowser);
+        modsBrowser->initialize();
+    }
 
     // Run the app
     while (brls::Application::mainLoop());

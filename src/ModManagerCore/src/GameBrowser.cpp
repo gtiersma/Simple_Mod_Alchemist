@@ -113,6 +113,11 @@ void GameBrowser::loadGames() {
         }
       }
 
+      // Fully select the game if the controller already has a selected title ID:
+      if (titleId == controller.titleId) {
+        selectGame(*game);
+      }
+
       _gameList_.push_back(std::move(*game));
     }
   }
