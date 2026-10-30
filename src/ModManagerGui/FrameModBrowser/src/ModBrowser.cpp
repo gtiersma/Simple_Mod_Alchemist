@@ -119,7 +119,7 @@ void ModBrowser::handleModSelect(ModSource& mod, size_t selectedIndex) {
     mod.setActiveIndex(selectedIndex - 1);
 
     // Show the list of files that were moved to the atmosphere folder:
-    if (gameBrowser.getConfigHandler().getConfig().showFileListPopup) {
+    if (gameBrowser.getConfigHandler().getConfig().shouldShowFileMoveReport(!conflicts.empty())) {
 
       // Build the string list of conflicts:
       std::string listedConflicts;

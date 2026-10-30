@@ -9,6 +9,15 @@
 
 #include <iostream>
 
+bool ConfigHandler::shouldShowFileMoveReport(bool hasConflicts) {
+  switch (_config_.showFileListPopup) {
+    case FileMoveReporting::NEVER: return false;
+    case FileMoveReporting::ALWAYS: return true;
+    case FileMoveReporting::ON_CONFLICT: return hasConflicts;
+    default: return false; // setting error: just fallback to false
+  }
+}
+
 // io
 void ConfigHandler::loadConfig(const std::string &configFilePath_) {
   ConfigHolder config{}; // loads defaults
@@ -45,9 +54,13 @@ void ConfigHandler::loadConfig(const std::string &configFilePath_) {
 
     if(elements[0] == "last-program-version"){
       config.lastSmmVersion = elements[1];
-    }
-    else if(elements[0] == "show-file-list-popup"){
-      config.showFileListPopup = (elements[1] == "true");
+    } else if (elements[0] == "show-file-list-popup") {
+      int fileListSetting{};
+      auto result = std::from_chars(elements[1].data(), elements[1].data() + elements[1].size(), fileListSetting);
+      if (result.ec == std::errc()) {
+        // Load setting if valid int (todo: but it's not checking int range)
+        config.showFileListPopup = static_cast<FileMoveReporting>(fileListSetting);
+      }
     }
 
   } // lines
@@ -70,7 +83,7 @@ void ConfigHandler::dumpConfigToFile() const {
   ssConfig << "last-program-version = " << APP_VERSION << std::endl;
   ssConfig << std::endl;
   ssConfig << "# Show the file list popup after enabling a mod" << std::endl;
-  ssConfig << "show-file-list-popup = " << (_config_.showFileListPopup ? "true" : "false") << std::endl;
+  ssConfig << "show-file-list-popup = " << std::to_string(_config_.showFileListPopup) << std::endl;
   ssConfig << std::endl;
 
   GenericToolbox::dumpStringInFile(_config_.configFilePath, ssConfig.str());

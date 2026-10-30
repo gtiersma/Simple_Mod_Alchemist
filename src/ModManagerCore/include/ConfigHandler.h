@@ -14,11 +14,19 @@
 #include <string>
 #include <sstream>
 
+/**
+ * When to show the dialog reporting the status of mod files that were just moved.
+ */
+enum class FileMoveReporting {
+  NEVER,
+  ALWAYS,
+  ON_CONFLICT // Only show if file conflicts occurred.
+}
 
 
 struct ConfigHolder{
   std::string lastSmmVersion{};
-  bool showFileListPopup{false};
+  FileMoveReporting showFileListPopup{FileMoveReporting::ON_CONFLICT};
 
   std::string configFilePath{"/config/SimpleModAlchemist/parameters.ini"};
 
@@ -32,11 +40,18 @@ struct ConfigHolder{
 class ConfigHandler {
 
 public:
-  ConfigHandler(){ this->loadConfig(); }
+  ConfigHandler() { this->loadConfig(); }
+
+  /**
+   * Computes whether the moved file listing should be shown to the user after moving files.
+   *
+   * @param hasConflicts Whether there were any conflicting files during the transfer or not.
+   */
+  bool shouldShowFileMoveReport(bool hasConflicts);
 
   // getters
-  [[nodiscard]] const ConfigHolder &getConfig() const{ return _config_; }
-  ConfigHolder &getConfig(){ return _config_; }
+  [[nodiscard]] const ConfigHolder &getConfig() const { return _config_; }
+  ConfigHolder &getConfig() { return _config_; }
 
   // io
   void loadConfig(const std::string& configFilePath_ = "");

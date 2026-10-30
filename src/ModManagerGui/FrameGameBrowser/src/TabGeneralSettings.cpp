@@ -23,6 +23,19 @@ TabGeneralSettings::TabGeneralSettings()
 void TabGeneralSettings::rebuildLayout() {
   Util::padContent(this);
 
+  brls::SelectorCell* fileListCell = new brls::SelectorCell();
+  fileListCell->init(
+    "Show file list after enabling mods",
+    {"Never", "Always", "Only on File Conflict"},
+    static_cast<int>(gameBrowser.getConfigHandler().getConfig().showFileListPopup),
+    [](int selected) {},
+    [](int selected) {
+      gameBrowser.getConfigHandler().getConfig().showFileListPopup = static_cast<FileMoveReporting>(selected);
+      gameBrowser.getConfigHandler().dumpConfigToFile();
+    }
+  );
+  this->addView(fileListCell);
+
   // TODO: Quite a bit of duplicate code from NoGames.cpp
   brls::NoteCell* migrationItem = new brls::NoteCell();
   migrationItem->setText("Bring over old SimpleModManager mods");
@@ -51,17 +64,6 @@ void TabGeneralSettings::rebuildLayout() {
     return true;
   });
   this->addView(migrationItem);
-
-  brls::BooleanCell* fileListToggle = new brls::BooleanCell();
-  fileListToggle->init(
-    "Show file list after enabling mods",
-    gameBrowser.getConfigHandler().getConfig().showFileListPopup,
-    [](bool on) {
-      gameBrowser.getConfigHandler().getConfig().showFileListPopup = on;
-      gameBrowser.getConfigHandler().dumpConfigToFile();
-    }
-  );
-  this->addView(fileListToggle);
 }
 
 /**
