@@ -87,7 +87,7 @@ class Controller {
      *
      * @param mod
      * @param fileConflicts Optionally provide a vector for this method to inject file paths of mod files that conflict.
-     *                      Vector modified by reference.
+     *                      Strings are appended to the vector by this method.
      *                      Paths will be relative to the mod folder.
      * 
      * @requirement:
@@ -95,7 +95,7 @@ class Controller {
      *  - "mod" parameter must not currently be active
      *  - the title ID folder for the current game must already exist in Atmosphere's "content" folder
      */
-    void activateMod(const std::string& mod, std::vector<std::string>& fileConflicts = {});
+    void activateMod(const std::string& mod, std::vector<std::string>* fileConflicts = nullptr);
 
     /**
      * Reads the list of moved files for the specified mod (the .txt file) and returns it as a string.

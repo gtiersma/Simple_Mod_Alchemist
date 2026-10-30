@@ -183,7 +183,7 @@ std::string Controller::getActiveMod(const std::string& source) {
   return activeMod;
 }
 
-void Controller::activateMod(const std::string& mod, std::vector<std::string>& fileConflicts) {
+void Controller::activateMod(const std::string& mod, std::vector<std::string>* fileConflicts) {
 
   // Path to the "mod" folder in alchemy's directory:
   std::string modPath = this->getModPath(mod);
@@ -197,8 +197,8 @@ void Controller::activateMod(const std::string& mod, std::vector<std::string>& f
   // Extra functionality to record each file as it is moved:
   std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn =
     [&movedFilesFile, &txtOffset, &fileConflicts](const std::string& relativePath, bool conflicts) {
-      if (conflicts) {
-        fileConflicts.push_back(relativePath);
+      if (conflicts && fileConflicts) {
+        fileConflicts->push_back(relativePath);
       } else {
         FsManager::write(movedFilesFile, relativePath + "\n", txtOffset);
       }

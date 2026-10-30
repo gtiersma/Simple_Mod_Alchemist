@@ -115,7 +115,7 @@ void ModBrowser::handleModSelect(ModSource& mod, size_t selectedIndex) {
     // mod.mods doesn't have the default option at the begining, so index must be offset by -1:
     std::string activatedMod = mod.getMods()[selectedIndex - 1];
     std::vector<std::string> conflicts;
-    controller.activateMod(activatedMod, conflicts);
+    controller.activateMod(activatedMod, &conflicts);
     mod.setActiveIndex(selectedIndex - 1);
 
     // Show the list of files that were moved to the atmosphere folder:
@@ -225,40 +225,51 @@ void ModBrowser::deduplicateMods(std::vector<ModSource> sources, std::function<v
 }
 
 void ModBrowser::showFileMoveReport(const std::string& movedFiles, const std::string& failedFiles) {
-  brls::DDownScroller* scroll = new brls::DDownScroller();
-  scroll->setWidth(660.0f);
-  scroll->setHeight(400.0f);
-  scroll->setFocusable(true);
-  scroll->setScrollingIndicatorVisible(true);
+  brls::Box* labelBox = new brls::Box(brls::Axis::COLUMN);
 
   if (!failedFiles.empty()) {
     brls::Label* label = new brls::Label();
     label->setText(
       "Files that failed to move:\n\n" +
       MetaManager::breakPaths(failedFiles) +
-      "\n\nThis is likely from it conflicting with a different active mod."
+      "\nThis is likely from it conflicting with a different active mod."
     );
     label->setSingleLine(false);
     label->setIsWrapping(true);
     label->setFontSize(14.0f);
-    label->setTextColor(RGB(70, 10, 10));
-    label->setMarginBottom(30);
-    scroll->setContentView(label);
+    label->setTextColor(RGB(250, 210, 150));
+    label->setMarginBottom(50);
+    labelBox->addView(label);
   }
 
+  
   brls::Label* label = new brls::Label();
-  label->setText("The following files were moved:\n\n" + MetaManager::breakPaths(movedFiles));
+
+  if (movedFiles.empty()) {
+    label->setText("No files were moved.");
+  } else {
+    label->setText("The following files were successfully moved:\n\n" + MetaManager::breakPaths(movedFiles));
+  }
+
   label->setSingleLine(false);
   label->setIsWrapping(true);
   label->setFontSize(14.0f);
-  scroll->setContentView(label);
+  label->setMarginBottom(30);
+  labelBox->addView(label);
 
-  brls::Box* content = new brls::Box(brls::Axis::COLUMN);
-  content->setWidth(680.0f);
-  content->setPadding(30, 0, 0, 30);
-  content->addView(scroll);
+  brls::DDownScroller* scroll = new brls::DDownScroller();
+  scroll->setWidth(660.0f);
+  scroll->setHeight(400.0f);
+  scroll->setFocusable(true);
+  scroll->setScrollingIndicatorVisible(true);
+  scroll->setContentView(labelBox);
 
-  brls::Dialog* dialog = new brls::Dialog(content);
+  brls::Box* scrollContainer = new brls::Box();
+  scrollContainer->setWidth(680.0f);
+  scrollContainer->setPadding(30, 0, 0, 30);
+  scrollContainer->addView(scroll);
+
+  brls::Dialog* dialog = new brls::Dialog(scrollContainer);
   dialog->addButton("OK", []() {});
   dialog->open();
 }
