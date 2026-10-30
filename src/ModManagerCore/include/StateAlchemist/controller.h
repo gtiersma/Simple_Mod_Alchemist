@@ -84,15 +84,20 @@ class Controller {
      * Make sure to deactivate any existing active mod for this source if there is one
      * 
      * Mod won't be activated if EVERY file belonging to it has a conflict with a file already in the atmosphere folder
+     *
+     * @param mod
+     * @param fileConflicts Optionally provide a vector for this method to inject file paths of mod files that conflict.
+     *                      Vector modified by reference.
+     *                      Paths will be relative to the mod folder.
      * 
      * @requirement:
      *  - group and source must be set
      *  - "mod" parameter must not currently be active
      *  - the title ID folder for the current game must already exist in Atmosphere's "content" folder
      */
-    void activateMod(const std::string& mod);
+    void activateMod(const std::string& mod, std::vector<std::string>& fileConflicts = {});
 
-    /*
+    /**
      * Reads the list of moved files for the specified mod (the .txt file) and returns it as a string.
      * 
      * Returns an empty string if no list exists (e.g. the mod isn't active).
@@ -103,6 +108,8 @@ class Controller {
 
     /**
      * Deactivates the currently active mod, restoring the moddable source to its vanilla state
+     * 
+     * @requirement: group and source must be set
      */
     void deactivateMod();
 

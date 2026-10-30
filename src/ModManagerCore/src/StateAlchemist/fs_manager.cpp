@@ -206,7 +206,6 @@ void FsManager::deduplicateFolderNames(const std::string& path, std::atomic<floa
 
   for (FsDirectoryEntry& entry : entries) {
     // Exclude hidden folders that start with "."
-    const std::string n = entry.name;
     if (entry.type == FsDirEntryType_Dir && entry.name[0] != '.') {
       const std::string parsedName = MetaManager::parseName(entry.name);
       

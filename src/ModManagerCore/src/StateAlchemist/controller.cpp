@@ -183,7 +183,7 @@ std::string Controller::getActiveMod(const std::string& source) {
   return activeMod;
 }
 
-void Controller::activateMod(const std::string& mod) {
+void Controller::activateMod(const std::string& mod, std::vector<std::string>& fileConflicts) {
 
   // Path to the "mod" folder in alchemy's directory:
   std::string modPath = this->getModPath(mod);
@@ -196,8 +196,10 @@ void Controller::activateMod(const std::string& mod) {
 
   // Extra functionality to record each file as it is moved:
   std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn =
-    [&movedFilesFile, &txtOffset](const std::string& relativePath, bool conflicts) {
-      if (!conflicts) {
+    [&movedFilesFile, &txtOffset, &fileConflicts](const std::string& relativePath, bool conflicts) {
+      if (conflicts) {
+        fileConflicts.push_back(relativePath);
+      } else {
         FsManager::write(movedFilesFile, relativePath + "\n", txtOffset);
       }
     };
@@ -217,13 +219,6 @@ void Controller::activateMod(const std::string& mod) {
   fsFileClose(&movedFilesFile);
 }
 
-/**
- * Reads the list of moved files for the specified mod (the .txt file) and returns it as a string.
- * 
- * Returns an empty string if no list exists (e.g. the mod isn't active).
- * 
- * @requirement: group and source must be set
- */
 std::string Controller::getMovedFilesList(const std::string& mod) {
   std::string movedFiles;
 
@@ -273,11 +268,7 @@ std::string Controller::getMovedFilesList(const std::string& mod) {
   return movedFiles;
 }
 
-/**
- * Deactivates the currently active mod, restoring the moddable source to its vanilla state
- * 
- * @requirement: group and source must be set
- */
+
 void Controller::deactivateMod() {
   std::string activeMod(this->getActiveMod(this->source));
 
@@ -287,10 +278,6 @@ void Controller::deactivateMod() {
   this->returnFiles(activeMod);
 }
 
-/**
- * @param progress Scale of 0.0-1.0 of the method's current progress.
- *                 Updated while the method runs.
- */
 void Controller::deactivateAll(std::atomic<float>& progress) {
   std::vector<std::string> groups = this->loadGroups(false);
 
@@ -321,12 +308,6 @@ void Controller::deactivateAll(std::atomic<float>& progress) {
   this->source = "";
 }
 
-/**
- * Randomly activates/deactivates all mods based upon their ratings
- *
- * @param progress Scale of 0.0-1.0 of the method's current progress.
- *                 Updated while the method runs.
- */
 void Controller::randomizeGame(std::atomic<float>& progress) {
   std::vector<std::string> groups = this->loadGroups(false);
 
@@ -342,20 +323,6 @@ void Controller::randomizeGame(std::atomic<float>& progress) {
   this->source = "";
 }
 
-/**
- * Randomly activates/deactivates all mods in the current group
- * 
- * @requirement: group must be set
- *
- * @param progress Scale of 0.0-1.0 of the method's current progress.
- *                 Updated while the method runs.
- *
- * @param percentageOfGame If the group is being randomized as part of an entire game,
- *                         include the percentage of the total number of groups this group represents.
- *                         The method will only increase the progress by that percentage.
- *                         Otherwise, it's expected that this group is the only thing being randomized,
- *                         so the progress param is at 0% and it will move forward to 100%.
- */
 void Controller::randomizeGroup(std::atomic<float>& progress, const float& percentageOfGame) {
   std::vector<std::string> sources = this->loadSources(false);
 
@@ -370,11 +337,6 @@ void Controller::randomizeGroup(std::atomic<float>& progress, const float& perce
   }
 }
 
-/**
- * Randomly activates/deactivates a mod for the current source in the current group
- * 
- * @requirement: group and source must be set
- */
 void Controller::randomizeSource() {
   
   // Seed the random number generator with the current time

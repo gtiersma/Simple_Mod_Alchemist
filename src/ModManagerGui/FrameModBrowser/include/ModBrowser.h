@@ -76,11 +76,12 @@ private:
   void configureModSelector(brls::SelectorCell* selector, ModSource& mod, const int& index);
 
   /**
-   * Shows a list of files that were moved (in a dialog)
+   * Shows a list of files that were moved/not-moved (in a dialog)
    *
-   * @param files File list in the form of a single string.
+   * @param movedFiles  List of moved files in the form of a single string.
+   * @param failedFiles List of files that failed to move in the form of a single string.
    */
-  void showFileMoveReport(const std::string& files);
+  void showFileMoveReport(const std::string& movedFiles, const std::string& failedFiles);
 };
 
 

@@ -114,14 +114,21 @@ void ModBrowser::handleModSelect(ModSource& mod, size_t selectedIndex) {
     controller.deactivateMod();
     // mod.mods doesn't have the default option at the begining, so index must be offset by -1:
     std::string activatedMod = mod.getMods()[selectedIndex - 1];
-    controller.activateMod(activatedMod);
+    std::vector<std::string> conflicts;
+    controller.activateMod(activatedMod, conflicts);
     mod.setActiveIndex(selectedIndex - 1);
 
     // Show the list of files that were moved to the atmosphere folder:
-    std::string movedFiles = controller.getMovedFilesList(activatedMod);
-    bool showPopup = gameBrowser.getConfigHandler().getConfig().showFileListPopup;
-    if (!movedFiles.empty() && showPopup) {
-      this->showFileMoveReport(movedFiles);
+    if (gameBrowser.getConfigHandler().getConfig().showFileListPopup) {
+
+      // Build the string list of conflicts:
+      std::string listedConflicts;
+      listedConflicts.reserve(conflicts.size());
+      for (const std::string& conflict : conflicts) {
+        listedConflicts += conflict + "\n";
+      }
+
+      this->showFileMoveReport(controller.getMovedFilesList(activatedMod), listedConflicts);
     }
   }
 }
@@ -217,18 +224,33 @@ void ModBrowser::deduplicateMods(std::vector<ModSource> sources, std::function<v
   }
 }
 
-void ModBrowser::showFileMoveReport(const std::string& files) {
-  brls::Label* label = new brls::Label();
-  label->setText("The following files were moved:\n\n" + MetaManager::breakPaths(files));
-  label->setSingleLine(false);
-  label->setIsWrapping(true);
-  label->setFontSize(14.0f);
-
+void ModBrowser::showFileMoveReport(const std::string& movedFiles, const std::string& failedFiles) {
   brls::DDownScroller* scroll = new brls::DDownScroller();
   scroll->setWidth(660.0f);
   scroll->setHeight(400.0f);
   scroll->setFocusable(true);
   scroll->setScrollingIndicatorVisible(true);
+
+  if (!failedFiles.empty()) {
+    brls::Label* label = new brls::Label();
+    label->setText(
+      "Files that failed to move:\n\n" +
+      MetaManager::breakPaths(failedFiles) +
+      "\n\nThis is likely from it conflicting with a different active mod."
+    );
+    label->setSingleLine(false);
+    label->setIsWrapping(true);
+    label->setFontSize(14.0f);
+    label->setTextColor(RGB(70, 10, 10));
+    label->setMarginBottom(30);
+    scroll->setContentView(label);
+  }
+
+  brls::Label* label = new brls::Label();
+  label->setText("The following files were moved:\n\n" + MetaManager::breakPaths(movedFiles));
+  label->setSingleLine(false);
+  label->setIsWrapping(true);
+  label->setFontSize(14.0f);
   scroll->setContentView(label);
 
   brls::Box* content = new brls::Box(brls::Axis::COLUMN);
