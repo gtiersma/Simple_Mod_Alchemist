@@ -10,15 +10,15 @@ Simple Mod Alchemist is the definitive Nintendo Switch mod management solution. 
 
 ## Features
 
-* Intuitive UI for changing mods
-* Mods are categorized in groups and by what they replace
-* Mod files are moved, not copied
-  * This makes switching between large files seemingly instant
-* Can automatically bring over mods from SimpleModManager to start using right away
-* Scalable - works with lists of hundreds of mods
-* Change mods at random
-  * Set how likely each mod gets picked at random
-* Support for `.ips` patches
+* Intuitive UI for changing mods.
+* Mods are categorized in groups and by what they replace.
+* Mod files are moved, not copied.
+  * This makes switching between large files seemingly instant.
+* Can automatically bring over mods from SimpleModManager to start using right away.
+* Scalable - works with lists of hundreds of mods.
+* Change mods at random.
+  * Set how likely each mod gets picked at random.
+* Support for `.ips` patches.
 
 
 ## Screenshots
@@ -171,9 +171,11 @@ Everything will work as long as the title ID in the parenthesis isn't changed.
 
 ### After enabling a mod, I don't notice it in the game.
 
-Disable the mod in the app. In the app's settings, turn on the moved file dialog. Then try enabling the mod again. You'll see a report listing the files that were moved.
+Disable the mod in the app. In the app's settings, set the moved files dialog to **Always**. Then try enabling the mod again. You'll see a list of mods that were moved, as well as any that were not moved due to "conflicts" (other active mods using those same files).
 
-Make sure the folders and files are all named correctly. The first folder in the path listed should be the folder you put directly in the `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/` folder. It should usually be named `romfs`. `romfs` should contain more folders matching the game's file system.
+If some of the files aren't being moved because of "conflicts", that's why it isn't in the game.
+
+Otherwise, make sure the folders and files are all named correctly. The first folder in the path listed should be the folder you put directly in the `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/` folder. It should usually be named `romfs`. `romfs` should contain more folders matching the game's file system.
 
 If everything looks fine there, try a file explorer. Go to that mod's folder in `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/`. If it really is enabled, it should be empty with all folders and files moved to `/atmosphere/contents/<title_id>/`.
 
@@ -181,11 +183,9 @@ If everything looks fine there, try a file explorer. Go to that mod's folder in 
 
 ### A mod is only being partially enabled. Not all files belonging to that mod were enabled.
 
-Disable the mod in the app. In the app's settings, turn on the moved file dialog setting. Then try enabling the mod again. You'll see a report listing the files moved.
+Disable the mod in the app. In the app's settings, set the moved files dialog to **Always**. Then try enabling the mod again. You'll see a list of mods that were moved, as well as any that were not moved due to "conflicts" (other active mods using those same files).
 
-If you see some of the mod's files and folders not listed, it's likely they aren't being moved because of a file conflict. There may already be a file within `/atmosphere/contents/<title_id>/` with the same name and location as a file that's not being moved from within `mod_alchemy/<game_name> (<title_id>)/<group_name>/<thing_being_modded>/<mod_name>/`.
-
-If you really want the mod to be fully enabled, you will need to find out where the conflicting file came from. It may have come from another mod that was enabled through the app.
+If some of the files aren't being moved because of "conflicts", that's why it isn't in the game. If you really want the mod to be fully enabled, you will need to find out where the conflicting file came from. It may have come from another mod that was enabled through the app.
 
 Try using **Disable All Mods** in the app. Then try searching your SD card for that file's name. You should be able to see all the mods that use it. If some of those mods may have been enabled at the same time, that would've been the problem. You will need to try to sort out the conflicting files between them.
 
@@ -378,6 +378,8 @@ make -C build_switch Simple_Mod_Alchemist.nro -j$(nproc)
 ```
 
 ## Special Thanks
+
+* **SehlingS** for contributing to this app
 
 * **SciresM** and the other contributors for creating and maintaining LayeredFs and Atmosphere
 

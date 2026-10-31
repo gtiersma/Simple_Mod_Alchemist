@@ -69,7 +69,13 @@
 
     <brls:Label
         width="100%"
-        text="Disable the mod in the app. In the settings, turn on the moved file dialog setting. Then try enabling the mod again. You'll see a report listing the files moved."
+        text="Disable the mod in the app. In the app's settings, set the moved files dialog to 'Always'. Then try enabling the mod again. You'll see a list of mods that were moved, as well as any that were not moved due to 'conflicts' (other active mods using those same files)."
+        marginBottom="30px"
+    />
+
+    <brls:Label
+        width="100%"
+        text="If some of the files aren't being moved because of 'conflicts', that's why it isn't in the game."
         marginBottom="30px"
     />
 
@@ -100,19 +106,13 @@
 
     <brls:Label
         width="100%"
-        text="Disable the mod in the app. In the settings, turn on the moved file dialog setting. Then try enabling the mod again. You'll see a report listing the files that were moved."
+        text="Disable the mod in the app. In the app's settings, set the moved files dialog to 'Always'. Then try enabling the mod again. You'll see a list of mods that were moved, as well as any that were not moved due to 'conflicts' (other active mods using those same files)."
         marginBottom="30px"
     />
 
     <brls:Label
         width="100%"
-        text="If you see some of the mod's files and folders not listed, it's likely they aren't being moved because of a file conflict. There may already be a file within `/atmosphere/contents/[-GAME-TITLE-ID-]/` with the same name and location as a file that's not being moved from within `mod_alchemy/[-GAME-NAME-] ([-TITLE-ID-])/[-GROUP-NAME-]/[-THING-BEING-MODDED-]/[-MOD-NAME-]/`."
-        marginBottom="30px"
-    />
-
-    <brls:Label
-        width="100%"
-        text="If you really want the mod to be fully enabled, you will need to find out where the conflicting file came from. It may have come from another mod that was enabled through the app."
+        text="If some of the files aren't being moved because of 'conflicts', that's why it isn't in the game. If you really want the mod to be fully enabled, you will need to find out where the conflicting file came from. It may have come from another mod that was enabled through the app."
         marginBottom="30px"
     />
 
