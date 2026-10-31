@@ -119,7 +119,7 @@ void ModBrowser::handleModSelect(ModSource& mod, size_t selectedIndex) {
     mod.setActiveIndex(selectedIndex - 1);
 
     // Show the list of files that were moved to the atmosphere folder:
-    if (gameBrowser.getConfigHandler().getConfig().shouldShowFileMoveReport(!conflicts.empty())) {
+    if (gameBrowser.getConfigHandler().shouldShowFileMoveReport(!conflicts.empty())) {
 
       // Build the string list of conflicts:
       std::string listedConflicts;
@@ -230,7 +230,7 @@ void ModBrowser::showFileMoveReport(const std::string& movedFiles, const std::st
   if (!failedFiles.empty()) {
     brls::Label* label = new brls::Label();
     label->setText(
-      "Files that failed to move:\n\n" +
+      "These file(s) failed to move, so they were left in their original location:\n\n" +
       MetaManager::breakPaths(failedFiles) +
       "\nThis is likely from it conflicting with a different active mod."
     );
@@ -248,7 +248,7 @@ void ModBrowser::showFileMoveReport(const std::string& movedFiles, const std::st
   if (movedFiles.empty()) {
     label->setText("No files were moved.");
   } else {
-    label->setText("The following files were successfully moved:\n\n" + MetaManager::breakPaths(movedFiles));
+    label->setText("The following file(s) were successfully moved:\n\n" + MetaManager::breakPaths(movedFiles));
   }
 
   label->setSingleLine(false);

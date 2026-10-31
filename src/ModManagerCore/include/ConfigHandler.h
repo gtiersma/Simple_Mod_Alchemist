@@ -21,12 +21,12 @@ enum class FileMoveReporting {
   NEVER,
   ALWAYS,
   ON_CONFLICT // Only show if file conflicts occurred.
-}
+};
 
 
 struct ConfigHolder{
   std::string lastSmmVersion{};
-  FileMoveReporting showFileListPopup{FileMoveReporting::ON_CONFLICT};
+  FileMoveReporting showFileListPopup{FileMoveReporting::NEVER};
 
   std::string configFilePath{"/config/SimpleModAlchemist/parameters.ini"};
 

@@ -8,6 +8,8 @@
 #include "GenericToolbox.Vector.h"
 
 #include <iostream>
+#include <charconv>
+
 
 bool ConfigHandler::shouldShowFileMoveReport(bool hasConflicts) {
   switch (_config_.showFileListPopup) {
@@ -83,7 +85,7 @@ void ConfigHandler::dumpConfigToFile() const {
   ssConfig << "last-program-version = " << APP_VERSION << std::endl;
   ssConfig << std::endl;
   ssConfig << "# Show the file list popup after enabling a mod" << std::endl;
-  ssConfig << "show-file-list-popup = " << std::to_string(_config_.showFileListPopup) << std::endl;
+  ssConfig << "show-file-list-popup = " << std::to_string(static_cast<int>(_config_.showFileListPopup)) << std::endl;
   ssConfig << std::endl;
 
   GenericToolbox::dumpStringInFile(_config_.configFilePath, ssConfig.str());
