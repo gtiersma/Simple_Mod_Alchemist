@@ -201,7 +201,7 @@ void ModBrowser::deduplicateMods(std::vector<ModSource> sources, std::function<v
 
   if (!sourcesOfDuplicateMods.empty()) {
     LoadingDialog* loadingDialog = LoadingDialog::build();
-    loadingDialog->setAction("Found mod folders that belong to the same mod. Combining them");
+    loadingDialog->setAction("Found mod folders that belong to the same mod. Combining them.");
     loadingDialog->open();
     
     new std::thread([sourcesOfDuplicateMods, completeFn, loadingDialog]() {

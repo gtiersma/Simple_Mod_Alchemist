@@ -304,18 +304,23 @@ void Controller::deactivateAll(std::atomic<float>& progress) {
 
     std::vector<std::string> sources = this->loadSources(false);
 
-    // Percentage completed per source
-    float progressPerSource = progressPerGroup / sources.size();
+    if (!sources.empty()) {
 
-    for (const std::string& source : sources) {
-      this->source = source;
-      std::string activeMod(this->getActiveMod(source));
+      // Percentage completed per source
+      float progressPerSource = progressPerGroup / sources.size();
 
-      if (!activeMod.empty()) {
-        this->returnFiles(activeMod);
-      }
+      for (const std::string& source : sources) {
+        this->source = source;
+        std::string activeMod(this->getActiveMod(source));
+
+        if (!activeMod.empty()) {
+          this->returnFiles(activeMod);
+        }
     
-      progress.store(progress.load() + progressPerSource);
+        progress.store(progress.load() + progressPerSource);
+      }
+    } else {
+      progress.store(progress.load() + progressPerGroup);
     }
   }
 
