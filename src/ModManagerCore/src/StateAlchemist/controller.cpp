@@ -436,17 +436,25 @@ void Controller::returnFiles(const std::string& mod) {
     std::size_t newLinePos = pathBuilder.find('\n');
     while (newLinePos != std::string::npos) {
       // Trim the new line and any characters that were gathered after it to get the cleaned atmosphere file path:
-      std::string basePath = pathBuilder.substr(0, newLinePos);
+      const std::string basePath = pathBuilder.substr(0, newLinePos);
 
-      std::string atmoRootPath = this->getAtmosphereRoot(basePath);
-      std::string atmoPath = atmoRootPath + basePath;
-      int atmoRootPathSize = atmoRootPath.size();
+      const std::string atmoRootPath = this->getAtmosphereRoot(basePath);
+      const std::string atmoPath = atmoRootPath + basePath;
+      const std::string alchPath = modPath + basePath;
+      const int atmoRootPathSize = atmoRootPath.size();
 
       // Move any characters gathered after the new line to the pathBuilder string for the next path:
       pathBuilder = pathBuilder.substr(newLinePos + 1);
 
-      // Move the file back to the mod's folder:
-      FsManager::moveFile(atmoPath, modPath + basePath);
+      // If this file already exists in the location we're moving this file back to,
+      // the only explanation would be that the mod was updated by the user while it was active.
+      // The one under the alchemist directory is likely from a user update, so keep that one.
+      // Just delete the one under the atmosphere directory to prevent future conflicts.
+      if (FsManager::doesFileExist(alchPath)) {
+        fsFsDeleteFile(&FsManager::sdSystem, FsManager::toPathBuffer(atmoPath).get());
+      } else {
+        FsManager::moveFile(atmoPath, alchPath);
+      }
 
       // If there are any folders now empty after moving this file, delete them:
       FsManager::forEachFolderInFilePathDeepestFirst(atmoPath, [atmoRootPathSize](std::string path) {
