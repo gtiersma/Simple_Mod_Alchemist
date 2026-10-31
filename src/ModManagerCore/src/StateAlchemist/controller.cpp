@@ -195,23 +195,38 @@ void Controller::activateMod(const std::string& mod, std::vector<std::string>* f
   s64 txtOffset = 0;
 
   // Extra functionality to record each file as it is moved:
-  std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn =
+  std::function<bool (const std::string& relativePath, bool conflicts)> fileMoveFn =
     [&movedFilesFile, &txtOffset, &fileConflicts](const std::string& relativePath, bool conflicts) {
       if (conflicts && fileConflicts) {
         fileConflicts->push_back(relativePath);
       } else {
         FsManager::write(movedFilesFile, relativePath + "\n", txtOffset);
       }
+      return true;
     };
 
   // Extra functionality to move patch folders and files to their alternate directory:
-  std::function<void (const std::string& relativePath)> folderMoveFn =
+  std::function<bool (const std::string& relativePath)> folderMoveFn =
     [modPath, fileMoveFn](const std::string& relativePath) {
-      if (relativePath == "/" + PATCH_PATH) {
-        const std::string patchAtmoPath = "/" + ATMOSPHERE_FOLDER + relativePath;
-        FsManager::createFolderIfNeeded(patchAtmoPath);
-        FsManager::moveContents(modPath, patchAtmoPath, ConflictStrategy::KEEP_BOTH, fileMoveFn);
+      if (relativePath == PATCH_PATH) {
+        FsManager::createFolderIfNeeded("/" + ATMOSPHERE_FOLDER + PATCH_PATH);
+
+        // Continue recursion with the same args EXCEPT use the path to the patch folder:
+        FsManager::moveContents(
+          modPath,
+          "/" + ATMOSPHERE_FOLDER,
+          ConflictStrategy::KEEP_BOTH,
+          fileMoveFn,
+          [](const std::string&) { return true; },
+          PATCH_PATH
+        );
+
+        fsFsDeleteDirectory(&FsManager::sdSystem, FsManager::toPathBuffer(modPath + PATCH_PATH).get());
+
+        // Abort previous recursion since it assumed the regular mod directory and we recursed deeper ourselves:
+        return false;
       }
+      return true;
     };
 
   // Begin recursively moving every file of the mod:

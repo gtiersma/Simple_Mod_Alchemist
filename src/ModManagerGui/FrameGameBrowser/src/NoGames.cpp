@@ -58,6 +58,11 @@ brls::Dialog* NoGames::buildMigrateFinishedDialog() {
     mainActivity->registerExitAction(brls::BUTTON_B);
     brls::AppletFrame* appFrame = (brls::AppletFrame*)mainActivity->getContentView();
     appFrame->setTitle("Simple Mod Alchemist (v" + APP_VERSION + ")");
+
+    // Set the tab width to a low percentage mainly for the Help tab since that could use the space:
+    brls::TabFrame* tabs = (brls::TabFrame*)appFrame->getContentView();
+    brls::Sidebar* sidebar = (brls::Sidebar*)tabs->getChildren().at(0);
+    sidebar->setWidthPercentage(20.0f);
   });
 
   return completeDialog;

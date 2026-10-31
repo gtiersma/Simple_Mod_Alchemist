@@ -119,18 +119,22 @@ namespace FsManager {
    * @param overwrite    Action to take if file conflict occurs. See enum.
    *                     Default: OVERWRITE_TARGET
    * @param fileMoveFn   Optionally provide a callback to run every time a file is moved.
-   *                       @subparam relativePath The base file path being moved (from the relative point of "toPath").
-   *                       @subparam conflicts    True if the files conflicts with an already-existing file under "toPath".
+   *                       @subparam   relativePath The base file path being moved (from the relative point of "toPath").
+   *                       @subparam   conflicts    True if the files conflicts with an already-existing file under "toPath".
+   *                       @subreturns "true" to continue move operation; "false" to abort.
    * @param folderMoveFn Optionally provide a callback to run every time a folder is moved.
-   *                       @subparam relativePath The base folder path being moved (from the relative point of "toPath").
+   *                       @subparam   relativePath The base folder path being moved (from the relative point of "toPath").
+   *                       @subreturns "true" to continue move operation; "false" to abort.
    * @param basePath     USED ONLY IN RECURSIVE CALLS. The base file path being moved (from the relative point of "toPath").
    */
   void moveContents(
     const std::string& fromPath,
     const std::string& toPath,
     ConflictStrategy conflictStrategy = ConflictStrategy::OVERWRITE_TARGET,
-    std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn = [](const std::string&, bool conflicts) {},
-    std::function<void (const std::string& relativePath)> folderMoveFn = [](const std::string&) {},
+    std::function<bool (const std::string& relativePath, bool conflicts)> fileMoveFn =
+      [](const std::string&, bool conflicts) { return true; },
+    std::function<bool (const std::string& relativePath)> folderMoveFn =
+      [](const std::string&) { return true; },
     const std::string& basePath = ""
   );
 

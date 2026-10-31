@@ -353,8 +353,8 @@ void FsManager::moveContents(
   const std::string& fromPath,
   const std::string& toPath,
   ConflictStrategy conflictStrategy,
-  std::function<void (const std::string& relativePath, bool conflicts)> fileMoveFn,
-  std::function<void (const std::string& relativePath)> folderMoveFn,
+  std::function<bool (const std::string& relativePath, bool conflicts)> fileMoveFn,
+  std::function<bool (const std::string& relativePath)> folderMoveFn,
   const std::string& basePath
 ) {
   std::vector<FsDirectoryEntry> entries;
@@ -384,27 +384,29 @@ void FsManager::moveContents(
     if (isFile) {
       // If a file already exists in the location we'll move it to, there's a conflict:
       bool fileConflict = doesFileExist(targetPath);
-      fileMoveFn(nextPath, fileConflict);
-      if (fileConflict) {
+      bool continueOp = fileMoveFn(nextPath, fileConflict);
+      if (continueOp && fileConflict) {
         if (conflictStrategy == ConflictStrategy::OVERWRITE_TARGET) {
           fsFsDeleteFile(&sdSystem, toPathBuffer(targetPath).get());
           moveFile(sourcePath, targetPath);
         } else if (conflictStrategy == ConflictStrategy::PRESERVE_TARGET) {
           fsFsDeleteFile(&sdSystem, toPathBuffer(sourcePath).get());
         }
-      } else {
+      } else if (continueOp) {
         moveFile(sourcePath, targetPath);
       }
     // If the next entry is a folder, we will traverse within it:
     } else if (isDirectory) {
-      folderMoveFn(nextPath);
-      createFolderIfNeeded(targetPath);
+      bool continueOp = folderMoveFn(nextPath);
+      if (continueOp) {
+        createFolderIfNeeded(targetPath);
 
-      moveContents(fromPath, toPath, conflictStrategy, fileMoveFn, folderMoveFn, nextPath);
+        moveContents(fromPath, toPath, conflictStrategy, fileMoveFn, folderMoveFn, nextPath);
 
-      // Delete the folder only if it's now empty. The folder should be empty,
-      // but if not for whatever reason, this should just silently break and skip it:
-      fsFsDeleteDirectory(&sdSystem, toPathBuffer(sourcePath).get());
+        // Delete the folder only if it's now empty. The folder should be empty,
+        // but if not for whatever reason, this should just silently break and skip it:
+        fsFsDeleteDirectory(&sdSystem, toPathBuffer(sourcePath).get());
+      }
     } else {
       brls::Logger::warning("Mod Alchemist: unknown FS entry '{}' (type {}), skipping", sourcePath, static_cast<int>(entry.type));
     }
